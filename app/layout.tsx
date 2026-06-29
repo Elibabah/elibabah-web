@@ -1,20 +1,27 @@
 import "./globals.css";
 
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { ThemeProvider } from "@/components/theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const sourceSerif = Source_Serif_4({
+  variable: "--font-heading",
+  subsets: ["latin"]
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+
+const inter = Inter({
+  variable: "--font-body",
+  subsets: ["latin"]
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"]
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -29,12 +36,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ThemeProvider>
         {children}
         <Analytics />
         <SpeedInsights />
+        </ThemeProvider>
       </body>
     </html>
   );
