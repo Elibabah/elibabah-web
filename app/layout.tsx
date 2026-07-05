@@ -42,13 +42,13 @@ export default function RootLayout({
       className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Nav />
         <ThemeProvider>
-        {children}
-        <Analytics />
-        <SpeedInsights />
+          <Nav />
+          {children}
+          <Footer />
+          <Analytics />
+          <SpeedInsights />
         </ThemeProvider>
-        <Footer />
       </body>
     </html>
   );
