@@ -3,7 +3,9 @@ import "./globals.css";
 import { Inter, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/next"
+import { Footer } from "@/components/layout/Footer";
 import type { Metadata } from "next";
+import { Nav } from "@/components/layout/Nav";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -40,11 +42,13 @@ export default function RootLayout({
       className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Nav />
         <ThemeProvider>
         {children}
         <Analytics />
         <SpeedInsights />
         </ThemeProvider>
+        <Footer />
       </body>
     </html>
   );
