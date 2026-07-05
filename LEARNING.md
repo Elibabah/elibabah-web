@@ -312,3 +312,92 @@ Se usa con la clase `prose` en el contenedor del contenido generado:
 > (`h2`, `p`, `ul`, `code`, etc.) sin que tengas que agregar clases a cada elemento manualmente. Esto
 > es especialmente útil porque el contenido MDX lo escribes en markdown plano — no puedes agregar
 > clases de Tailwind directamente a cada párrafo.
+
+---
+
+## Rutas fijas y dinámicas coexistiendo en el mismo nivel
+
+En Next.js App Router, dentro de un mismo directorio pueden coexistir carpetas con nombre fijo y
+carpetas dinámicas `[slug]`. El router los resuelve con una regla simple:
+
+**Las rutas fijas tienen prioridad sobre las dinámicas.**
+
+Ejemplo real del proyecto (`app/editorial/`):
+
+```
+app/editorial/
+  page.tsx           → /editorial              (índice)
+  software/page.tsx  → /editorial/software     ← ruta FIJA, prioridad
+  career/page.tsx    → /editorial/career       ← ruta FIJA, prioridad
+  aotearoa/page.tsx  → /editorial/aotearoa     ← ruta FIJA, prioridad
+  [slug]/page.tsx    → /editorial/:cualquier-slug  ← ruta DINÁMICA, fallback
+```
+
+Si alguien visita `/editorial/software`, Next.js sirve `software/page.tsx` — nunca toca `[slug]/page.tsx`.
+Si visita `/editorial/mi-articulo`, no hay carpeta fija que coincida, entonces entra `[slug]/page.tsx`.
+
+**Consecuencia práctica**: los nombres de las carpetas fijas quedan como **slugs prohibidos** para
+el contenido dinámico. En este proyecto, ningún artículo puede tener `slug: software`, `slug: career`,
+ni `slug: aotearoa` en su front matter — si lo tuviera, la ruta fija lo taparía y el artículo
+quedaría inaccesible.
+
+> **Pregunta de entrevista**: ¿cómo resuelve Next.js el conflicto entre una ruta fija y una dinámica
+> en el mismo nivel?
+> Las rutas estáticas (carpetas con nombre literal) siempre ganan sobre los segmentos dinámicos
+> `[slug]`. No hay configuración que invierta esa prioridad — es una regla fija del router.
+
+---
+
+## Union types en TypeScript para valores enumerados
+
+Cuando un campo solo puede tomar un conjunto cerrado de valores de cadena, TypeScript ofrece dos
+opciones: `enum` o un **union type de strings literales**.
+
+```typescript
+// Opción A: enum (más verboso, genera código JS)
+enum ArticleSection {
+  Software = "software",
+  Career = "career",
+  Aotearoa = "aotearoa",
+}
+
+// Opción B: union type (recomendada — solo existe en tiempo de compilación, no genera JS)
+type ArticleSection = "software" | "career" | "aotearoa";
+```
+
+En este proyecto se usa la Opción B. Las ventajas:
+
+- **No genera código JavaScript en el bundle** — es solo una anotación de tipos, desaparece al compilar.
+- **Autocompletado y validación**: TypeScript garantiza que `section` solo pueda ser uno de esos tres
+  valores. Si escribes `section: "sports"` en el front matter y luego lo tipas como `ArticleSection`,
+  TypeScript detecta el error en compile time.
+- **Fácil de mantener**: agregar una nueva sección es tan simple como añadir `| "nueva-seccion"` al
+  tipo — sin editar un objeto enum.
+
+Se usa en `lib/editorial.ts` para tipar el campo `section` del front matter, y en la firma de
+`getArticlesBySection(section: ArticleSection)` para que TypeScript rechace llamadas con secciones
+inválidas.
+
+---
+
+## Render condicional en React con `&&`
+
+```tsx
+{project.caseStudy && (
+  <Link href={`/case-studies/${project.caseStudy}`}>Case Study →</Link>
+)}
+```
+
+El operador `&&` evalúa la expresión de izquierda a derecha:
+- Si `project.caseStudy` es `null`, `undefined`, o `false` → la expresión corta y React no renderiza nada.
+- Si tiene un valor truthy (un string con contenido) → React renderiza el elemento de la derecha.
+
+**Trampa común**: si el valor de la izquierda es `0` (número cero), React lo renderiza como texto
+`"0"` en vez de no renderizar nada, porque `0` es falsy pero JSX lo trata como nodo de texto válido.
+La solución es forzar boolean: `{items.length > 0 && <Lista />}` en vez de `{items.length && <Lista />}`.
+
+> **Pregunta de entrevista**: ¿por qué `{0 && <Component />}` renderiza `0` en pantalla en vez de
+> no renderizar nada?
+> Porque JSX convierte los valores a nodos de texto cuando son números. `false`, `null`, `undefined`
+> se ignoran, pero `0` es un número válido como nodo de texto. Usar `{count > 0 && <Component />}`
+> garantiza que la condición sea boolean.
