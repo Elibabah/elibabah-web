@@ -401,3 +401,177 @@ La solución es forzar boolean: `{items.length > 0 && <Lista />}` en vez de `{it
 > Porque JSX convierte los valores a nodos de texto cuando son números. `false`, `null`, `undefined`
 > se ignoran, pero `0` es un número válido como nodo de texto. Usar `{count > 0 && <Component />}`
 > garantiza que la condición sea boolean.
+
+---
+
+## El patrón `mounted` — evitar hydration mismatch en componentes sensibles al tema
+
+Algunos Client Components necesitan renderizar cosas distintas según el tema activo (dark/light). El
+problema: en el **primer render** del cliente (justo al hidratar), React no sabe aún qué tema eligió
+el usuario — `localStorage` y `prefers-color-scheme` solo están disponibles después de que el JS
+corre. Si el componente intenta usar el tema antes de ese momento, genera un **hydration mismatch**
+(lo que el servidor generó no coincide con lo que React generaría en el cliente).
+
+**La solución — patrón `mounted`**:
+
+```tsx
+"use client";
+
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+
+export function ThemeAwareComponent() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true); // solo corre en el cliente, después de hidratar
+  }, []);
+
+  if (!mounted) {
+    // En server render y primer render del cliente: placeholder neutro
+    // (mismas dimensiones que el componente real para evitar layout shift)
+    return <div className="w-8 h-8" />;
+  }
+
+  // A partir de aquí, resolvedTheme tiene el valor real
+  return resolvedTheme === "dark" ? <SunIcon /> : <MoonIcon />;
+}
+```
+
+**Por qué funciona**: `useEffect` nunca corre en el servidor — solo en el cliente, después de que
+el DOM está listo. Al setear `mounted = true` dentro del efecto, garantizas que el componente no
+intenta leer `resolvedTheme` hasta que next-themes ya lo calculó correctamente.
+
+**El placeholder**: debe tener las mismas dimensiones que el componente real. Sin esto, el layout
+"salta" (CLS, Cumulative Layout Shift) cuando el componente real aparece.
+
+Ejemplo real en este proyecto: [components/layout/ThemeToggle.tsx](components/layout/ThemeToggle.tsx)
+y [components/layout/Logo.tsx](components/layout/Logo.tsx).
+
+> **Pregunta de entrevista**: ¿cuándo necesitas el patrón `mounted`?
+> Cuando tu componente toma decisiones de render basadas en información que solo existe en el cliente
+> (tema del usuario, idioma del navegador, tamaño de pantalla via JS, etc.). Sin el patrón, el
+> servidor genera HTML con el valor por defecto, React hidrata y detecta que el cliente querría un
+> valor distinto → warning. El patrón corta el ciclo renderizando algo neutro hasta que el cliente
+> tiene la información real.
+
+---
+
+## `resolvedTheme` vs `theme` en next-themes
+
+`useTheme()` de next-themes devuelve dos propiedades relacionadas pero distintas:
+
+```tsx
+const { theme, resolvedTheme, setTheme } = useTheme();
+```
+
+- **`theme`**: el valor que el *usuario* o el código seleccionó. Puede ser `"light"`, `"dark"`, o
+  `"system"` (si next-themes está configurado con `enableSystem`, que es lo habitual). Cuando el
+  valor es `"system"`, significa "seguir la preferencia del SO" — pero no dice cuál es esa
+  preferencia.
+
+- **`resolvedTheme`**: siempre es `"light"` o `"dark"` — nunca `"system"`. next-themes ya resolvió
+  el sistema operativo y te da el tema real que se está aplicando en este momento.
+
+**Por qué importa para lógica condicional**:
+
+```tsx
+// ❌ Puede ser "system" — la condición falla si el usuario no cambió el tema manualmente
+setTheme(theme === "dark" ? "light" : "dark");
+
+// ✅ Siempre es "light" o "dark" — funciona siempre
+setTheme(resolvedTheme === "dark" ? "light" : "dark");
+```
+
+Usar `theme` para el toggle hacía que el botón llamara siempre `setTheme("light")` cuando el tema
+era `"system"` (ya que `"system" !== "dark"`), aunque el sistema estuviera en dark mode.
+
+> **Regla práctica**: usa `resolvedTheme` para cualquier lógica que dependa del tema actual
+> (`if dark, do X`). Usa `theme` solo si necesitas saber si el usuario eligió "seguir al sistema".
+
+---
+
+## El árbol de contexto React con Server y Client Components mezclados
+
+Cuando un Server Component pasa otro Server Component como `children` a un Client Component, los
+Client Components anidados dentro de ese Server Component **siguen siendo parte del árbol de React
+en el cliente** y pueden consumir context normalmente.
+
+Ejemplo real del proyecto:
+
+```
+layout.tsx (Server Component)
+  └── ThemeProvider (Client Component — provee contexto)
+        └── Nav (Server Component — pasado como children)
+              └── ThemeToggle (Client Component — consume contexto con useTheme())
+              └── Logo      (Client Component — consume contexto con useTheme())
+```
+
+`Nav` es un Server Component: se renderiza en el servidor y su output se pasa como `children` a
+`ThemeProvider`. Pero `ThemeToggle` y `Logo` dentro de `Nav` son Client Components — en el cliente,
+React los hidrata como parte del árbol React. Ese árbol reconoce que están dentro de `ThemeProvider`,
+así que `useTheme()` funciona con normalidad.
+
+**La regla**: lo que determina si un Client Component puede consumir un contexto es su posición en
+el **árbol React del cliente**, no en qué archivo Server Component apareció su JSX. El árbol de
+componentes que React hidrata en el browser preserva el anidamiento correcto.
+
+> **Pregunta de entrevista**: ¿puede un Client Component consumir un contexto si está anidado dentro
+> de un Server Component?
+> Sí — siempre que haya un `Provider` ancestor en el árbol React del cliente. El Server Component
+> intermedio no "rompe" el contexto: en el cliente, React ve el árbol completo y conecta los
+> consumidores con sus providers, independientemente de qué nivel de la cadena fue Server Component.
+
+---
+
+## CSS vs Client Component para theme switching
+
+Hay dos estrategias para que un elemento cambie visualmente con el tema:
+
+### Estrategia A — CSS puro
+
+```css
+/* globals.css */
+.logo-dark { display: none; }
+[data-theme="dark"] .logo-light { display: none; }
+[data-theme="dark"] .logo-dark { display: block; }
+```
+
+```tsx
+{/* Dos imágenes en el DOM; CSS oculta una según data-theme */}
+<img src="/logo-light.svg" className="logo-light" />
+<img src="/logo-dark.svg"  className="logo-dark"  />
+```
+
+- **Ventaja**: sin JS, sin re-renders. El navegador reacciona al cambio de `data-theme` en `<html>`
+  inmediatamente, incluso antes de que React hidrate.
+- **Desventaja**: ambas imágenes existen en el DOM (doble request). Puede tener conflictos de
+  especificidad con Tailwind v4 o con otras clases de display.
+
+### Estrategia B — Client Component con `useTheme()`
+
+```tsx
+"use client";
+export function Logo() {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  return (
+    <img
+      src={mounted && resolvedTheme === "dark" ? "/logo-dark.svg" : "/logo-light.svg"}
+      alt="Elibabah"
+    />
+  );
+}
+```
+
+- **Ventaja**: explícita y predecible — un solo elemento en el DOM, sin CSS de display jugando.
+  Más fácil de razonar y depurar.
+- **Desventaja**: requiere JS. Hay un momento breve (antes de `mounted = true`) en que siempre
+  se muestra el logo light (el fallback).
+
+En este proyecto se empezó con Estrategia A y se migró a B cuando surgieron problemas de
+especificidad CSS con Tailwind v4. B es la más robusta para componentes que necesitan lógica
+de tema más allá de simples cambios de color.
