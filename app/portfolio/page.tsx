@@ -35,6 +35,15 @@ export default function PortfolioPage() {
                 </li>
               ))}
             </ul>
+
+            {project.caseStudy && (
+              <Link
+                href={`/case-studies/${project.caseStudy}`}
+                className="font-mono text-xs text-accent hover:underline"
+                >
+                Case Study →
+              </Link>
+              )}
           </li>
         ))}
       </ul>
