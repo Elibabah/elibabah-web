@@ -575,3 +575,126 @@ export function Logo() {
 En este proyecto se empezó con Estrategia A y se migró a B cuando surgieron problemas de
 especificidad CSS con Tailwind v4. B es la más robusta para componentes que necesitan lógica
 de tema más allá de simples cambios de color.
+
+---
+
+## Metadata en Next.js App Router
+
+Next.js App Router tiene dos mecanismos para definir los metadatos (`<title>`, `<meta
+description>`, Open Graph, etc.) de una página. Ambos se exportan desde `page.tsx` o `layout.tsx`.
+
+### Metadata estática — `export const metadata`
+
+Para páginas cuyo contenido no depende de parámetros dinámicos:
+
+```tsx
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description: "Selected projects and technical experiments.",
+};
+```
+
+### Metadata dinámica — `export async function generateMetadata`
+
+Para rutas `[slug]`, donde el título y descripción vienen del contenido (front matter del MDX):
+
+```tsx
+import type { Metadata } from "next";
+import { getArticleBySlug } from "@/lib/editorial";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug);
+  return {
+    title: article.title,
+    description: article.excerpt,
+  };
+}
+```
+
+Nota: `params` es `Promise<{ slug: string }>` — el mismo patrón async que ya aplica al componente
+`Page` en Next.js 16.
+
+### Title template — evitar repetir el nombre del sitio
+
+En el root `layout.tsx`, en vez de un string fijo, se define una plantilla:
+
+```tsx
+export const metadata: Metadata = {
+  title: {
+    default: "Elibabah — Elías Hernández", // usado cuando la página no define título propio
+    template: "%s | Elibabah",              // %s es reemplazado por el título de cada página
+  },
+  description: "Software developer. Portfolio and editorial.",
+};
+```
+
+Con esto, una página que exporte `title: "Portfolio"` genera automáticamente `Portfolio | Elibabah`
+en el browser tab y en SEO, sin tener que escribir el sufijo en cada página.
+
+**Trampa real de este proyecto**: al implementar metadata en múltiples páginas se copió el bloque
+de portfolio sin actualizar el `title` ni la `description`, resultando en que todas las páginas
+decían `"Portfolio"`. Además, dos rutas dinámicas (`editorial/[slug]` y `case-studies/[slug]`)
+usaban `getProjectBySlug` (la función de portfolio) en vez de sus funciones correctas, lo que
+habría causado crashes en runtime. La fuente de verdad siempre debe ser la función de lib que
+corresponde a la ruta.
+
+> **Pregunta de entrevista**: ¿cuándo usarías `generateMetadata` en vez de `export const metadata`?
+> Cuando el título o descripción dependen de datos que solo se conocen en runtime: el slug de la
+> URL, el contenido de una base de datos, o una API externa. Para páginas estáticas (listados,
+> about, contacto), `export const metadata` es suficiente.
+
+---
+
+## Favicon en Next.js App Router — convención de archivos
+
+Next.js App Router tiene una **convención de archivos especiales** en la carpeta `app/` para
+metadata de íconos. Sin necesidad de configurar nada en `layout.tsx`, si colocas alguno de estos
+archivos en `app/`, Next.js genera automáticamente los `<link>` tags correctos en el `<head>`:
+
+| Archivo | Resultado |
+|---|---|
+| `app/favicon.ico` | `<link rel="icon" href="/favicon.ico">` |
+| `app/icon.svg` | `<link rel="icon" href="/icon.svg" type="image/svg+xml">` |
+| `app/icon.png` | `<link rel="icon" href="/icon.png" type="image/png">` |
+| `app/apple-icon.png` | `<link rel="apple-touch-icon" href="/apple-icon.png">` |
+
+En este proyecto se usa `app/icon.svg`.
+
+### SVG favicon con soporte de dark mode
+
+Los archivos SVG soportan CSS interno, incluyendo `@media (prefers-color-scheme: dark)`. Esto
+permite un favicon que cambia de color según el tema del sistema operativo:
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 627 358">
+  <style>
+    path { fill: #20221a; }
+    @media (prefers-color-scheme: dark) { path { fill: #fafafa; } }
+  </style>
+  <path fill-rule="evenodd" d="...paths del logo..." />
+</svg>
+```
+
+**Puntos clave de la implementación**:
+- Se elimina `fill="..."` del elemento `<path>` — el color lo controla el CSS, no el atributo.
+- Se eliminan `width` y `height` fijos del `<svg>` — los favicons escalan por `viewBox`.
+- Se usa `prefers-color-scheme` (preferencia del OS), **no** `data-theme` (variable del DOM).
+
+**Por qué `prefers-color-scheme` y no `data-theme`**: el favicon vive fuera del árbol HTML del
+documento. El atributo `data-theme` en `<html>` es un selector CSS que aplica al árbol del DOM,
+pero el SVG del favicon se renderiza en el browser como imagen aislada — no tiene acceso al DOM
+de la página. Solo puede leer variables del entorno del navegador, como `prefers-color-scheme`.
+
+> **Pregunta de entrevista**: ¿en qué se diferencian `prefers-color-scheme` y `data-theme`?
+> `prefers-color-scheme` es una media query CSS que lee la preferencia del sistema operativo —
+> funciona en cualquier contexto (CSS, SVG embebido, etc.) sin JS. `data-theme` es un atributo
+> custom en el `<html>` que libraries como next-themes escriben via JS para permitir selección
+> manual del usuario. En el DOM del sitio son equivalentes cuando el usuario no cambió el tema;
+> pero fuera del DOM (favicon, imágenes SVG externas) solo existe `prefers-color-scheme`.

@@ -1,14 +1,14 @@
 export function Footer() {
   return (
-    <footer id="contact" className="border-t border-foreground/10 mt-auto">
-      <div className="mx-auto max-w-3xl px-6 py-16 flex flex-col gap-12">
+    <footer id="contact" className="bg-surface border-t border-line mt-auto transition-colors duration-[350ms]">
+      <div className="mx-auto max-w-5xl px-6 py-10 flex flex-col gap-10">
 
         {/* Contact block */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <h2 className="font-heading text-2xl font-semibold text-foreground">
             Get in touch
           </h2>
-          <p className="font-body text-base text-foreground/70">
+          <p className="font-body text-base text-ink-soft">
             Open to new opportunities in New Zealand. Feel free to reach out.
           </p>
           <a
@@ -19,18 +19,36 @@ export function Footer() {
           </a>
         </div>
 
-        {/* Resume + copyright */}
-        <div className="flex items-center justify-between">
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-sm text-accent border border-accent/40 rounded-full px-4 py-1.5 hover:bg-accent/5 transition-colors"
-          >
-            Download Resume
-          </a>
-          <p className="font-mono text-xs text-foreground/40">
-            © {new Date().getFullYear()} Elías Hernández
+        {/* Bottom row */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-5">
+            <a
+              href="https://linkedin.com/in/elibabah"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-sm text-ink-soft hover:text-accent transition-colors"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://github.com/Elibabah"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-sm text-ink-soft hover:text-accent transition-colors"
+            >
+              GitHub
+            </a>
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-sm text-accent font-semibold hover:underline"
+            >
+              Resume ↓
+            </a>
+          </div>
+          <p className="font-mono text-xs text-ink-faint">
+            © {new Date().getFullYear()} Elías Hernández · Auckland
           </p>
         </div>
 
