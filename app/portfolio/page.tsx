@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getAllProjects } from "@/lib/portfolio";
+
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description: "Selected projects and technical experiments.",
+};
 
 export default function PortfolioPage() {
   const projects = getAllProjects();

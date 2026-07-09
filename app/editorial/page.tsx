@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getAllArticles } from "@/lib/editorial";
+
+export const metadata: Metadata = {
+  title: "Editorial",
+  description: "Writing on software, career, and life in Aotearoa.",
+};
 
 export default function EditorialPage() {
   const articles = getAllArticles();

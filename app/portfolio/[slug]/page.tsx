@@ -2,6 +2,20 @@ import { getAllProjects, getProjectBySlug } from "@/lib/portfolio";
 
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const project = getProjectBySlug(slug);
+  return {
+    title: project.title,
+    description: project.summary,
+  };
+}
 
 export async function generateStaticParams() {
   const projects = getAllProjects();

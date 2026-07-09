@@ -1,6 +1,20 @@
 import { getAllArticles, getArticleBySlug } from "@/lib/editorial";
 
 import { MDXRemote } from "next-mdx-remote/rsc";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticleBySlug(slug);
+  return {
+    title: article.title,
+    description: article.excerpt,
+  };
+}
 
 export async function generateStaticParams() {
   const articles = getAllArticles();

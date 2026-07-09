@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About",
+  description: "Software developer based in New Zealand.",
+};
+
 export default function AboutPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-24">

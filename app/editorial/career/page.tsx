@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getArticlesBySection } from "@/lib/editorial";
+
+export const metadata: Metadata = {
+  title: "Career",
+  description: "On craft, identity, and professional transition.",
+};
 
 export default function CareerPage() {
   const articles = getArticlesBySection("career");
