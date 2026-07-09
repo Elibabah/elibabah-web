@@ -1,5 +1,11 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getArticlesBySection } from "@/lib/editorial";
+
+export const metadata: Metadata = {
+  title: "Aotearoa",
+  description: "Life in New Zealand — travel, community, Southland.",
+};
 
 export default function AotearoaPage() {
   const articles = getArticlesBySection("aotearoa");

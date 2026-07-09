@@ -1,6 +1,20 @@
 import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
 
 import { MDXRemote } from "next-mdx-remote/rsc";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const caseStudy = getCaseStudyBySlug(slug);
+  return {
+    title: caseStudy.title,
+    description: caseStudy.problem,
+  };
+}
 
 export async function generateStaticParams() {
   const caseStudies = getAllCaseStudies();

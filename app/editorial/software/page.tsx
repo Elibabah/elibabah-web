@@ -1,5 +1,12 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { getArticlesBySection } from "@/lib/editorial";
+
+export const metadata: Metadata = {
+  title: "Software",
+  description: "Technical articles on software development.",
+};
+
 
 export default function SoftwarePage() {
   const articles = getArticlesBySection("software");

@@ -26,7 +26,10 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Elibabah — Elías Hernández",
+  title: {
+    default: "Elibabah — Elías Hernández",
+    template: "%s | Elibabah",
+  },
   description: "Software developer. Portfolio and editorial.",
 };
 
