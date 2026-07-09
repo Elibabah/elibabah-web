@@ -1,29 +1,11 @@
 import Link from "next/link";
 import { getAllArticles } from "@/lib/editorial";
-
-const highlights = [
-  {
-    title: "Project Alpha",
-    summary: "A short description of what this project does and why it matters.",
-    stack: ["React", "TypeScript", "Next.js"],
-    slug: "project-alpha",
-  },
-  {
-    title: "Project Beta",
-    summary: "Another short description that fits in two lines at most.",
-    stack: ["Node.js", "PostgreSQL"],
-    slug: "project-beta",
-  },
-  {
-    title: "Project Gamma",
-    summary: "Something interesting built with interesting tools.",
-    stack: ["Python", "FastAPI"],
-    slug: "project-gamma",
-  },
-];
+import { getAllProjects } from "@/lib/portfolio";
 
 export default function Home() {
   const latestArticles = getAllArticles().slice(0, 3);
+  const featuredProjects = getAllProjects().filter(p => p.featured);
+
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-20">
@@ -70,11 +52,11 @@ export default function Home() {
           </Link>
         </div>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {highlights.map((project) => (
-            <li key={project.slug}>
+          {featuredProjects.map((project) => (
+            <li key={project.slug} className="flex flex-col">
               <Link
                 href={`/portfolio/${project.slug}`}
-                className="group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
+                className="h-full group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
               >
                 <div className="aspect-[16/10] bg-accent-soft border-b border-line" />
                 <div className="flex flex-col gap-2 p-4">
