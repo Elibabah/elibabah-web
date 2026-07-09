@@ -1,5 +1,6 @@
 import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
 
+import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 
@@ -32,22 +33,31 @@ export default async function CaseStudyPage({
   const caseStudy = getCaseStudyBySlug(slug);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-12">
-      <header className="flex flex-col gap-4">
-        <h1 className="font-heading text-4xl font-bold text-foreground">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-10">
+
+      <Link href="/portfolio" className="font-mono text-xs text-accent hover:underline">
+        ← Portfolio
+      </Link>
+
+      <header className="flex flex-col gap-4 max-w-xl">
+        <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-[10px] py-1 rounded-md">
+          Case Study
+        </span>
+        <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground">
           {caseStudy.title}
         </h1>
-        <p className="font-body text-base text-foreground/70 italic">
+        <p className="font-body text-lg text-ink-soft leading-relaxed italic">
           {caseStudy.problem}
         </p>
-        <p className="font-mono text-xs text-foreground/50">
-          {caseStudy.role} · {caseStudy.readingTime} min read
-        </p>
-        <ul className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-4 flex-wrap font-mono text-xs text-ink-faint">
+          <span><span className="tracking-wide uppercase">Role</span>&nbsp;&nbsp;{caseStudy.role}</span>
+          <span><span className="tracking-wide uppercase">Read</span>&nbsp;&nbsp;{caseStudy.readingTime} min</span>
+        </div>
+        <ul className="flex flex-wrap gap-1.5">
           {caseStudy.stack.map((tech) => (
             <li
               key={tech}
-              className="font-mono text-xs text-accent border border-accent/30 rounded-full px-3 py-1"
+              className="font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
             >
               {tech}
             </li>
@@ -55,18 +65,19 @@ export default async function CaseStudyPage({
         </ul>
       </header>
 
+      <div className="aspect-[21/9] bg-accent-soft border border-line rounded-xl" />
+
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={caseStudy.content} />
       </article>
 
-      <footer className="border-t border-foreground/10 pt-8">
-        <p className="font-mono text-xs text-foreground/50 uppercase tracking-wide">
-          Outcome
-        </p>
-        <p className="font-body text-base text-foreground/80 mt-2">
+      <footer className="border-t border-line pt-8 flex flex-col gap-2">
+        <span className="font-mono text-[10px] text-ink-faint tracking-[0.6px] uppercase">Outcome</span>
+        <p className="font-body text-base text-ink-soft leading-relaxed">
           {caseStudy.outcome}
         </p>
       </footer>
+
     </main>
   );
 }

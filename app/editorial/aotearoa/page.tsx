@@ -11,26 +11,43 @@ export default function AotearoaPage() {
   const articles = getArticlesBySection("aotearoa");
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-12">
-      <h1 className="font-heading text-4xl font-bold text-foreground">
-        Aotearoa
-      </h1>
-      <ul className="flex flex-col gap-8">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-10">
+
+      <header className="flex flex-col gap-2">
+        <Link href="/editorial" className="font-mono text-xs text-accent hover:underline">
+          ← Editorial
+        </Link>
+        <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground mt-2">
+          Aotearoa
+        </h1>
+        <p className="font-body text-base text-ink-soft mt-1">
+          Life in New Zealand — travel, community, and the far south.
+        </p>
+      </header>
+
+      <ul>
         {articles.map((article) => (
-          <li key={article.slug} className="flex flex-col gap-2">
+          <li key={article.slug}>
             <Link
               href={`/editorial/${article.slug}`}
-              className="font-heading text-xl font-semibold text-foreground hover:text-accent transition-colors"
+              className="group flex items-center justify-between gap-6 py-[18px] border-t border-line"
             >
-              {article.title}
+              <div className="flex flex-col gap-2 min-w-0">
+                <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">
+                  {article.title}
+                </span>
+                <span className="font-body text-sm text-ink-soft line-clamp-2">
+                  {article.excerpt}
+                </span>
+              </div>
+              <span className="font-mono text-xs text-ink-faint whitespace-nowrap shrink-0 text-right">
+                {article.readingTime} min<br />{article.publishedAt}
+              </span>
             </Link>
-            <p className="font-body text-sm text-foreground/70">{article.excerpt}</p>
-            <p className="font-mono text-xs text-foreground/50">
-              {article.publishedAt} · {article.readingTime} min read
-            </p>
           </li>
         ))}
       </ul>
+
     </main>
   );
 }

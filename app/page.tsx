@@ -1,92 +1,141 @@
 import Link from "next/link";
+import { getAllArticles } from "@/lib/editorial";
 
 const highlights = [
-{
-  title: "Project Alpha",
-  summary: "A short description of what this project does and why it matters.",
-  stack: ["React", "TypeScript", "Next.js"],
-  role: "Frontend Developer",
-  year: 2026,
-  slug: "project-alpha",
-},
-{
-  title: "Project Beta",
-  summary: "Another short description that fits in two lines at most.",
-  stack: ["Node.js", "PostgreSQL"],
-  role: "Full Stack Developer",
-  year: 2026,
-  slug: "project-beta",
-},
-{
-  title: "Project Gamma",
-  summary: "Something interesting built with interesting tools.",
-  stack: ["Python", "FastAPI"],
-  role: "Backend Developer",
-  year: 2026,
-  slug: "project-gamma",
-},
+  {
+    title: "Project Alpha",
+    summary: "A short description of what this project does and why it matters.",
+    stack: ["React", "TypeScript", "Next.js"],
+    slug: "project-alpha",
+  },
+  {
+    title: "Project Beta",
+    summary: "Another short description that fits in two lines at most.",
+    stack: ["Node.js", "PostgreSQL"],
+    slug: "project-beta",
+  },
+  {
+    title: "Project Gamma",
+    summary: "Something interesting built with interesting tools.",
+    stack: ["Python", "FastAPI"],
+    slug: "project-gamma",
+  },
 ];
 
 export default function Home() {
+  const latestArticles = getAllArticles().slice(0, 3);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-24">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-20">
+
       {/* Hero */}
-      <section className="flex flex-col gap-6">
-        <h1 className="font-heading text-5xl font-bold text-foreground">
-          Elías Hernández
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center gap-2.5">
+          <span className="w-[7px] h-[7px] rounded-full bg-accent shrink-0" />
+          <span className="font-mono text-xs text-ink-soft tracking-[0.6px] uppercase">
+            Frontend Engineer · Auckland, NZ
+          </span>
+        </div>
+        <h1 className="font-heading max-w-xxl font-bold text-5xl leading-[1.12] tracking-[-0.5px] text-foreground">
+          Building software with intention.<br />
+          Sharing the thinking behind it.<br />
         </h1>
-        <p className="font-body text-lg text-foreground/70">
-          Software developer based in New Zealand.
+        <p className="font-body text-lg leading-relaxed text-ink-soft max-w-xl">
+          I build software, think about the craft in the age of AI, and write about the move from Mexico to New Zealand. A portfolio and an editorial, under one roof.
         </p>
-        <blockquote className="border-l-2 border-accent pl-5">
-          <p className="font-heading italic text-foreground/50 text-base leading-relaxed">
-            Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena.
-          </p>
-        </blockquote>
-        <div>
+        <div className="flex items-center gap-3 mt-1">
           <Link
             href="/portfolio"
-            className="font-mono text-sm text-accent hover:underline"
+            className="bg-accent text-on-accent font-semibold text-sm px-5 py-[11px] rounded-[9px] hover:opacity-90 transition-opacity"
           >
-            View my work →
+            View work
+          </Link>
+          <Link
+            href="/about"
+            className="text-accent border border-accent font-semibold text-sm px-5 py-[11px] rounded-[9px] hover:bg-accent/5 transition-colors"
+          >
+            About me
           </Link>
         </div>
       </section>
 
-      {/* Highlights */}
-      <section className="flex flex-col gap-8">
-        <h2 className="font-heading text-2xl font-semibold text-foreground">
-          Selected work
-        </h2>
-        <ul className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Selected Work */}
+      <section className="flex flex-col gap-5">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-xs text-accent tracking-[0.6px] uppercase">
+            Featured Work
+          </span>
+          <Link href="/portfolio" className="font-mono text-xs text-accent font-semibold hover:underline">
+            All projects →
+          </Link>
+        </div>
+        <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {highlights.map((project) => (
-            <li key={project.slug} className="flex flex-col gap-3">
-              <h3 className="font-heading text-lg font-semibold text-foreground">
-                {project.title}
-              </h3>
-              <p className="font-body text-sm text-foreground/70">
-                {project.summary}
-              </p>
-              <p className="font-mono text-xs text-foreground/50">
-                {project.role} · {project.year}
-              </p>
-              <ul className="flex flex-wrap gap-2">
-                {project.stack.map((tech) => (
-                  <li
-                    key={tech}
-                    className="font-mono text-xs text-accent border border-accent/30 rounded-full px-3 py-1"
-                  >
-                    {tech}
-                  </li>
-                ))}
-              </ul>
+            <li key={project.slug}>
+              <Link
+                href={`/portfolio/${project.slug}`}
+                className="group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
+              >
+                <div className="aspect-[16/10] bg-accent-soft border-b border-line" />
+                <div className="flex flex-col gap-2 p-4">
+                  <h3 className="font-heading font-bold text-lg text-foreground">
+                    {project.title}
+                  </h3>
+                  <p className="font-body text-sm text-ink-soft leading-snug">
+                    {project.summary}
+                  </p>
+                  <ul className="flex flex-wrap gap-1.5 mt-1">
+                    {project.stack.map((tech) => (
+                      <li
+                        key={tech}
+                        className="font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
+                      >
+                        {tech}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
       </section>
 
-
+      {/* Latest from Editorial */}
+      {latestArticles.length > 0 && (
+        <section className="flex flex-col gap-0">
+          <div className="flex items-center justify-between mb-4">
+            <span className="font-mono text-xs text-accent tracking-[0.6px] uppercase">
+              Latest from the Editorial
+            </span>
+            <Link href="/editorial" className="font-mono text-xs text-accent font-semibold hover:underline">
+              All writing →
+            </Link>
+          </div>
+          <ul>
+            {latestArticles.map((article) => (
+              <li key={article.slug}>
+                <Link
+                  href={`/editorial/${article.slug}`}
+                  className="group flex items-center justify-between gap-6 py-[18px] border-t border-line"
+                >
+                  <div className="flex flex-col gap-2 min-w-0">
+                    <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-[10px] py-1 rounded-md">
+                      {article.section}
+                    </span>
+                    <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">
+                      {article.title}
+                    </span>
+                  </div>
+                  <span className="font-mono text-xs text-ink-faint whitespace-nowrap shrink-0">
+                    {article.readingTime} min · {article.publishedAt}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
     </main>
   );

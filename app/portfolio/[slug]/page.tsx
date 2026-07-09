@@ -33,37 +33,77 @@ export default async function ProjectPage({
   const project = getProjectBySlug(slug);
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-16 flex flex-col gap-12">
-      <header className="flex flex-col gap-4">
-        <h1 className="font-heading text-4xl font-bold text-foreground">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-10">
+
+      <Link href="/portfolio" className="font-mono text-xs text-accent hover:underline">
+        ← Portfolio
+      </Link>
+
+      <header className="flex flex-col gap-4 max-w-xl">
+        <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground">
           {project.title}
         </h1>
-        <p className="font-mono text-xs text-foreground/50">
-          {project.role} · {project.year}
+        <p className="font-body text-lg text-ink-soft leading-relaxed">
+          {project.summary}
         </p>
-        <ul className="flex flex-wrap gap-2">
+        <div className="flex items-center gap-4 flex-wrap font-mono text-xs text-ink-faint">
+          <span><span className="text-ink-faint tracking-wide uppercase">Role</span>&nbsp;&nbsp;{project.role}</span>
+          <span><span className="text-ink-faint tracking-wide uppercase">Year</span>&nbsp;&nbsp;{project.year}</span>
+        </div>
+        <ul className="flex flex-wrap gap-1.5">
           {project.stack.map((tech) => (
             <li
               key={tech}
-              className="font-mono text-xs text-accent border border-accent/30 rounded-full px-3 py-1"
+              className="font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
             >
               {tech}
             </li>
           ))}
         </ul>
-          {project.caseStudy && (
-            <Link
-                href={`/case-studies/${project.caseStudy}`}
-                className="font-mono text-xs text-accent hover:underline"
+        <div className="flex items-center gap-3 mt-1">
+          {project.links?.demo && (
+            <a
+              href={project.links.demo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-accent text-on-accent font-semibold text-sm px-5 py-[10px] rounded-[9px] hover:opacity-90 transition-opacity"
             >
-                Case Study →
+              Live demo
+            </a>
+          )}
+          {project.links?.repo && (
+            <a
+              href={project.links.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent border border-accent font-semibold text-sm px-5 py-[10px] rounded-[9px] hover:bg-accent/5 transition-colors"
+            >
+              View repo
+            </a>
+          )}
+        </div>
+        {project.caseStudy && (
+          <div className="bg-surface border border-line rounded-xl p-4 flex items-center justify-between gap-4 mt-2">
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] text-accent tracking-[0.6px] uppercase">Goes deeper</span>
+              <span className="font-heading text-base text-foreground">Case study available</span>
+            </div>
+            <Link
+              href={`/case-studies/${project.caseStudy}`}
+              className="font-mono text-xs text-accent hover:underline shrink-0"
+            >
+              Read →
             </Link>
-            )}
+          </div>
+        )}
       </header>
+
+      <div className="aspect-[21/9] bg-accent-soft border border-line rounded-xl" />
 
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={project.content} />
       </article>
+
     </main>
   );
 }
