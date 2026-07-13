@@ -48,7 +48,7 @@ export default function PortfolioPage() {
                   {project.stack.map((tech) => (
                     <li
                       key={tech}
-                      className="font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
+                      className="flex flex-col font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
                     >
                       {tech}
                     </li>
