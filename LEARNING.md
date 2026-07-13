@@ -698,3 +698,208 @@ de la página. Solo puede leer variables del entorno del navegador, como `prefer
 > custom en el `<html>` que libraries como next-themes escriben via JS para permitir selección
 > manual del usuario. En el DOM del sitio son equivalentes cuando el usuario no cambió el tema;
 > pero fuera del DOM (favicon, imágenes SVG externas) solo existe `prefers-color-scheme`.
+
+---
+
+## Especificidad CSS — cómo depurar cuando el tema oscuro no aplica
+
+**El problema real de este proyecto**: `[data-theme="dark"]` no sobreescribía `--background`
+aunque el atributo estuviera en `<html>`. La variable seguía resolviendo el valor claro.
+
+**Por qué ocurre**: `:root` y `[data-theme="dark"]` tienen la misma especificidad CSS — ambos son
+selectores de pseudo-clase / atributo con valor 0,1,0. Cuando dos reglas tienen la misma
+especificidad, **gana la que aparece más tarde en el CSS**. Tailwind v4 procesa y reordena el CSS
+al compilar, por lo que el bloque de `:root` puede quedar después del bloque `[data-theme="dark"]`
+en el output final, haciendo que `:root` gane.
+
+**La solución**: añadir `html` al selector oscuro para sumar un elemento y elevar la especificidad
+de 0,1,0 a 0,1,1:
+
+```css
+/* ❌ Especificidad 0,1,0 — puede perder contra :root si el orden CSS cambia */
+[data-theme="dark"] {
+  --background: #121514;
+}
+
+/* ✅ Especificidad 0,1,1 — siempre gana a :root (0,1,0) */
+html[data-theme="dark"] {
+  --background: #121514;
+}
+```
+
+**Cómo se diagnostica**: si cambiar el color manualmente en DevTools funciona pero el CSS
+automático no, el problema es que la variable CSS no se está sobreescribiendo — no que el
+`background` no se aplique. El siguiente paso es verificar si `data-theme="dark"` está realmente
+en el `<html>` en el panel Elements de DevTools.
+
+> **Regla práctica para theming**: cuando uses un atributo de `<html>` para controlar variables
+> CSS, hacer el selector más específico con `html[data-theme="dark"]` es más robusto que
+> `[data-theme="dark"]` solo — te protege de conflictos de orden en el CSS procesado.
+
+---
+
+## Navegación responsive — patrón con Tailwind y `useState`
+
+Un nav responsive con hamburguesa necesita tres responsabilidades separadas en el marcado:
+
+```
+1. Brand (logo + nombre) — siempre visible
+2. Links desktop         — visible en md+, oculto en mobile
+3. Controles mobile      — visible en mobile, oculto en md+
+```
+
+Se implementa con dos clases utilitarias de Tailwind para visibilidad responsiva:
+- `hidden md:flex` — oculto en mobile, flex en desktop
+- `flex md:hidden` — flex en mobile, oculto en desktop
+
+```tsx
+"use client"
+import { useState } from "react"
+
+export function Nav() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <header>
+      <nav>
+        {/* 1. Brand — siempre visible */}
+        <div>Logo + nombre</div>
+
+        {/* 2. Desktop */}
+        <div className="hidden md:flex items-center gap-8">
+          {/* links + ThemeToggle + Contact */}
+        </div>
+
+        {/* 3. Mobile */}
+        <div className="flex md:hidden items-center gap-3">
+          <ThemeToggle />
+          <button onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <XIcon /> : <MenuIcon />}
+          </button>
+        </div>
+      </nav>
+
+      {/* Panel desplegable — fuera del <nav>, dentro del <header> */}
+      {isOpen && (
+        <div className="md:hidden border-t border-line px-6 py-6 flex flex-col gap-5">
+          <Link href="/portfolio" onClick={() => setIsOpen(false)}>Portfolio</Link>
+          {/* ... */}
+        </div>
+      )}
+    </header>
+  )
+}
+```
+
+**Puntos clave**:
+- El Nav completo se convierte en Client Component (`"use client"`) para poder usar `useState`.
+- El panel va **fuera del `<nav>`** pero dentro del `<header>` — el header es `sticky top-0`, así
+  el panel se queda pegado al tope de pantalla junto con el nav.
+- Cada `<Link>` del panel llama `onClick={() => setIsOpen(false)}` para cerrar el menú al navegar.
+- Los íconos hamburguesa/cierre se implementan con SVG inline para control total del tamaño y
+  color (`stroke="currentColor"` hereda el color del texto del tema).
+
+> **Pregunta de entrevista**: ¿por qué el panel del menú móvil va fuera del `<nav>` y no dentro?
+> Semánticamente, `<nav>` contiene los links de navegación — el panel los contiene, así que podría
+> ir dentro. En la práctica, va fuera porque el `<nav>` tiene `flex items-center justify-between`
+> para la fila del header: si el panel es un hijo directo, ese flex lo pondría en línea con el
+> logo. Poniéndolo como hermano del `<nav>` (dentro del `<header>`), queda como bloque debajo.
+
+---
+
+## Next.js App Router — convenciones de archivo para SEO y metadata
+
+Además de `page.tsx` y `layout.tsx`, Next.js reserva varios nombres de archivo en `app/` para
+generar automáticamente metadata y recursos sin configuración extra:
+
+| Archivo | Genera | URL |
+|---|---|---|
+| `opengraph-image.tsx` | `<meta property="og:image">` | `/opengraph-image` |
+| `twitter-image.tsx` | `<meta name="twitter:image">` | `/twitter-image` |
+| `not-found.tsx` | página 404 personalizada | cualquier ruta inexistente |
+| `sitemap.ts` | `sitemap.xml` | `/sitemap.xml` |
+| `robots.ts` | `robots.txt` | `/robots.txt` |
+| `icon.svg` / `icon.png` | `<link rel="icon">` | — |
+
+**Herencia en el árbol de rutas**: un `opengraph-image.tsx` en `app/` aplica a todas las rutas del
+sitio. Si una subruta tiene su propio `opengraph-image.tsx`, lo sobreescribe para esa rama. Esto
+permite una imagen base global y variantes específicas por sección sin repetir código.
+
+`sitemap.ts` y `robots.ts` exportan funciones que devuelven tipos de Next.js:
+
+```ts
+// app/sitemap.ts
+import type { MetadataRoute } from "next"
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    { url: "https://elibabah.com" },
+    { url: "https://elibabah.com/portfolio" },
+    // ... rutas dinámicas desde getAllProjects(), getAllArticles(), etc.
+  ]
+}
+
+// app/robots.ts
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: { userAgent: "*", allow: "/" },
+    sitemap: "https://elibabah.com/sitemap.xml",
+  }
+}
+```
+
+> **Por qué importa para un recruiter técnico**: tener sitemap y robots correctamente configurados
+> demuestra comprensión del ciclo completo de un producto web — no solo el código, sino también
+> cómo los motores de búsqueda lo descubren e indexan.
+
+---
+
+## `ImageResponse` y Satori — generación de imágenes OG en el servidor
+
+`ImageResponse` (de `next/og`) es una función que recibe JSX y genera una imagen PNG en el
+servidor. Internamente usa **Satori**, un renderer de JSX-a-SVG desarrollado por Vercel.
+
+```tsx
+// app/opengraph-image.tsx
+import { ImageResponse } from "next/og"
+import { readFileSync } from "fs"
+import { join } from "path"
+
+export const size = { width: 1200, height: 630 }
+export const contentType = "image/png"
+
+export default function OGImage() {
+  const fontData = readFileSync(join(process.cwd(), "public/fonts/SourceSerif4-Bold.ttf"))
+
+  return new ImageResponse(
+    (<div style={{ backgroundColor: "#121514", width: 1200, height: 630 }}>...</div>),
+    {
+      width: 1200,
+      height: 630,
+      fonts: [{ name: "Source Serif 4", data: fontData, weight: 700 }],
+    }
+  )
+}
+```
+
+**Limitaciones de Satori que hay que conocer**:
+
+1. **Solo estilos inline** — no Tailwind, no clases CSS externas. Todo con `style={{}}`.
+2. **No `background` shorthand** — usar `backgroundColor` para fondos sólidos. `background` se
+   ignora silenciosamente (el fondo queda blanco).
+3. **No SVG en `<img>`** — los SVG embebidos como `data:image/svg+xml;base64,...` en una etiqueta
+   `<img>` no se renderizan. Solo PNG y JPEG funcionan como fuentes de imagen.
+4. **Fuentes explícitas** — Satori no tiene acceso a las fuentes de `next/font/google`. Hay que
+   proveer el `.ttf` manualmente en el array `fonts` de `ImageResponse`. Los `.ttf` estáticos
+   (weights fijos) son más simples que variable fonts.
+5. **Subset de CSS** — Satori implementa un subconjunto de Flexbox. No soporta CSS Grid, `position:
+   absolute` limitado, ni todas las propiedades. Diseñar con Flexbox puro.
+
+**Runtime**: sin declarar `export const runtime`, el archivo corre en Node.js serverless — lo que
+permite usar `fs.readFileSync` para leer fuentes e imágenes locales con `process.cwd()` como raíz.
+
+> **Pregunta de entrevista**: ¿cuándo generarías imágenes OG dinámicas vs una imagen estática?
+> Una imagen estática (un PNG en `app/`) es suficiente cuando todas las páginas comparten la misma
+> imagen de preview. Imágenes dinámicas (`opengraph-image.tsx` que lee params) valen la pena cuando
+> el título del artículo o el nombre del proyecto deben aparecer en la imagen — mejoran el CTR en
+> LinkedIn y Twitter porque el preview ya dice de qué trata el contenido antes de hacer clic.
