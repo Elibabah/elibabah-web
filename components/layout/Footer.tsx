@@ -48,7 +48,7 @@ export function Footer() {
             </a>
           </div>
           <p className="font-mono text-xs text-ink-faint">
-            © {new Date().getFullYear()} Elías Hernández · Auckland
+            © {new Date().getFullYear()} Elías Hernández · New Zealand
           </p>
         </div>
 
