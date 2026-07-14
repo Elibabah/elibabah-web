@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllProjects } from "@/lib/portfolio";
@@ -15,7 +16,7 @@ export default function PortfolioPage() {
 
       <header className="flex flex-col gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="w-[7px] h-[7px] rounded-full bg-accent shrink-0" />
+          <span className="w-1.75 h-1.75 rounded-full bg-accent shrink-0" />
           <span className="font-mono text-xs text-ink-soft tracking-[0.6px] uppercase">Work</span>
         </div>
         <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground">
@@ -31,9 +32,20 @@ export default function PortfolioPage() {
           <li key={project.slug}>
             <Link
               href={`/portfolio/${project.slug}`}
-              className="group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent h-full"
+              className="group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-220 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent h-full"
             >
-              <div className="aspect-[16/10] bg-accent-soft border-b border-line" />
+              {project.cover ? (
+                <div className="aspect-16/10 relative border-b border-line overflow-hidden">
+                  <Image
+                    src={project.cover}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-16/10 bg-accent-soft border-b border-line" />
+              )}
               <div className="flex flex-col gap-2 p-5 flex-1">
                 <h2 className="font-heading font-bold text-xl text-foreground">
                   {project.title}

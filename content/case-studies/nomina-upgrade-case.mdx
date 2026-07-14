@@ -1,0 +1,71 @@
+---
+title: "Upgrading 2M+ Accounts: The BBVA Nómina Compliance Flow"
+slug: nomina-upgrade-case
+project: nomina-upgrade
+problem: Mexican banking regulation required BBVA to collect complete identity and address data from all salary account holders — with no existing mobile flow to do it.
+role: Frontend Developer
+stack:
+  - Lit
+  - TypeScript
+  - Cells
+  - Web Components
+readingTime: 6
+outcome: Delivered a modular, accessible document collection flow across five regulatory modules, iterated across two production MVPs, and contributed to BBVA meeting national compliance requirements for the nómina product line.
+cover: null
+---
+
+## Context
+
+In 2022, Mexican banking regulators mandated that financial institutions hold complete verified identity data for all account holders. For BBVA Mexico, this meant reaching millions of nómina (payroll) customers — people whose accounts had been opened years earlier with minimal documentation — and guiding them through a full compliance upgrade without friction.
+
+The challenge landed on the mobile team: build a flow that collects five categories of sensitive data (ID, proof of address, KYC declaration, FATCA status, and beneficiary information), integrates with existing backend APIs, and does all of it within the constraints of BBVA's internal Web Components ecosystem.
+
+## Team and scope
+
+Two of us owned the frontend entirely. There was no larger team to distribute complexity to — just my colleague and me, working directly with design, business analysts, compliance, and the backend API owners.
+
+Our responsibilities covered the full lifecycle: UX/UI sessions with design and business to define the flow, frontend implementation across all modules, integration with existing bank APIs, unit and end-to-end tests, analytics tagging per the business tagging specification, and accessibility review.
+
+## Architecture decisions
+
+### Modular by design
+
+The five document types — INE/ID verification, proof of address, KYC, FATCA, and beneficiary — are logically independent. A user might complete identity verification in one session and address in another. The regulation didn't require completion in one sitting.
+
+We built each module as a self-contained unit: its own state, its own API contracts, its own error handling. The orchestration layer tracked which modules had been completed and resumed the user from where they left off. This meant we could ship, test, and fix each module without touching the others — important in a bank environment where changes go through multiple layers of review.
+
+### Cells framework
+
+BBVA's Cells framework is built on Lit and TypeScript. It's not a framework you choose — it's the framework the bank has standardised on for mobile web, with its own component catalogue, routing patterns, and state management conventions.
+
+Working within Cells meant no npm packages, no external component libraries, no workarounds that deviate from the bank's standards. Every architectural decision had to work within those constraints. This turned out to be a useful forcing function: it pushed us toward simpler patterns that were easier to test and audit.
+
+### API integration without negotiation
+
+The backend APIs existed before this project. We were consumers, not designers. This meant adapting the UI flow to data shapes we didn't control — handling partial responses, edge cases in validation states, and error codes that didn't always map cleanly to user-facing messages.
+
+The front matter model we settled on: the API is the contract; the UI handles all the edge cases gracefully.
+
+## Two MVPs
+
+**2023 — The full modular flow**
+The first production release covered all five modules. We prioritised getting the happy path into users' hands and validating the architecture. The proof of address module in this version worked, but it was built on an older UI pattern.
+
+**2024 — Address module rebuild**
+The second MVP was scoped to a single module: proof of address. By then, BBVA had introduced a new UX design language and updated tooling for certain component patterns. We rebuilt the address module from scratch within the new system while keeping the same API contracts — the surrounding flow didn't change from the user's perspective.
+
+This was a useful lesson in modular architecture paying off: one module could be rearchitected in isolation without touching the rest.
+
+## What made it difficult
+
+Banking compliance flows operate under constraints that consumer apps don't. Every interaction is audited. Error states have legal implications. Accessibility is not optional — it's a regulatory requirement in Mexico for financial services.
+
+The analytics tagging requirement was particularly demanding: every user action, every API call result, every module entry and exit had to be instrumented per a business tagging guide maintained by a separate team. Getting this right required careful coordination and thorough E2E testing.
+
+Working without the ability to share code or screenshots publicly also sharpens how you talk about the work. The architecture and the decisions are the story — not the pixels.
+
+## Outcome
+
+The flow shipped to production and reached BBVA's nómina customer base at scale. The modular design meant the 2024 address module rebuild could be delivered without regression risk to the other four modules.
+
+For me personally: this was the project where I moved from executing tickets to owning a product surface — designing the architecture, making tradeoffs across competing constraints, and being accountable for the full delivery.

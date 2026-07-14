@@ -1,0 +1,34 @@
+---
+title: "Nómina Account Upgrade — BBVA"
+slug: nomina-upgrade
+summary: Modular document collection flow enabling salary account holders to upgrade from N2 to N4 compliance via the BBVA mobile app, driven by Mexican banking regulation.
+stack:
+  - Lit
+  - TypeScript
+  - Cells
+  - Web Components
+role: Frontend Developer
+year: 2024
+links:
+  demo: null
+  repo: null
+caseStudy: nomina-upgrade-case
+featured: true
+cover: /images/covers/nomina-upgrade.png
+---
+
+## Overview
+
+BBVA Mexico required salary account holders (nómina clients) to complete a full identity and compliance upgrade — from account level N2 to N4 — directly through the mobile app, in line with national banking regulation requiring complete customer data on file.
+
+Two of us owned the frontend end-to-end: from UX/UI sessions with design and business, through implementation, API integration, unit and e2e testing, analytics tagging per business spec, and accessibility review.
+
+## Architecture
+
+The flow was built as independent document modules — INE/ID, proof of address, KYC, FATCA, and beneficiary — each self-contained and composable, so users could complete them in any order and resume a partial upgrade without losing progress.
+
+Built with Lit and TypeScript on Cells, BBVA's internal Web Components framework. Each module consumed existing bank APIs; our work was the frontend orchestration layer connecting them into a coherent user journey.
+
+## Two MVPs
+
+The first version (2023) established the modular architecture across all five document types. In 2024, the proof of address module was rebuilt in isolation as a second MVP — migrated to an updated UX design language and newer internal tooling — while preserving the same API contracts.

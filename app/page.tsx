@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link";
 import { getAllArticles } from "@/lib/editorial";
 import { getAllProjects } from "@/lib/portfolio";
@@ -13,7 +14,7 @@ export default function Home() {
       {/* Hero */}
       <section className="flex flex-col gap-5">
         <div className="flex items-center gap-2.5">
-          <span className="w-[7px] h-[7px] rounded-full bg-accent shrink-0" />
+          <span className="w-1.75 h-1.75 rounded-full bg-accent shrink-0" />
           <span className="font-mono text-xs text-ink-soft tracking-[0.6px] uppercase">
             Frontend Engineer · New Zealand
           </span>
@@ -58,8 +59,14 @@ export default function Home() {
                 href={`/portfolio/${project.slug}`}
                 className="h-full group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
               >
-                <div className="aspect-[16/10] bg-accent-soft border-b border-line" />
-                <div className="flex flex-col gap-2 p-4">
+                  {project.cover ? (
+                    <div className="aspect-16/10 relative border-b border-line overflow-hidden">
+                      <Image src={project.cover} alt={project.title} fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-16/10 bg-accent-soft border-b border-line" />
+                  )}                
+                  <div className="flex flex-col gap-2 p-4">
                   <h3 className="font-heading font-bold text-lg text-foreground">
                     {project.title}
                   </h3>
