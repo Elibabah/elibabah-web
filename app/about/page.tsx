@@ -23,7 +23,7 @@ export default function AboutPage() {
       <section className="flex flex-col gap-3 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">Who I am</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          I'm a software developer based in Auckland, New Zealand.
+          I am a software developer based in New Zealand.
           I build web applications with a focus on clean architecture and
           thoughtful user experience.
         </p>

@@ -15,7 +15,7 @@ export default function Home() {
         <div className="flex items-center gap-2.5">
           <span className="w-[7px] h-[7px] rounded-full bg-accent shrink-0" />
           <span className="font-mono text-xs text-ink-soft tracking-[0.6px] uppercase">
-            Frontend Engineer · Auckland, NZ
+            Frontend Engineer · New Zealand
           </span>
         </div>
         <h1 className="font-heading max-w-xxl font-bold text-5xl leading-[1.12] tracking-[-0.5px] text-foreground">
