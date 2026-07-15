@@ -30,7 +30,10 @@ export const metadata: Metadata = {
     template: "%s | Elibabah",
   },
   description: "Software developer. Portfolio and editorial.",
-};
+  verification: {
+    google: "WxOXaeBjakeZGTAZcwBGhCgTIjnPRPLTbgnErf0UQoE",
+  },
+}
 
 const personJsonLd = {
   "@context": "https://schema.org",
