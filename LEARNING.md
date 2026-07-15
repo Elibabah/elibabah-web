@@ -970,6 +970,33 @@ usuario (o el propio buscador, al comparar) no puede ver en la página.
 > perfiles externos ya establecidos. JSON-LD hace esa relación explícita y estructurada, lo cual es
 > la base para que un buscador arme un grafo de conocimiento coherente sobre una persona o marca.
 
+### Validar el JSON-LD: dos herramientas con propósitos distintos
+
+Existen dos herramientas de Google/schema.org para chequear structured data, y **no son
+intercambiables**:
+
+- **Rich Results Test** (`search.google.com/test/rich-results`) — solo detecta tipos de schema que
+  están en la lista específica de Google de tipos elegibles para "rich results" (resultados con
+  mejoras visuales en el buscador: estrellas de reseña, breadcrumbs, FAQs, recetas, eventos...).
+  `Person` suelto **no está en esa lista**, así que esta herramienta va a decir "No items detected"
+  aunque el JSON-LD esté perfecto — no es un error, es que la pregunta que hace esa herramienta
+  ("¿esto genera un rich result?") no aplica a este tipo de schema.
+- **Schema Markup Validator** (`validator.schema.org`) — valida la sintaxis y estructura de
+  *cualquier* tipo de schema.org, sin filtrar por elegibilidad a rich results. Es la herramienta
+  correcta para confirmar que un `Person` (o cualquier tipo no cubierto por rich results) está bien
+  formado: campos correctos, tipos anidados válidos, sin errores de sintaxis.
+
+**Regla práctica**: si el tipo de schema que usás no aparece en la lista de rich results de Google
+(`Person`, por ejemplo), usá el Schema Markup Validator para confirmar validez — el Rich Results Test
+siempre va a reportar "no items detected" para ese caso, sin que eso signifique nada malo.
+
+> **Pregunta de entrevista**: ¿por qué el Rich Results Test de Google puede decir "no items detected"
+> para un JSON-LD que en realidad está bien implementado?
+> Porque esa herramienta no valida structured data en general — solo detecta los tipos específicos
+> que Google soporta como "rich results" visuales en el buscador. Si el tipo de schema (como `Person`
+> suelto) no está en esa lista, la herramienta correcta para validar sintaxis y estructura es el
+> Schema Markup Validator de schema.org, que sí cubre cualquier tipo del vocabulario.
+
 ---
 
 ## Falso positivo de hidratación causado por extensiones del navegador
