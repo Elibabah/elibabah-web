@@ -30,7 +30,7 @@ export default function AotearoaPage() {
           <li key={article.slug}>
             <Link
               href={`/editorial/${article.slug}`}
-              className="group flex items-center justify-between gap-6 py-[18px] border-t border-line"
+              className="group flex items-center justify-between gap-6 py-4.5 border-t border-line"
             >
               <div className="flex flex-col gap-2 min-w-0">
                 <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">
