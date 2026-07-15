@@ -903,3 +903,115 @@ permite usar `fs.readFileSync` para leer fuentes e imágenes locales con `proces
 > imagen de preview. Imágenes dinámicas (`opengraph-image.tsx` que lee params) valen la pena cuando
 > el título del artículo o el nombre del proyecto deben aparecer en la imagen — mejoran el CTR en
 > LinkedIn y Twitter porque el preview ya dice de qué trata el contenido antes de hacer clic.
+
+---
+
+## Datos estructurados (JSON-LD) para SEO por nombre propio
+
+`meta description` y Open Graph controlan **cómo se ve** tu página en un resultado de búsqueda o al
+compartir un link. **JSON-LD** es un mecanismo distinto: le dice al buscador **de qué entidad trata**
+la página, en un vocabulario estandarizado (schema.org), sin ambigüedad de lenguaje natural.
+
+El problema que resuelve: si alguien busca tu nombre legal completo, tu nombre profesional, y tu
+handle de marca, son tres strings de texto distintos. Sin señal explícita, un buscador no tiene por
+qué asumir que las tres apuntan a la misma persona — solo puede matchear texto literal.
+
+Ejemplo real de este proyecto ([app/layout.tsx](app/layout.tsx)):
+
+```ts
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "David Elías Hernández Morales",
+  alternateName: ["Elías Hernández", "Elibabah"],
+  url: "https://elibabah.com",
+  jobTitle: "Frontend Engineer",
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "NZ",
+  },
+  sameAs: [
+    "https://www.linkedin.com/in/elibabah/",
+    "https://github.com/elibabah",
+  ],
+};
+```
+
+- **`name`**: la forma canónica de la entidad.
+- **`alternateName`**: variantes válidas de la misma entidad (no es keyword stuffing porque son
+  strings reales por las que te buscan, no relleno).
+- **`sameAs`**: la señal más fuerte del bloque. Cualquiera puede escribir cualquier texto en su
+  propio dominio, pero enlazar perfiles ya verificados en otras plataformas (LinkedIn, GitHub) es
+  mucho más difícil de falsear — por eso el buscador le da más peso que al texto propio.
+
+Se renderiza directamente en el JSX, no en un `<head>` manual (el App Router gestiona el `<head>` vía
+la Metadata API, no acepta un `<head>` explícito):
+
+```tsx
+<script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+/>
+```
+
+`dangerouslySetInnerHTML` normalmente es riesgo de XSS cuando el HTML viene de una fuente externa o
+de input de usuario. Acá es seguro porque `personJsonLd` es un objeto estático que escribe el propio
+desarrollador — no hay dato externo ni de usuario involucrado en el string que se inyecta.
+
+**Regla de coherencia**: lo que declara el JSON-LD debe reflejarse también en el texto visible de la
+página. En este proyecto, el nombre legal completo se agregó primero solo al schema — hubo que
+sumarlo también como texto real en la bio de `/about` para que el markup no describiera algo que un
+usuario (o el propio buscador, al comparar) no puede ver en la página.
+
+> **Pregunta de entrevista**: ¿por qué usar JSON-LD en vez de simplemente escribir el texto en la
+> página?
+> El texto ayuda a que Google indexe esas palabras, pero no le dice explícitamente que "David Elías
+> Hernández Morales", "Elías Hernández" y "Elibabah" son la misma entidad, ni conecta el dominio con
+> perfiles externos ya establecidos. JSON-LD hace esa relación explícita y estructurada, lo cual es
+> la base para que un buscador arme un grafo de conocimiento coherente sobre una persona o marca.
+
+---
+
+## Falso positivo de hidratación causado por extensiones del navegador
+
+La sección de "Hidratación" más arriba cubre mismatches **reales y esperados**, generados por el
+propio código (tema claro/oscuro). Existe una segunda categoría, distinta: mismatches que el buscador
+reporta pero que **no los genera tu código en absoluto**.
+
+Caso real de este proyecto: la consola tiraba
+
+```
+A tree hydrated but some attributes of the server rendered HTML didn't match the client properties.
+```
+
+señalando en el diff atributos como `data-new-gr-c-s-check-loaded` y `data-gr-ext-installed` en el
+`<body>`. Ninguno de esos atributos existe en el código del proyecto — los inyecta la extensión
+**Grammarly** del navegador, modificando el DOM del lado del cliente antes de que React termine de
+hidratar. El servidor nunca los generó, así que al comparar árbol servidor vs. cliente, React los
+detecta como diferencia y avisa.
+
+**Cómo diagnosticarlo**: mirar el nombre del atributo marcado en el diff. Prefijos de terceros
+conocidos (`data-gr-*` de Grammarly, `data-lt-*` de LanguageTool, `data-darkreader-*`, etc.) que no
+aparecen en ningún archivo del proyecto son la pista. El propio mensaje de error de Next.js lo
+enumera como causa posible ("It can also happen if the client has a browser extension installed").
+Para confirmarlo del todo: reproducir en una ventana de incógnito sin extensiones — si el warning
+desaparece, es la extensión, no el código.
+
+**Solución**: `suppressHydrationWarning` en el nodo afectado. Ya se usa en `<html>` para el caso de
+`next-themes` ([app/layout.tsx](app/layout.tsx)); puede aplicarse igual al `<body>` si la extensión
+inyecta atributos ahí. El prop es local a ese nodo puntual — no oculta mismatches reales en otras
+partes del árbol.
+
+**Diferencia clave con el patrón `mounted`**:
+- Patrón `mounted` → el mismatch es real y lo genera tu propio código (ej. tema) — hay que resolverlo
+  con lógica, no con `suppressHydrationWarning`.
+- Extensión de navegador → el mismatch no lo genera tu código — es ruido externo, y silenciarlo con
+  `suppressHydrationWarning` es la respuesta correcta, no un parche que esconde un bug real.
+
+> **Pregunta de entrevista**: ¿cómo distinguirías un hydration mismatch real de uno causado por una
+> extensión del navegador?
+> Mirando qué atributos marca el diff. Si son props que tu propio código controla (`data-theme`,
+> clases condicionales, valores que dependen de estado), es un mismatch real que requiere el patrón
+> `mounted` o ajustar la lógica. Si son atributos con prefijos de terceros que no existen en ningún
+> archivo del proyecto, es una extensión inyectando HTML en el cliente — confirmable reproduciendo en
+> una ventana sin extensiones.

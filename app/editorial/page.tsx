@@ -15,7 +15,7 @@ export default function EditorialPage() {
 
       <header className="flex flex-col gap-2">
         <div className="flex items-center gap-2.5">
-          <span className="w-[7px] h-[7px] rounded-full bg-accent shrink-0" />
+          <span className="w-1.75 h-1.75 rounded-full bg-accent shrink-0" />
           <span className="font-mono text-xs text-ink-soft tracking-[0.6px] uppercase">Writing</span>
         </div>
         <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground">
@@ -38,11 +38,11 @@ export default function EditorialPage() {
       </header>
 
       <ul>
-        {articles.map((article) => (
+        {articles?.map((article) => (
           <li key={article.slug}>
             <Link
               href={`/editorial/${article.slug}`}
-              className="group flex items-center justify-between gap-6 py-[18px] border-t border-line"
+              className="group flex items-center justify-between gap-6 py-4.5 border-t border-line"
             >
               <div className="flex flex-col gap-2 min-w-0">
                 <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-2.5 py-1 rounded-md">

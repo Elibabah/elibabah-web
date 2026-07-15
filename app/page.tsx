@@ -4,9 +4,8 @@ import { getAllArticles } from "@/lib/editorial";
 import { getAllProjects } from "@/lib/portfolio";
 
 export default function Home() {
-  const latestArticles = getAllArticles().slice(0, 3);
-  const featuredProjects = getAllProjects().filter(p => p.featured);
-
+  const latestArticles = getAllArticles().slice(0, 3) || [];
+  const featuredProjects = getAllProjects().filter(p => p.featured) || [];
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-20">
@@ -29,13 +28,13 @@ export default function Home() {
         <div className="flex items-center gap-3 mt-1">
           <Link
             href="/portfolio"
-            className="bg-accent text-on-accent font-semibold text-sm px-5 py-[11px] rounded-[9px] hover:opacity-90 transition-opacity"
+            className="bg-accent text-on-accent font-semibold text-sm px-5 py-2.75 rounded-[9px] hover:opacity-90 transition-opacity"
           >
             View work
           </Link>
           <Link
             href="/about"
-            className="text-accent border border-accent font-semibold text-sm px-5 py-[11px] rounded-[9px] hover:bg-accent/5 transition-colors"
+            className="text-accent border border-accent font-semibold text-sm px-5 py-2.75 rounded-[9px] hover:bg-accent/5 transition-colors"
           >
             About me
           </Link>
@@ -53,11 +52,11 @@ export default function Home() {
           </Link>
         </div>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {featuredProjects.map((project) => (
+          {featuredProjects.length > 0 && featuredProjects?.map((project) => (
             <li key={project.slug} className="flex flex-col">
               <Link
                 href={`/portfolio/${project.slug}`}
-                className="h-full group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-[220ms] hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
+                className="h-full group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-220 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
               >
                   {project.cover ? (
                     <div className="aspect-16/10 relative border-b border-line overflow-hidden">
@@ -74,7 +73,7 @@ export default function Home() {
                     {project.summary}
                   </p>
                   <ul className="flex flex-wrap gap-1.5 mt-1">
-                    {project.stack.map((tech) => (
+                    {project.stack?.map((tech) => (
                       <li
                         key={tech}
                         className="font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
@@ -102,14 +101,14 @@ export default function Home() {
             </Link>
           </div>
           <ul>
-            {latestArticles.map((article) => (
+            {latestArticles?.map((article) => (
               <li key={article.slug}>
                 <Link
                   href={`/editorial/${article.slug}`}
-                  className="group flex items-center justify-between gap-6 py-[18px] border-t border-line"
+                  className="group flex items-center justify-between gap-6 py-4.5 border-t border-line"
                 >
                   <div className="flex flex-col gap-2 min-w-0">
-                    <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-[10px] py-1 rounded-md">
+                    <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-2.5 py-1 rounded-md">
                       {article.section}
                     </span>
                     <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">

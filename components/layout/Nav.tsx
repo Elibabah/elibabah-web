@@ -10,16 +10,16 @@ export function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-line transition-colors duration-[350ms]">
+    <header className="sticky top-0 z-50 bg-background border-b border-line transition-colors duration-350">
       <nav className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
 
-      {/* 1. Brand — always visible */}
-      <div className="flex items-center gap-[11px]">
-        <Logo />
-        <Link href="/" className="font-heading font-bold text-[21px] tracking-[-0.3px] text-foreground hover:text-foreground">
-          elibabah
-        </Link>
-      </div>
+        {/* 1. Brand — always visible */}
+        <div className="flex items-center gap-2.75">
+          <Logo />
+          <Link href="/" className="font-heading font-bold text-[21px] tracking-[-0.3px] text-foreground hover:text-foreground">
+            elibabah
+          </Link>
+        </div>
       
         {/* 2. Desktop — hidden in mobile */}
         <div className="hidden md:flex items-center gap-8">
@@ -82,8 +82,7 @@ export function Nav() {
             )}
           </button>
         </div>
-
-
+        
       </nav>
 
        {/* Panel móvil */}

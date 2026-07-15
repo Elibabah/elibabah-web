@@ -14,7 +14,6 @@ const sourceSerif = Source_Serif_4({
   subsets: ["latin"]
 })
 
-
 const inter = Inter({
   variable: "--font-body",
   subsets: ["latin"]
@@ -33,6 +32,23 @@ export const metadata: Metadata = {
   description: "Software developer. Portfolio and editorial.",
 };
 
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "David Elías Hernández Morales",
+  alternateName: ["Elías Hernández", "Elibabah"],
+  url: "https://elibabah.com",
+  jobTitle: "Frontend Engineer",
+  address: {
+    "@type": "PostalAddress",
+    addressCountry: "NZ",
+  },
+  sameAs: [
+    "https://www.linkedin.com/in/elibabah/",
+    "https://github.com/elibabah",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -45,6 +61,11 @@ export default function RootLayout({
       className={`${sourceSerif.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+        />
+
         <ThemeProvider>
           <Nav />
           {children}

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function PortfolioPage() {
-  const projects = getAllProjects();
+  const projects = getAllProjects() || [];
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-12">
@@ -28,7 +28,7 @@ export default function PortfolioPage() {
       </header>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {projects.map((project) => (
+        {projects?.map((project) => (
           <li key={project.slug}>
             <Link
               href={`/portfolio/${project.slug}`}
@@ -57,7 +57,7 @@ export default function PortfolioPage() {
                   {project.role} · {project.year}
                 </p>
                 <ul className="flex flex-wrap gap-1.5 mt-2">
-                  {project.stack.map((tech) => (
+                  {project.stack?.map((tech) => (
                     <li
                       key={tech}
                       className="flex flex-col font-mono text-[10px] text-ink-soft border border-line px-2 py-0.5 rounded-[5px]"
@@ -67,8 +67,8 @@ export default function PortfolioPage() {
                   ))}
                 </ul>
                 {project.caseStudy && (
-                  <span className="font-mono text-xs text-accent mt-2 group-hover:underline">
-                    Read case study →
+                  <span className="font-mono text-xs text-accent mt-2">
+                    Case study available
                   </span>
                 )}
               </div>

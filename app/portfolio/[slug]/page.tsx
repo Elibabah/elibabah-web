@@ -66,7 +66,7 @@ export default async function ProjectPage({
               href={project.links.demo}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-accent text-on-accent font-semibold text-sm px-5 py-[10px] rounded-[9px] hover:opacity-90 transition-opacity"
+              className="bg-accent text-on-accent font-semibold text-sm px-5 py-2.5 rounded-[9px] hover:opacity-90 transition-opacity"
             >
               Live demo
             </a>
@@ -76,7 +76,7 @@ export default async function ProjectPage({
               href={project.links.repo}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent border border-accent font-semibold text-sm px-5 py-[10px] rounded-[9px] hover:bg-accent/5 transition-colors"
+              className="text-accent border border-accent font-semibold text-sm px-5 py-2.5 rounded-[9px] hover:bg-accent/5 transition-colors"
             >
               View repo
             </a>
@@ -98,7 +98,7 @@ export default async function ProjectPage({
         )}
       </header>
 
-      <div className="aspect-[21/9] bg-accent-soft border border-line rounded-xl" />
+      <div className="aspect-21/9 bg-accent-soft border border-line rounded-xl" />
 
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={project.content} />

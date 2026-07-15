@@ -1,20 +1,15 @@
 # Handoff — elibabah.com (personal site, Next.js)
 
 > Document to continue the project in Claude (VS Code).
-> The working principle stays the same: **Elías writes all the code**; Claude acts as a
-> thinking partner, architecture guide, and support, not as the implementer.
+> The working principle stays the same: **Elías writes all the code**; Claude acts as a thinking partner, architecture guide, and support, not as the implementer.
 
 ---
 
 ## 1. What this project is
 
-Elías's personal professional site (handle: **Elibabah**). It is neither a pure portfolio
-nor a blog: it integrates both. The primary audience is **technical recruiters and hiring
-managers in New Zealand**. The site also doubles as a demonstration of the React/Next.js
-skills Elías is actively developing.
+Elías's personal professional site (handle: **Elibabah**). It is neither a pure portfolio nor a blog: it integrates both. The primary audience is **technical recruiters and hiring managers in New Zealand**. The site also doubles as a demonstration of the React/Next.js skills Elías is actively developing.
 
-Site language: **English**. Spanish is used only as a deliberate identity marker (the hero
-epigraph: *"Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena."*, kept verbatim).
+Site language: **English**. Spanish is used only as a deliberate identity marker (the hero epigraph: *"Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena."*, kept verbatim).
 
 ---
 

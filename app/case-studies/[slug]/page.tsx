@@ -3,6 +3,7 @@ import { getAllCaseStudies, getCaseStudyBySlug } from "@/lib/case-studies";
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
+import { getProjectBySlug } from "@/lib/portfolio";
 
 export async function generateMetadata({
   params,
@@ -31,16 +32,17 @@ export default async function CaseStudyPage({
 }) {
   const { slug } = await params;
   const caseStudy = getCaseStudyBySlug(slug);
+  const project = getProjectBySlug(caseStudy.project);
 
   return (
     <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-10">
 
-      <Link href="/portfolio" className="font-mono text-xs text-accent hover:underline">
-        ← Portfolio
+      <Link href={`/portfolio/${project.slug}`} className="font-mono text-xs text-accent hover:underline">
+        ← Back to {project.title}
       </Link>
 
       <header className="flex flex-col gap-4 max-w-xl">
-        <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-[10px] py-1 rounded-md">
+        <span className="self-start bg-accent-soft text-accent font-mono text-[10px] tracking-[0.5px] uppercase px-2.5 py-1 rounded-md">
           Case Study
         </span>
         <h1 className="font-heading text-4xl font-bold tracking-[-0.5px] text-foreground">
@@ -65,7 +67,7 @@ export default async function CaseStudyPage({
         </ul>
       </header>
 
-      <div className="aspect-[21/9] bg-accent-soft border border-line rounded-xl" />
+      <div className="aspect-21/9 bg-accent-soft border border-line rounded-xl" />
 
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={caseStudy.content} />

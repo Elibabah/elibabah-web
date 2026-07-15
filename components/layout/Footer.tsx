@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer id="contact" className="bg-surface border-t border-line mt-auto transition-colors duration-[350ms]">
+    <footer id="contact" className="bg-surface border-t border-line mt-auto transition-colors duration-350">
       <div className="mx-auto max-w-5xl px-6 py-10 flex flex-col gap-10">
 
         {/* Contact block */}
@@ -31,7 +31,7 @@ export function Footer() {
               LinkedIn
             </a>
             <a
-              href="https://github.com/Elibabah"
+              href="https://github.com/elibabah"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-ink-soft hover:text-accent transition-colors"
