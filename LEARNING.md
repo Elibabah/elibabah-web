@@ -51,6 +51,38 @@ Server Component (layout.tsx)
 
 Es decir: un Client Component puede "envolver" Server Components sin convertirlos en Client Components.
 
+### Import directo dentro de un archivo `"use client"`: dos formas distintas de romperse
+
+Si en vez de recibir un Server Component como `children`, un archivo `"use client"` lo **importa
+directamente** (`import ProjectCard from "./ProjectCard"` dentro de `ThemeProvider.tsx`, por ejemplo,
+y lo renderiza ahí mismo), ese import queda atrapado en el module graph del cliente — Next.js lo
+empaqueta como JS de navegador, sin importar que `ProjectCard` no tenga su propio `"use client"`. A
+partir de ahí hay dos escenarios posibles, con síntomas muy distintos:
+
+1. **Si el componente usa APIs exclusivas de servidor** (`fs.readFileSync`, ser `async function` con
+   `await getProjectBySlug(...)`, leer variables de entorno privadas) → **error real y visible**. Esas
+   APIs no existen en el bundle del navegador, así que la app truena en build o en runtime.
+2. **Si el componente es puramente presentacional** (solo props → JSX, sin nada server-only) → **no
+   truena, pero pierde su naturaleza de Server Component en silencio**. Sigue funcionando
+   visualmente, pero ahora se envía como JS al cliente igual que cualquier Client Component — bundle
+   más pesado, sin ningún error que lo delate.
+
+**Por qué `children` no tiene este problema**: cuando el Server Component llega como `children` desde
+un padre Server Component, ya fue renderizado y resuelto en el servidor antes de llegar al Client
+Component — para éste, `children` es un valor opaco (RSC payload ya resuelto), no un módulo que tenga
+que importar y empaquetar. El bundler nunca rastrea su código.
+
+**Regla práctica**: import directo = el bundler tiene que rastrear y empaquetar ese código para el
+cliente (con o sin error, según lo que contenga). `children` = el resultado ya viene resuelto desde
+afuera, nada que el bundler necesite rastrear.
+
+> **Pregunta de entrevista**: ¿qué pasa si un archivo `"use client"` importa y renderiza directamente
+> un Server Component (en vez de recibirlo como `children`)?
+> Ese import queda dentro del module graph del cliente, así que Next.js lo trata como código de
+> cliente. Si el componente depende de APIs exclusivas de servidor, falla con un error real. Si es
+> puramente presentacional, no falla pero pierde su condición de Server Component sin avisar —
+> termina enviándose como JS al navegador igual que cualquier otro Client Component.
+
 ---
 
 ## Context API y por qué no funciona en Server Components
