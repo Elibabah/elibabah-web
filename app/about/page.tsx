@@ -23,12 +23,14 @@ export default function AboutPage() {
       <section className="flex flex-col gap-3 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">Who I am</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          I am David Elías Hernández Morales, a software developer based in New Zealand.
-          I build web applications with a focus on clean architecture and
-          thoughtful user experience.
+        I am David Elías Hernández Morales, a frontend engineer based in New Zealand. 
+        I build interfaces for large-scale products, with a focus on component architecture, 
+        accessibility, and code that stays maintainable long after it ships.
+        I care about the part of engineering that does not show: the decisions underneath a component, 
+        the reasons a system holds together or quietly falls apart. 
         </p>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          Placeholder — one or two sentences about what drives you professionally.
+          Good software, like good writing, is a question of precision, rhythm, and care.
         </p>
       </section>
 
@@ -36,8 +38,14 @@ export default function AboutPage() {
       <section className="flex flex-col gap-3 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">Background</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          Placeholder — your trajectory before arriving in NZ. Previous industry,
-          how you transitioned into software, what you worked on before.
+        I came to software through language. I trained as a linguist and literary scholar, 
+        and spent years learning to read structure: how a system of signs holds meaning, 
+        where an argument breaks, why one arrangement works and another does not.
+        That turned out to be engineering training in disguise. I read code the way I once read texts, 
+        attentive to intention and structure, and I approach architecture as a problem of meaning as much as mechanics.
+        Over five years I have built enterprise interfaces at Sngular, React products at Innovattia for Walmart, 
+        and now design-system components at BBVA, where I work with Web Components and Lit across banking products used by millions. 
+        I am also completing a Master of Applied Management at SIT, which has sharpened how I connect technical work to strategy, value, and the business it serves.
         </p>
       </section>
 
@@ -45,11 +53,14 @@ export default function AboutPage() {
       <section className="flex flex-col gap-4 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">What I work with</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          Placeholder — the technologies you use regularly and the ones you are
-          actively developing.
+          My core is JavaScript, TypeScript, Web Components, and Lit; 
+          the last two are what I work with daily at BBVA, 
+          building reusable components for a shared design system. React is where 
+          I have shipped production work and where I am actively deepening, alongside Next.js. 
+          This site is part of that practice: built from scratch, App Router, MDX, continuous deployment.
         </p>
         <ul className="flex flex-wrap gap-2 mt-1">
-          {["React", "TypeScript", "Next.js", "Node.js", "PostgreSQL"].map((tech) => (
+          {["TypeScript", "JavaScript", "Web Components", "Lit", "React.js", "Next.js", "Node.js", "Accessibility", "Design Systems"].map((tech) => (
             <li
               key={tech}
               className="font-mono text-xs text-accent border border-accent/30 rounded-full px-3 py-1"
@@ -64,8 +75,18 @@ export default function AboutPage() {
       <section className="flex flex-col gap-3 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">Life in Aotearoa</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-          Placeholder — why New Zealand, what you are looking for here,
-          what the experience of building a career in a new country means to you.
+        I wanted to build my career somewhere international and English-speaking, 
+        and New Zealand made a particular kind of sense: a small country that punches 
+        well above its size in technology, where Auckland holds its own as a genuine tech hub. 
+        Being here means being where things happen, without needing to be somewhere enormous to feel it.
+        The decision was also a family one. We looked at several countries and chose this one because of 
+        what it offers for raising children: safety, calm, and a set of values we recognised. 
+        The closeness to the natural world was not a small part of it either.
+        And something here rhymes with where I come from. Coming from Mexico, 
+        with its own deep pre-Hispanic cultures, I find something familiar in 
+        the way this country carries its Māori history and worldview. 
+        I am still learning, and I know how little I know, but the resonance is real. 
+        I have always felt like a citizen of the world. This is where that feels true.
         </p>
       </section>
 

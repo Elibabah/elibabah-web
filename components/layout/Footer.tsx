@@ -42,14 +42,19 @@ export function Footer() {
               href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-mono text-sm text-accent font-semibold hover:underline"
+              className="font-mono text-sm text-accent font-semibold border border-accent/30 rounded-full px-3 py-1 hover:bg-accent/10 hover:border-accent/50 transition-colors"
             >
               Resume ↓
             </a>
           </div>
-          <p className="font-mono text-xs text-ink-faint">
-            © {new Date().getFullYear()} Elías Hernández · New Zealand
-          </p>
+          <div className="flex flex-col items-end gap-1">
+            <p className="font-mono text-xs text-ink-faint italic">
+              Elibabah — Elías meets Ali Baba: the right words open the cave.
+            </p>
+            <p className="font-mono text-xs text-ink-faint">
+              © {new Date().getFullYear()} Elías Hernández · New Zealand
+            </p>
+          </div>
         </div>
 
       </div>
