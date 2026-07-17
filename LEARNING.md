@@ -51,6 +51,38 @@ Server Component (layout.tsx)
 
 Es decir: un Client Component puede "envolver" Server Components sin convertirlos en Client Components.
 
+### Import directo dentro de un archivo `"use client"`: dos formas distintas de romperse
+
+Si en vez de recibir un Server Component como `children`, un archivo `"use client"` lo **importa
+directamente** (`import ProjectCard from "./ProjectCard"` dentro de `ThemeProvider.tsx`, por ejemplo,
+y lo renderiza ahí mismo), ese import queda atrapado en el module graph del cliente — Next.js lo
+empaqueta como JS de navegador, sin importar que `ProjectCard` no tenga su propio `"use client"`. A
+partir de ahí hay dos escenarios posibles, con síntomas muy distintos:
+
+1. **Si el componente usa APIs exclusivas de servidor** (`fs.readFileSync`, ser `async function` con
+   `await getProjectBySlug(...)`, leer variables de entorno privadas) → **error real y visible**. Esas
+   APIs no existen en el bundle del navegador, así que la app truena en build o en runtime.
+2. **Si el componente es puramente presentacional** (solo props → JSX, sin nada server-only) → **no
+   truena, pero pierde su naturaleza de Server Component en silencio**. Sigue funcionando
+   visualmente, pero ahora se envía como JS al cliente igual que cualquier Client Component — bundle
+   más pesado, sin ningún error que lo delate.
+
+**Por qué `children` no tiene este problema**: cuando el Server Component llega como `children` desde
+un padre Server Component, ya fue renderizado y resuelto en el servidor antes de llegar al Client
+Component — para éste, `children` es un valor opaco (RSC payload ya resuelto), no un módulo que tenga
+que importar y empaquetar. El bundler nunca rastrea su código.
+
+**Regla práctica**: import directo = el bundler tiene que rastrear y empaquetar ese código para el
+cliente (con o sin error, según lo que contenga). `children` = el resultado ya viene resuelto desde
+afuera, nada que el bundler necesite rastrear.
+
+> **Pregunta de entrevista**: ¿qué pasa si un archivo `"use client"` importa y renderiza directamente
+> un Server Component (en vez de recibirlo como `children`)?
+> Ese import queda dentro del module graph del cliente, así que Next.js lo trata como código de
+> cliente. Si el componente depende de APIs exclusivas de servidor, falla con un error real. Si es
+> puramente presentacional, no falla pero pierde su condición de Server Component sin avisar —
+> termina enviándose como JS al navegador igual que cualquier otro Client Component.
+
 ---
 
 ## Context API y por qué no funciona en Server Components
@@ -969,6 +1001,33 @@ usuario (o el propio buscador, al comparar) no puede ver en la página.
 > Hernández Morales", "Elías Hernández" y "Elibabah" son la misma entidad, ni conecta el dominio con
 > perfiles externos ya establecidos. JSON-LD hace esa relación explícita y estructurada, lo cual es
 > la base para que un buscador arme un grafo de conocimiento coherente sobre una persona o marca.
+
+### Validar el JSON-LD: dos herramientas con propósitos distintos
+
+Existen dos herramientas de Google/schema.org para chequear structured data, y **no son
+intercambiables**:
+
+- **Rich Results Test** (`search.google.com/test/rich-results`) — solo detecta tipos de schema que
+  están en la lista específica de Google de tipos elegibles para "rich results" (resultados con
+  mejoras visuales en el buscador: estrellas de reseña, breadcrumbs, FAQs, recetas, eventos...).
+  `Person` suelto **no está en esa lista**, así que esta herramienta va a decir "No items detected"
+  aunque el JSON-LD esté perfecto — no es un error, es que la pregunta que hace esa herramienta
+  ("¿esto genera un rich result?") no aplica a este tipo de schema.
+- **Schema Markup Validator** (`validator.schema.org`) — valida la sintaxis y estructura de
+  *cualquier* tipo de schema.org, sin filtrar por elegibilidad a rich results. Es la herramienta
+  correcta para confirmar que un `Person` (o cualquier tipo no cubierto por rich results) está bien
+  formado: campos correctos, tipos anidados válidos, sin errores de sintaxis.
+
+**Regla práctica**: si el tipo de schema que usás no aparece en la lista de rich results de Google
+(`Person`, por ejemplo), usá el Schema Markup Validator para confirmar validez — el Rich Results Test
+siempre va a reportar "no items detected" para ese caso, sin que eso signifique nada malo.
+
+> **Pregunta de entrevista**: ¿por qué el Rich Results Test de Google puede decir "no items detected"
+> para un JSON-LD que en realidad está bien implementado?
+> Porque esa herramienta no valida structured data en general — solo detecta los tipos específicos
+> que Google soporta como "rich results" visuales en el buscador. Si el tipo de schema (como `Person`
+> suelto) no está en esa lista, la herramienta correcta para validar sintaxis y estructura es el
+> Schema Markup Validator de schema.org, que sí cubre cualquier tipo del vocabulario.
 
 ---
 
