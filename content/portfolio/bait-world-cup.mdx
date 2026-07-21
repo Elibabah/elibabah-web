@@ -1,0 +1,51 @@
+---
+title: "Bait World Cup Microsite"
+slug: "bait-world-cup"
+section: "software"
+summary: "A World Cup campaign microsite for Bait, Walmart's mobile carrier, built from scratch in vanilla HTML, CSS, and JavaScript. Live match tracking, group standings, and a trivia game, hand-coded without a framework."
+stack:
+  - Vanilla JavaScript
+  - HTML
+  - CSS
+role: Frontend Developer
+year: 2022
+featured: true
+cover: /images/portfolio/bait-world-cup/home-overview.jpg
+---
+
+
+## Overview
+
+Bait is Walmart Mexico's mobile carrier, and for the 2022 World Cup it ran a fan-facing campaign built around the tournament. The microsite gave users a single place to follow Mexico's group-stage journey: fixtures, live scores, group standings, and a set of engagement mechanics such as a World Cup trivia and a penalty game tied to the wider promotion.
+
+I worked on this at Innovattia, delivering for Walmart and Bait. The UX team handed me a visual sketch of the intended layout, and I built the entire interface from scratch. This project predates the AI-assisted tooling common in frontend work today; every layout decision, interaction, and piece of state was hand-written.
+
+{/* IMAGE — homepage overview: hero, fixtures by group, how-to-participate, prizes, weekly winners */}
+<Image
+  src="/images/portfolio/bait-world-cup/home-overview.jpg"
+  alt="Bait World Cup microsite homepage with the campaign hero, upcoming fixtures by group, how-to-participate steps, prizes, and weekly winners table"
+  caption="The campaign homepage: hero, fixtures by group, participation steps, prizes, and the weekly winners table."
+/>
+
+## What I built
+
+The site was implemented in plain HTML, CSS, and JavaScript, with no framework and no UI library. That constraint shaped the whole approach. Layout and responsiveness were solved directly in CSS, component structure was expressed through disciplined markup and class conventions, and interactivity was wired up with the native DOM API rather than a rendering library.
+
+The core surfaces included a fixtures panel for Mexico's three group matches, a live statistics view for the group table, and campaign entry points into the trivia and penalty games. Data such as scores and standings was rendered into the DOM and updated as the tournament progressed, which meant thinking carefully about how to keep the markup, the styling, and the data in sync without the conveniences a framework would normally provide.
+
+{/* IMAGE — fixtures panel and Group C statistics table */}
+<Image
+  src="/images/portfolio/bait-world-cup/fixtures-stats.jpg"
+  alt="Bait World Cup microsite showing Mexico's Group C fixtures panel and the group statistics table"
+  caption="Mexico's Group C fixtures alongside the live statistics view and group table."
+/>
+
+## Why it mattered
+
+This was one of my earliest professional portfolio, and it taught the fundamentals that still hold up under any framework: semantic markup, responsive layout, DOM manipulation, and the discipline of translating a design into a faithful, working interface. Building it without abstractions made the underlying mechanics visible, which is a foundation I have carried into component-based work at scale since.
+
+It is also a project I return to for its symbolism. From one World Cup to the next, it marks a point of departure in a longer engineering journey.
+
+## Stack
+
+Vanilla JavaScript, HTML, and CSS. No framework, no build-time UI library, no AI assistance. Hand-coded from a UX sketch.

@@ -47,3 +47,11 @@ export function getProjectBySlug(slug: string): ProjectWithContent {
     content,
   };
 }
+
+export function findProjectBySlug(slug: string): Project | null {
+  const filepath = path.join(PORTFOLIO_DIR, `${slug}.mdx`);
+  if (!fs.existsSync(filepath)) return null;
+  const raw = fs.readFileSync(filepath, "utf-8");
+  const { data } = matter(raw);
+  return data as Project;
+}
