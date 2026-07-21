@@ -1074,3 +1074,179 @@ partes del árbol.
 > `mounted` o ajustar la lógica. Si son atributos con prefijos de terceros que no existen en ningún
 > archivo del proyecto, es una extensión inyectando HTML en el cliente — confirmable reproduciendo en
 > una ventana sin extensiones.
+
+---
+
+## Componentes custom dentro de MDX — el prop `components` de `next-mdx-remote`
+
+A diferencia de `@next/mdx` (donde los archivos `.mdx` son las páginas mismas y comparten el árbol de
+imports normal de la app), `next-mdx-remote/rsc` compila un string de MDX que llega de **fuera** del
+grafo de módulos de Next — viene de `content/*.mdx`, leído con `fs`. Eso significa que un tag como
+`<Image src="..." alt="..." />` escrito dentro del MDX **no tiene ningún componente detrás por
+default**. Hay que decírselo explícitamente:
+
+```tsx
+<MDXRemote source={project.content} components={mdxComponents} />
+```
+
+`mdxComponents` es un objeto plano `{ NombreDeTag: Componente }`. Sin ese prop, cualquier tag
+capitalizado sin equivalente HTML nativo (`Image`, `Callout`, lo que sea) revienta en runtime con algo
+como `ReferenceError: Image is not defined` — porque MDX compila JSX que espera esa referencia en
+scope, y nunca la puso ahí nadie.
+
+**Patrón usado en este proyecto**: un mapa único y compartido en vez de repetirlo por ruta.
+
+```tsx
+// lib/mdx-components.tsx
+import { MdxImage } from "@/components/content/MdxImage";
+
+export const mdxComponents = {
+  Image: MdxImage,
+};
+```
+
+Y las tres rutas de detalle (`portfolio/[slug]`, `editorial/[slug]`, `case-studies/[slug]`) importan
+el mismo `mdxComponents` — un componente nuevo (ej. `Callout`) se registra una sola vez y queda
+disponible para los tres tipos de contenido.
+
+**Trampa real de este proyecto**: la instrucción era "agrégale el prop `components` a la
+`<MDXRemote>` que ya existe". En vez de eso, se copió el snippet completo como una **línea nueva** al
+final de las tres páginas, sin adaptarlo:
+
+- En `portfolio/[slug]/page.tsx` compiló, pero el contenido se renderizaba **dos veces** — una dentro
+  de `<article className="prose">` (sin `components`) y otra suelta al final (con `components`, pero
+  sin los estilos de `prose`).
+- En `editorial/[slug]/page.tsx` ni compiló: el snippet copiado decía `project.content`, pero en ese
+  archivo la variable se llama `article`. `mdxComponents` tampoco estaba importado.
+- En `case-studies/[slug]/page.tsx` tenía el mismo problema de import faltante, más un bug semántico
+  extra: `project.content` ahí es el body del *proyecto relacionado*, no el del *case study* — habría
+  mostrado el contenido equivocado si hubiera compilado.
+
+**La lección**: copiar un snippet a varios archivos no es pegarlo tal cual — cada archivo tiene su
+propia variable local para "el contenido actual" (`project`, `article`, `caseStudy`) y sus propios
+imports. Adaptar eso es parte de aplicar el cambio, no un detalle opcional.
+
+> **Pregunta de entrevista**: ¿por qué un tag JSX como `<Image>` dentro de contenido MDX remoto
+> necesita registrarse explícitamente, si en un archivo `.tsx` normal `Image` funcionaría con solo
+> importarlo?
+> Porque el MDX de `next-mdx-remote` se compila desde un string que vive fuera del grafo de módulos de
+> la app (viene de `fs`, no de un `import`). El compilador de MDX no tiene forma de resolver a qué
+> componente se refiere `<Image>` a menos que se le pase explícitamente en el prop `components` — es
+> el puente entre el string MDX y el árbol de React real.
+
+---
+
+## Dimensiones de imagen para `next/image` con archivos locales referenciados por string (`image-size`)
+
+`next/image` necesita conocer el ancho y alto intrínsecos de la imagen para reservar espacio en el
+layout (evitar layout shift) — eso es obligatorio, vía `width`/`height` o vía `fill`. Cuando la imagen
+se importa de forma estática (`import cover from "./cover.png"`), Next lee esas dimensiones solo con
+analizar el archivo en build time, sin que el desarrollador las escriba a mano.
+
+**El caso distinto**: cuando el `src` es un string que apunta a `public/` (`"/images/portfolio/.../
+foto.jpg"`) — que es justamente el caso de cualquier imagen que venga de front matter o de contenido
+MDX, porque ahí el path es un dato, no un `import` — Next **no puede** inferir las dimensiones. Hay
+que dárselas.
+
+**Solución usada**: el paquete `image-size`, leyendo el archivo con `fs` en el servidor (posible
+porque `next-mdx-remote/rsc` corre como Server Component):
+
+```tsx
+// components/content/MdxImage.tsx
+import { readFileSync } from "fs";
+import path from "path";
+import { imageSize } from "image-size";
+
+const filePath = path.join(process.cwd(), "public", src);
+const { width, height } = imageSize(readFileSync(filePath));
+```
+
+Esto le evita al autor del contenido (Elías, escribiendo `.mdx` a mano) tener que abrir cada imagen y
+copiar sus píxeles exactos al front matter o al JSX — el servidor lo calcula solo, en cada render.
+
+> **Pregunta de entrevista**: ¿por qué `next/image` puede inferir automáticamente las dimensiones de
+> una imagen importada (`import x from "./x.png"`) pero no de una referenciada por string desde
+> `public/`?
+> Porque un `import` de imagen pasa por el loader de Next en build time, que sí puede abrir el archivo
+> y leer sus dimensiones como parte del proceso de bundling. Un string (`"/images/x.png"`) es solo un
+> valor de dato en runtime — no hay ningún paso de build que lo intercepte para inspeccionar el
+> archivo, así que hay que resolverlas explícitamente (leyendo el archivo, como con `image-size`) o
+> usar `fill` con un contenedor de aspect-ratio fijo.
+
+---
+
+## Modelar contenido: campos de front matter sin ningún consumidor real
+
+**El caso concreto**: `bait-world-cup.mdx` llegó a tener un campo `gallery` (array de `{src, alt,
+caption}`) en el front matter. Pero ni `lib/portfolio.ts` lo declaraba en el tipo `Project`, ni
+ninguna página lo leía — no existía ningún componente tipo carrusel que lo consumiera. Además, las
+mismas dos imágenes de `gallery` estaban también puestas a mano como `<Image>` dentro del body MDX,
+así que si algún día se hubiera construido ese carrusel, las fotos habrían aparecido **duplicadas** en
+la página (una vez en el carrusel, otra vez inline en el texto).
+
+**La regla práctica**: antes de agregar un campo nuevo a un front matter model, confirmar quién lo va
+a leer — un `grep` rápido del nombre del campo contra `app/` y `lib/`. Si no aparece en ningún lado
+fuera del propio `.mdx`, es data modelada pero sin efecto: no rompe nada, pero tampoco hace nada, y es
+fácil olvidar que quedó ahí a medio implementar.
+
+**La distinción real, una vez que sí hay implementación**, entre los tres tipos de imagen que puede
+tener un mismo item de contenido:
+
+- **`cover`** — una sola imagen representativa, consumida *fuera* de la página de detalle: cards de
+  listado, banner hero de la propia página, potencialmente Open Graph.
+- **Imágenes inline** (`<Image>` dentro del body MDX) — consumidas *dentro* del artículo, en la
+  posición exacta donde el texto las referencia. Su cantidad varía libremente por artículo.
+- **`gallery`** (si se llega a construir) — pensada para un carrusel separado del flujo narrativo. No
+  debe repetir fotos que ya están puestas inline, porque ambas aparecen en la misma página.
+
+> **Pregunta de entrevista**: ¿cómo detectarías que un campo de front matter quedó sin usar en el
+> código?
+> Buscando su nombre fuera del propio archivo de contenido — en los tipos de `lib/` (¿el campo está
+> en la interfaz TypeScript?) y en los componentes de `app/` (¿algún JSX lo renderiza?). Si el único
+> lugar donde aparece es el YAML del `.mdx`, es data sin consumidor: TypeScript no lo va a marcar como
+> error porque el objeto parseado de `gray-matter` es un `any` hasta que se castea a un tipo — el
+> campo de más simplemente se ignora en silencio.
+
+---
+
+## Organización de imágenes de contenido que crece — un árbol por slug, no dos árboles paralelos
+
+Portfolio y editorial van a acumular imágenes con el tiempo: un cover por item, más un número variable
+de imágenes inline por artículo/proyecto. Dos convenciones distintas se probaron en este proyecto:
+
+```
+❌ Por tipo primero (probado y descartado)
+public/images/
+  covers/{section}/{archivo}.png     ← covers agrupados por tipo
+  contents/                          ← árbol paralelo, vacío, sin estructura clara
+
+✅ Por slug (convención final)
+public/images/{section}/{slug}/
+  cover.png
+  imagen-inline-descriptiva.jpg
+```
+
+**Por qué el segundo gana**: con un árbol por tipo, el cover y las imágenes inline de un mismo
+artículo viven en dos lugares distintos del filesystem — hay que mantenerlos sincronizados a mano, y
+borrar o mover un item de contenido implica tocar dos carpetas en vez de una. Con un árbol por slug,
+todo lo visual de un item vive junto — coincide 1:1 con `content/{section}/{slug}.mdx`.
+
+**El bug real que este cambio expuso** (dos veces, en dos archivos distintos): mover un archivo de
+imagen en el filesystem sin actualizar la ruta que apunta a él desde el front matter. Pasó con
+`nomina-upgrade.mdx` (`cover: /images/covers/nomina-upgrade.png` apuntando a un archivo que ya se
+había movido a `covers/portfolio/`), y otra vez con `bait-world-cup.mdx` (front matter y `<Image>`
+inline apuntando a `/images/projects/...`, una carpeta que nunca existió — el árbol real usa
+`/images/portfolio/...`).
+
+**Por qué se repite el mismo bug**: la carpeta de `public/` y el string de la ruta en el `.mdx` son
+dos fuentes de verdad independientes que nada en el proyecto valida entre sí. `findProjectBySlug` /
+`getProjectBySlug` fallan (o devuelven `null`) si el `.mdx` no existe, pero **nada revisa si la imagen
+que el `.mdx` referencia existe de verdad en disco** — el 404 solo aparece al renderizar la página en
+el navegador, no en build ni en el editor.
+
+> **Pregunta de entrevista**: ¿cómo se detectaría en build time (no en runtime) que un `cover` de
+> front matter apunta a un archivo que no existe?
+> Un script o chequeo que recorra todo el contenido (`getAllProjects()`, `getAllArticles()`, etc.),
+> tome cada campo tipo `cover`/imagen, y confirme con `fs.existsSync(path.join("public", src))` que el
+> archivo existe — fallando el build si no. No existe ese chequeo todavía en este proyecto; es la
+> extensión natural de la lección de esta sección, pendiente de implementar.
