@@ -1,0 +1,159 @@
+---
+title: "Building an AI Driving Examiner With Process, Not Vibes"
+slug: nz-drive-practice-case
+project: nz-drive-practice
+problem: "A case study on NZ Drive Practice: an AI-examiner app for the New Zealand full-licence test, built deliberately as a demonstration of AI-assisted engineering with discipline, ADRs for every structural decision, an MVP roadmap with explicit exit criteria, and deterministic replay tests. A record of the reasoning, the trade-offs, and the honest state of the work."
+role: Fullstack Developer
+stack:
+  - React Native + Expo
+  - react-native-maps (Google Maps)
+  - expo-speech-recognition + OpenAI TTS
+  - Supabase (Postgres, RLS, OAuth)
+  - Claude (Haiku + Sonnet) via Edge Function proxy
+readingTime: 12
+outcome: work-in-progress # narrative reflects the state of the build as of July 2026
+cover: null
+---
+
+{/*
+  GUIDE — This is a scaffold, not finished prose. Each section carries a note on
+  what to develop and which source material to draw on. Fill at your own pace.
+  Voice: first person, but keeping the dialectical build, triadic rhythm, British
+  spelling, no em dashes, no rhetorical questions. Switch to third person only if
+  you decide to align this with the MAM research register.
+*/}
+
+## Context and problem
+
+{/*
+  DEVELOP: Why this app, and why you specifically.
+  - The concrete problem: rehearsing the NZ full-licence practical test, aimed at
+    drivers converting an overseas full licence, a path many new residents walk.
+  - The personal thread: your own migration, the licence-conversion journey. This
+    is where the project stops being a generic demo and becomes yours. Keep it
+    brief but let it carry weight; it connects to your wider narrative of the self
+    as becoming.
+  - The stakes: the real question a learner asks is not "what percentage did I
+    score" but "would I have passed". Name that early; it justifies ADR-0005 later.
+  Open with the core claim, not a preamble. One tight paragraph on the problem,
+  one on why it matters to you.
+*/}
+
+## The approach: process over improvisation
+
+{/*
+  DEVELOP: This is the spine of the whole piece, your differentiator.
+  - State the thesis plainly: this is not vibecoding; it is AI-assisted
+    engineering with process.
+  - The three pillars (a natural triad): ADRs for every structural decision, an
+    MVP roadmap with explicit exit criteria, and deterministic replay tests.
+  - The tension worth naming: AI-assisted development is often caricatured as
+    improvisation without rigour. This project is a deliberate counter-example.
+    Note the link to your MAM research on AI's impact on professional practice and
+    identity; this app is, in a sense, an empirical artefact of that same question.
+  Do not enumerate the pillars as a list in the prose; develop them as an argument.
+*/}
+
+## Decision one: a pure, deterministic session engine (ADR-0006)
+
+{/*
+  DEVELOP: Your flagship decision. Give it the most room.
+  - The before: exam logic lived in a ~350-line hook, leaning on useRef to dodge
+    stale closures and on module-level singletons. Slow to test (jest-expo renders
+    hooks; the suite took ~10 minutes) and fragile on state reset.
+  - The decision: extract the logic into a pure engine (src/engine/) with no React,
+    Expo, or globals. Plain data in (GPS fixes, clock ticks, voice exchanges),
+    plain data out (events, speech requests, state transitions). useDrivingSession.ts
+    becomes a thin adapter to device APIs.
+  - The payoff (the trade-off accepted): a large refactor cost, but it unlocks
+    deterministic replay, a real GPS track plus a transcript replayed in a unit
+    test in milliseconds, and it makes the later Android port (MVP-5) feasible by
+    reusing the engine intact. The suite now runs in ~4s, down from ~10min.
+  - Why this is the decision that best demonstrates judgement: it trades short-term
+    effort for testability, portability, and confidence. That is engineering, not
+    output.
+*/}
+
+## Decision two: real NZTA scoring, not an invented percentage (ADR-0005)
+
+{/*
+  DEVELOP: Your product-judgement decision, not just technical.
+  - The choice: align scoring to official NZTA categories (critical errors,
+    immediate-fail conditions) rather than a percentage score invented for effect.
+  - Why it matters: it answers the user's real question, "would I have passed",
+    instead of a number that looks precise but means nothing.
+  - The trade-off accepted: it requires maintaining an event-to-category mapping
+    table by hand, and the NZTA-aligned engine is still MVP-1 work, not yet
+    complete. Be honest about that here.
+  - CAVEAT to flag: alignment to NZTA categories is a design intent, not a claim of
+    official equivalence or endorsement. Keep the wording careful.
+*/}
+
+## Decision three: the honest gap, hands-free audio (ADR-0003)
+
+{/*
+  DEVELOP: The decision that shows honesty and risk-thinking. Do not hide it.
+  - The core product constraint: a truly hands-free session, phone untouched for
+    the full twenty minutes. This is the vision.
+  - The reality: the original voice library crashed on an AVAudioPCMBuffer
+    exception and was replaced by expo-speech-recognition, but true always-listening
+    is unresolved. Today it is tap-to-speak, which contradicts the central
+    constraint. This is the largest gap between product vision and current code.
+  - The framing: name it as an open spike (full-duplex vs half-duplex), a known
+    unknown being worked deliberately, not a failure swept aside. MVP-2 is blocked
+    on this spike, and saying so is a strength, not an apology.
+*/}
+
+## Other decisions worth noting
+
+{/*
+  DEVELOP (briefly, one short paragraph each or a tight prose cluster):
+  - ADR-0001: all AI calls go through a Supabase Edge Function proxy. One extra
+    network hop (tens of ms) in exchange for never shipping API keys in the client
+    bundle, a blocker for TestFlight distribution.
+  - ADR-0002: guest tier fully ephemeral, nothing persisted. Loses local-to-account
+    progress migration, but avoids orphaned data and gives the simplest privacy
+    story.
+  - ADR-0004: OSM/Overpass as the source of speed limits and checkpoints, replacing
+    a hardcoded 50 km/h limit and a sign-detection path that never fired. Costs an
+    extra network call and imperfect NZ data coverage.
+  - Positioning: MapView.onUserLocationChange as the authoritative source (not
+    followsUserLocation, unreliable with PROVIDER_GOOGLE); watchPositionAsync as
+    fallback.
+  - Dynamic rerouteing: no fixed route; recalculated from current GPS whenever a
+    leg completes or the driver strays >300m, with a 20s debounce.
+*/}
+
+## The honest state of the work
+
+{/*
+  DEVELOP: This section is a strength; frame it as method, not confession.
+  - Active technical debt: true hands-free not yet implemented (the biggest gap);
+    stop/intersection detection mid-migration from Google-text parsing to OSM; the
+    NZTA-aligned scoring engine still MVP-1; simulate_drive.sh referenced in
+    CLAUDE.md but absent from the repo, its Maestro-based replacement scheduled for
+    MVP-4.
+  - Roadmap status (per docs/ROADMAP.md, updated 2026-07-18, progress through 21
+    July): MVP-0 complete (AI proxy in production, schema v2 with 60s checkpointing,
+    false reroutes fixed, CI green with the suite at ~4s). MVP-1 in progress (pure
+    engine extracted; real OSM data, justified-detour classification, and NZTA
+    scoring outstanding). MVP-2 blocked on the ADR-0003 spike. MVP-3, 4, 5 not
+    started.
+  - The argument to make: documenting debt precisely is itself an engineering
+    practice. Knowing exactly what is not done, and why, is a form of control.
+*/}
+
+## Reflection: what this says about how I work
+
+{/*
+  DEVELOP: The synthesis. Earn it; do not merely summarise.
+  - Tie the three threads together: a real problem from lived experience, an
+    AI-augmented build, and an interface that must stay calm while someone does
+    something demanding.
+  - Return to the opening claim with new weight: process is not the enemy of speed
+    in AI-assisted work; it is what makes the speed trustworthy.
+  - Connect to the larger arc: your MAM research on AI and professional identity,
+    and your sense of the developer's craft as something that deepens rather than
+    dissolves under AI. This is where the case study stops being about an app and
+    becomes about a way of working.
+*/}
