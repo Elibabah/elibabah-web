@@ -15,7 +15,10 @@ export type Project = {
     repo: string | null;
   };
   caseStudy: string | null;
-  cover: string | null;
+  //imgs
+  cardThumb: string | null; // home featured cards + /portfolio listing cards
+  heroBand: string | null; // hero -> /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
+  relatedThumb: string | null; // related project -> /editorial/[slug]
 };
 
 export type ProjectWithContent = Project & {

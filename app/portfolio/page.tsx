@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getAllProjects } from "@/lib/portfolio";
+import { imageSlots } from "@/lib/image-slots";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -34,17 +35,18 @@ export default function PortfolioPage() {
               href={`/portfolio/${project.slug}`}
               className="group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-220 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent h-full"
             >
-              {project.cover ? (
-                <div className="aspect-16/10 relative border-b border-line overflow-hidden">
+              {project.cardThumb ? (
+                <div className={`${imageSlots.cardThumb.aspectClass} relative border-b border-line overflow-hidden`}>
                   <Image
-                    src={project.cover}
+                    src={project.cardThumb}
                     alt={project.title}
                     fill
+                    sizes={imageSlots.cardThumb.portfolioSizes}
                     className="object-cover"
                   />
-                </div>
+              </div>
               ) : (
-                <div className="aspect-16/10 bg-accent-soft border-b border-line" />
+                <div className={`${imageSlots.cardThumb.aspectClass} bg-accent-soft border-b border-line`} />
               )}
               <div className="flex flex-col gap-2 p-5 flex-1">
                 <h2 className="font-heading font-bold text-xl text-foreground">
