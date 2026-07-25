@@ -19,6 +19,18 @@ export const imageSlots = {
     sizes: "80px",
     exportPx: { width: 240, height: 240 }, // 3x de 80px para retina
   },
+  body: {
+    screenshotMobile: {
+      // capturas de apps/sitios en mobile — portfolio y editorial/software
+      maxWidthClass: "max-w-xs", // ~320px, ancho de referencia de un celular
+      exportPx: { width: 750 },   // 2x de un viewport mobile típico (375px)
+    },
+    screenshotDesktop: {
+      // capturas de sitios/apps en web — portfolio y editorial/software
+      maxWidthClass: "w-3/4",    // usa todo el ancho de la columna de prosa
+      exportPx: { width: 1800 },
+    }
+  },
 } as const;
 
 export type ImageSlot = keyof typeof imageSlots;
