@@ -13,7 +13,7 @@ export type Article = {
   readingTime: number;
   relatedProject: string | null;
   relatedCaseStudy: string | null;
-  cover: string | null;
+  heroBand: string | null; // hero -> /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
 };
 
 export type ArticleWithContent = Article & {

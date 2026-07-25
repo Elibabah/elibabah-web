@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link";
 import { getAllArticles } from "@/lib/editorial";
 import { getAllProjects } from "@/lib/portfolio";
+import { imageSlots } from "@/lib/image-slots";
 
 export default function Home() {
   const latestArticles = getAllArticles().slice(0, 3) || [];
@@ -58,12 +59,18 @@ export default function Home() {
                 href={`/portfolio/${project.slug}`}
                 className="h-full group flex flex-col bg-surface border border-line rounded-2xl overflow-hidden transition-[transform,box-shadow,border-color] duration-220 hover:-translate-y-1 hover:shadow-[0_10px_28px_rgba(0,0,0,0.06)] hover:border-accent"
               >
-                  {project.cover ? (
-                    <div className="aspect-16/10 relative border-b border-line overflow-hidden">
-                      <Image src={project.cover} alt={project.title} fill className="object-cover" />
+                  {project.cardThumb ? (
+                    <div className={`${imageSlots.cardThumb.aspectClass} relative border-b border-line overflow-hidden`}>
+                      <Image 
+                        src={project.cardThumb} 
+                        alt={project.title} 
+                        fill
+                        sizes={imageSlots.cardThumb.sizes}
+                        className="object-cover"
+                         />
                     </div>
                   ) : (
-                    <div className="aspect-16/10 bg-accent-soft border-b border-line" />
+                    <div className={`${imageSlots.cardThumb.aspectClass} bg-accent-soft border-b border-line`} />
                   )}                
                   <div className="flex flex-col gap-2 p-4">
                   <h3 className="font-heading font-bold text-lg text-foreground">

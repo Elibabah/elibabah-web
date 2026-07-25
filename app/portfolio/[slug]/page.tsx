@@ -1,8 +1,10 @@
 import { getAllProjects, getProjectBySlug } from "@/lib/portfolio";
 
+import Image from "next/image"
 import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
+import { imageSlots } from "@/lib/image-slots";
 import { mdxComponents } from "@/lib/mdx-components";
 
 export async function generateMetadata({
@@ -99,7 +101,17 @@ export default async function ProjectPage({
         )}
       </header>
 
-      <div className="aspect-21/9 bg-accent-soft border border-line rounded-xl" />
+      {project.heroBand && (
+        <div className={`${imageSlots.heroBand.aspectClass} bg-accent-soft border border-line rounded-xl relative overflow-hidden`} >
+          <Image
+            src={project.heroBand}
+            alt={project.title}
+            fill
+            sizes={imageSlots.heroBand.sizes}
+            className="object-cover"
+          />
+        </div>
+      )}
 
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={project.content} components={mdxComponents} />

@@ -11,7 +11,6 @@ export type CaseStudy = {
   stack: string[];
   readingTime: number;
   outcome: string;
-  cover: string | null;
 };
 
 export type CaseStudyWithContent = CaseStudy & {

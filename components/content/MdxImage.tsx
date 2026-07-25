@@ -9,7 +9,7 @@ type MdxImageProps = {
   caption?: string;
 };
 
-const PHONE_ASPECT_RATIO_THRESHOLD = 0.6;
+const PHONE_ASPECT_RATIO_THRESHOLD = 0.85;
 
 export function MdxImage({ src, alt, caption }: MdxImageProps) {
   const filePath = path.join(process.cwd(), "public", src);
@@ -23,10 +23,10 @@ export function MdxImage({ src, alt, caption }: MdxImageProps) {
         alt={alt}
         width={width}
         height={height}
-        className={`h-auto rounded-xl border border-line ${isPhoneShaped ? "w-full max-w-xs" : "w-full"}`}
+        className={`h-auto rounded-xl border border-line ${isPhoneShaped ? "w-full max-w-xs" : "w-3/4 mx-auto"}`}
       />
       {caption && (
-        <figcaption className={isPhoneShaped ? "text-center" : undefined}>
+        <figcaption className="text-center">
           {caption}
         </figcaption>
       )}

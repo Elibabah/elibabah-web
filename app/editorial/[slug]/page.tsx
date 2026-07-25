@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import { findProjectBySlug } from '@/lib/portfolio'
+import { imageSlots } from "@/lib/image-slots";
 import { mdxComponents } from "@/lib/mdx-components";
 
 export async function generateMetadata({
@@ -59,20 +60,34 @@ export default async function ArticlePage({
         </div>
       </header>
 
+      {article.heroBand && (
+        <div className={`${imageSlots.heroBand.aspectClass} bg-accent-soft border border-line rounded-xl relative overflow-hidden` }>
+          <Image
+            src={article.heroBand}
+            alt={article.title}
+            fill
+            sizes={imageSlots.heroBand.sizes}
+            className="object-cover"
+          />
+        </div>
+      )}
+
       <article className="prose prose-neutral max-w-none">
         <MDXRemote source={article.content} components={mdxComponents} />
       </article>
 
       {relatedProject && (
         <div className="max-w-xl border border-line rounded-xl bg-surface p-5 flex items-center gap-4">
-          {relatedProject.cover ? (
-            <Image
-              src={relatedProject.cover}
-              alt=""
-              width={80}
-              height={80}
-              className="rounded-[9px] object-cover shrink-0"
-            />
+          {relatedProject.relatedThumb ? (
+                <div className={`${imageSlots.relatedThumb.aspectClass} w-20 h-20 shrink-0 rounded-[9px] border border-line relative border-b overflow-hidden`}>
+                  <Image
+                    src={relatedProject.relatedThumb}
+                    alt={relatedProject.title}
+                    fill
+                    sizes={imageSlots.relatedThumb.sizes}
+                    className="object-cover"
+                  />
+              </div>
           ) : (
             <div className="w-20 h-20 rounded-[9px] bg-accent-soft border border-line shrink-0" />
           )}
