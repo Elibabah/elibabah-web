@@ -2,6 +2,9 @@
 
 > Document to continue the project in Claude (VS Code).
 > The working principle stays the same: **Elías writes all the code**; Claude acts as a thinking partner, architecture guide, and support, not as the implementer.
+>
+> Public-facing overview of the same project lives in [README.md](README.md). This file holds
+> the *decisions and rationale*; the README holds the *facts a visitor needs*. Keep them in sync.
 
 ---
 
@@ -9,66 +12,108 @@
 
 Elías's personal professional site (handle: **Elibabah**). It is neither a pure portfolio nor a blog: it integrates both. The primary audience is **technical recruiters and hiring managers in New Zealand**. The site also doubles as a demonstration of the React/Next.js skills Elías is actively developing.
 
-Site language: **English**. Spanish is used only as a deliberate identity marker (the hero epigraph: *"Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena."*, kept verbatim).
+Site language: **English**. Spanish is reserved as a deliberate identity marker — the epigraph
+*"Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena."*,
+kept verbatim. **Not placed on the site yet**: the current Home hero uses an English headline
+("Building software with intention. Sharing the thinking behind it."). Still pending a decision
+on where the epigraph lands — Home hero, About, or footer.
 
 ---
 
-## 2. Current state (what already exists)
+## 2. Current state (as of July 2026)
 
-- Repo: **`elibabah-web`** (GitHub: `Elibabah/elibabah-web`), Next.js initialised with **pnpm**.
+Infrastructure:
+
+- Repo: **`elibabah-web`** (GitHub: `Elibabah/elibabah-web`), **pnpm**.
 - Deployed on **Vercel** with custom domain **elibabah.com** (apex); `www` redirects to apex.
 - **CI/CD active**: push to `main` deploys to production; branches and PRs generate Preview Deployments.
 - `main` branch protected with a ruleset (restrict deletions, block force pushes).
-- The project is still in Next.js's default state (the real site is not built yet).
+
+The site is built and live. All routes from the architecture in §5 exist:
+
+- Home with hero, Featured Work and Latest from the Editorial.
+- `/portfolio` listing + `/portfolio/[slug]`.
+- `/editorial` index + `/editorial/software`, `/career`, `/aotearoa` + `/editorial/[slug]`.
+- `/case-studies/[slug]`.
+- `/about`.
+
+Also in place:
+
+- Root layout with the three fonts via `next/font/google`, `ThemeProvider`, Nav (with mobile menu),
+  Footer, and Person JSON-LD.
+- Design tokens as CSS variables in `app/globals.css`, exposed to Tailwind v4 via `@theme inline`.
+- Theme toggle (`next-themes`, `data-theme`), light/dark palettes.
+- Contact as an anchor: nav CTA `#contact` → `<footer id="contact">` with `mailto:elias@elibabah.com`,
+  LinkedIn, GitHub and `resume.pdf`.
+- SEO/ops: `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `icon.svg`, `not-found.tsx`,
+  Google site verification, Vercel Analytics and Speed Insights.
+- MDX pipeline: `gray-matter` for front matter, `next-mdx-remote` for the body,
+  `lib/mdx-components.tsx` for the component mapping.
+- Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive `sizes`
+  and recommended export dimensions.
+- Content seeded: 3 projects, 2 case studies, 4 articles.
 
 ---
 
 ## 3. Stack and technical decisions (already made, do not reopen without cause)
 
-- **Next.js App Router** (not Pages Router).
-- **MDX with front matter** for all content (projects, articles, case studies).
-- Theming with **next-themes**, using \`attribute="data-theme"\`.
+- **Next.js App Router** (not Pages Router) — currently Next 16 / React 19.
+- **MDX with front matter** for all content (projects, articles, case studies),
+  read with `gray-matter` and rendered with `next-mdx-remote`.
+- **Tailwind CSS v4**, CSS-first config (`@theme inline` in `app/globals.css`, no `tailwind.config`),
+  plus `@tailwindcss/typography` for MDX prose.
+- Theming with **next-themes**, using `attribute="data-theme"`.
 - Package manager: **pnpm**.
-- Content lives in \`.mdx\` files, kept separate from route code.
+- Content lives in `.mdx` files, kept separate from route code.
 
 ---
 
 ## 4. Design system (already defined and validated)
 
 **Palette — teal petrol** (WCAG AA contrast verified in light and dark):
-- Accent light mode: \`#0C5566\`
-- Accent dark mode: \`#4D9FB3\`
+
+- Accent light mode: `#0C5566`
+- Accent dark mode: `#4D9FB3`
 
 Strict colour rule: **accent appears ONLY in links, kickers, pills, and CTAs.**
 Never in body text or full headings.
 
+Full token set (background, foreground, surface, ink-soft, ink-faint, line, accent, accent-soft,
+on-accent) is defined in `app/globals.css` for both themes. Use the Tailwind utilities that map to
+them (`bg-surface`, `text-ink-soft`, `border-line`, `text-accent`…) instead of raw hex values, so
+theming keeps working.
+
 **Typography — three-family system:**
+
 - **Source Serif 4** -> headings and humanist voice (never coloured).
 - **Inter** -> UI and body reading.
 - **JetBrains Mono** -> kickers, metadata, and code.
 
 **Logo:** interlocked EB monogram, monochrome SVG (single-ink, scalable).
-- Dark-ink variant (\`#20221a\`) for light backgrounds.
-- Cream/light variant (\`#fafafa\`) for dark backgrounds.
-- Embedded with theme adaptation (\`<picture>\` pattern or \`currentColor\`).
+
+- Dark-ink variant (`#20221a`) for light backgrounds.
+- Cream/light variant (`#fafafa`) for dark backgrounds.
+- Embedded with theme adaptation (`<picture>` pattern or `currentColor`).
 
 ---
 
 ## 5. Site architecture (validated — do NOT reopen)
 
 ### Route map
-- \`Home\` (/) — static.
-- \`Portfolio\` (/portfolio) — listing. Conceptual sub-levels: selected projects,
+
+- `Home` (/) — static.
+- `Portfolio` (/portfolio) — listing. Conceptual sub-levels: selected projects,
   technical experiments, case studies.
-- \`Editorial\` (/editorial) — listing with **three subsections as THEIR OWN ROUTES**:
-  - \`/editorial/software\` — technical articles.
-  - \`/editorial/career\` — Career & Migration: identity, craft, transition.
-  - \`/editorial/aotearoa\` — Life in Aotearoa: life in NZ, travel, Southland.
-- \`About\` (/about) — static, scroll sections.
-- \`Contact\` — **NOT a navigable route**. Lives as a CTA in the nav and a block in the footer.
-- Case studies at \`/case-studies/[slug]\` — standalone routes, linked from project cards.
+- `Editorial` (/editorial) — listing with **three subsections as THEIR OWN ROUTES**:
+  - `/editorial/software` — technical articles.
+  - `/editorial/career` — Career & Migration: identity, craft, transition.
+  - `/editorial/aotearoa` — Life in Aotearoa: life in NZ, travel, Southland.
+- `About` (/about) — static, scroll sections.
+- `Contact` — **NOT a navigable route**. Lives as a CTA in the nav and a block in the footer.
+- Case studies at `/case-studies/[slug]` — standalone routes, linked from project cards.
 
 ### Navigation
+
 - Nav with three items: **Portfolio, Editorial, About**.
 - The logo links to Home.
 - **Resume** prominent in the footer.
@@ -76,22 +121,25 @@ Never in body text or full headings.
 ### Key Editorial decision
 **Own routes** were chosen (not filters) for the three subsections, because each is a
 distinct facet of the professional identity aimed at a distinct audience, and being able
-to link \`/editorial/career\` or \`/editorial/software\` separately has value. Elías confirmed
+to link `/editorial/career` or `/editorial/software` separately has value. Elías confirmed
 he will feed all three regularly.
 
-**Technical caveat:** in \`app/editorial/\`, fixed routes (\`software\`, \`career\`, \`aotearoa\`)
-coexist with the dynamic \`[slug]\`. App Router prioritises the fixed ones. Reserve those
+**Technical caveat:** in `app/editorial/`, fixed routes (`software`, `career`, `aotearoa`)
+coexist with the dynamic `[slug]`. App Router prioritises the fixed ones. Reserve those
 three names as forbidden article slugs, so an article does not get shadowed.
 
 ---
 
-## 6. Target folder structure
+## 6. Folder structure (as built)
 
-\`\`\`
+```text
 elibabah-web/
   app/
-    layout.tsx              # root layout: nav, footer, theme provider
+    layout.tsx              # root layout: fonts, theme provider, nav, footer, JSON-LD
     page.tsx                # Home (/)
+    globals.css             # design tokens + prose theming (no separate styles/ folder)
+    not-found.tsx
+    sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg
     portfolio/
       page.tsx              # /portfolio (listing)
       [slug]/page.tsx       # /portfolio/project
@@ -106,44 +154,64 @@ elibabah-web/
     about/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
-                            # subdivide: layout (nav, footer) vs content (cards, listings)
+    layout/                 # Nav, Footer, Logo, ThemeToggle
+    content/                # MdxImage, MdxImageRow
+    theme-provider.tsx
   content/
     portfolio/*.mdx
     editorial/*.mdx
     case-studies/*.mdx
-  lib/                      # utilities: read MDX, parse front matter (content <-> app bridge)
-  public/                   # static assets: logo, images
-  styles/                   # design system tokens, global CSS (or app/globals)
-\`\`\`
+  lib/                      # content <-> app bridge
+    portfolio.ts, editorial.ts, case-studies.ts
+    mdx-components.tsx      # MDX -> React component mapping
+    image-slots.ts          # aspect ratios, responsive sizes, export dimensions
+  public/
+    images/{portfolio,editorial,case-studies}/<slug>/…
+    logo-light.svg, logo-dark.svg, resume.pdf
+```
 
 Structure decisions made:
-- **\`components/\` at the root** (not inside \`app/\`), to separate routes from reusable UI.
-- \`Contact\` has no folder: it is a component in the layout (CTA in nav + block in footer).
-- \`case-studies\` only has \`[slug]\`, no index \`page.tsx\` (not a navigable section).
-- \`[slug]\` dynamic route: one folder serves all items; growing = adding a new \`.mdx\`.
+
+- **`components/` at the root** (not inside `app/`), to separate routes from reusable UI.
+- `Contact` has no folder: it is a component in the layout (CTA in nav + block in footer).
+- `case-studies` only has `[slug]`, no index `page.tsx` (not a navigable section).
+- `[slug]` dynamic route: one folder serves all items; growing = adding a new `.mdx`.
+- The planned `styles/` folder was **not** created: tokens and global CSS live in `app/globals.css`,
+  since Tailwind v4 configures the theme from CSS anyway.
 
 ---
 
-## 7. Content models (front matter)
+## 7. Content models (front matter, as implemented)
 
-### Project — \`content/portfolio/[slug].mdx\`
-\`\`\`yaml
+Source of truth are the TypeScript types in `lib/portfolio.ts`, `lib/case-studies.ts` and
+`lib/editorial.ts` — if this section and those types disagree, the types win.
+
+Image fields are **not** a generic `cover`: each one names a slot defined in `lib/image-slots.ts`,
+so the aspect ratio and `sizes` are decided once, not per page. Files live under
+`public/images/<collection>/<slug>/`.
+
+### Project — `content/portfolio/[slug].mdx`
+
+```yaml
 title: string
 slug: string
 summary: string        # 1-2 lines for the card
 stack: string[]        # ['React','TypeScript','Lit']
 role: string           # role in the project
 year: number
-links:
-  demo: url?
-  repo: url?
-caseStudy: slug?       # link to the case study if it exists
 featured: boolean      # shows on Home
-cover: image?
-\`\`\`
+links:
+  demo: url | null
+  repo: url | null
+caseStudy: slug | null # link to the case study if it exists
+cardThumb: path | null # home featured cards + /portfolio listing cards
+heroBand: path | null  # wide hero at the top of /portfolio/[slug]
+relatedThumb: path | null  # square mini-card in editorial cross-links
+```
 
-### Case Study — \`content/case-studies/[slug].mdx\`
-\`\`\`yaml
+### Case Study — `content/case-studies/[slug].mdx`
+
+```yaml
 title: string
 slug: string
 project: slug          # the project it expands on
@@ -151,41 +219,46 @@ problem: string        # the starting challenge
 role: string
 stack: string[]
 readingTime: number
-sections: MDX          # problem, decisions, alternatives, outcome
 outcome: string        # impact / learning
-cover: image?
-\`\`\`
+```
 
-### Article (Editorial) — \`content/editorial/[slug].mdx\`
-\`\`\`yaml
+The body (problem, decisions, alternatives, outcome) is the MDX content itself, not a
+front-matter field. Case studies currently have **no image field**; they reuse the
+narrative and body images.
+
+### Article (Editorial) — `content/editorial/[slug].mdx`
+
+```yaml
 title: string
 slug: string
 section: enum          # 'software' | 'career' | 'aotearoa'
 excerpt: string        # for the listing
-publishedAt: date
+publishedAt: date      # quoted ISO string, e.g. "2026-05-15"
 readingTime: number
-relatedProject: slug?  # cross-link to the portfolio
-relatedCaseStudy: slug?
-body: MDX
-cover: image?
-\`\`\`
+relatedProject: slug | null      # cross-link to the portfolio
+relatedCaseStudy: slug | null
+heroBand: path | null
+```
 
-All three models include **cross-linking** fields (\`caseStudy\`, \`relatedProject\`,
-\`relatedCaseStudy\`) to weave portfolio, case studies, and editorial together.
+All three models include **cross-linking** fields (`caseStudy`, `relatedProject`,
+`relatedCaseStudy`) to weave portfolio, case studies, and editorial together.
 
 ---
 
-## 8. Build order (suggested)
+## 8. Build order (completed)
 
-1. **Base layout + tokens** — root layout, theme provider (next-themes), design tokens
-   (palette, typography), nav and footer. This is the foundation for everything.
-2. **Home** — static page with hero (includes the Spanish epigraph) and highlights.
-3. **Portfolio** — listing + \`[slug]\` route reading from MDX.
-4. **Case Study** — \`[slug]\` route, linked from project cards.
-5. **Editorial** — index + three subsections + \`[slug]\` route.
-6. **About** — static with scroll sections.
+1. ~~**Base layout + tokens**~~ — root layout, theme provider, design tokens, nav and footer. ✅
+2. ~~**Home**~~ — hero, Featured Work, Latest from the Editorial. ✅
+3. ~~**Portfolio**~~ — listing + `[slug]` route reading from MDX. ✅
+4. ~~**Case Study**~~ — `[slug]` route, linked from project cards. ✅
+5. ~~**Editorial**~~ — index + three subsections + `[slug]` route. ✅
+6. ~~**About**~~ — static with scroll sections. ✅
 
-Contact (CTA + footer) is integrated into the layout in step 1, not a separate step.
+Contact (CTA + footer) was integrated into the layout in step 1, not as a separate step.
+
+The scaffolding phase is over. Work from here is **refinement and content**: writing real
+projects/case studies/articles, polishing responsive behaviour and imagery, and deciding where
+the Spanish epigraph goes (§1).
 
 ---
 
@@ -193,21 +266,11 @@ Contact (CTA + footer) is integrated into the layout in step 1, not a separate s
 
 - **Elías writes the code.** Claude guides architecture, reviews, explains trade-offs,
   unblocks, and proposes approaches. It does not implement by default.
-- Start with step 1 (base layout + tokens) working on a branch, not directly on \`main\`
-  (reminder: \`main\` is protected and the flow is branch -> PR -> preview -> merge).
-- Likely first technical tasks to resolve with guidance:
-  - Configure MDX in Next.js App Router (package and config).
-  - Set up \`next-themes\` with \`attribute="data-theme"\`.
-  - Load the three typographic families.
-  - Define the design tokens (CSS variables) for light/dark.
-  - Write the \`lib/\` utilities to read and parse the \`.mdx\` files in \`content/\`.
-
----
-
-## 10. Minor pending items outside the site (non-blocking)
-
-- In the GitHub profile (Edit profile, not the README): update the URL to \`elibabah.com\`
-  and, if desired, show the brand email \`elias@elibabah.com\`.
-- Profile README already finished and published (repo \`Elibabah/Elibabah\`, separate from this one).
-- Brand email \`elias@elibabah.com\` already operational (receives via forwarding to Gmail,
-  replies from the domain). Could be used as the destination for the site's Contact block later.
+- Never work directly on `main`: it is protected and the flow is branch -> PR -> preview -> merge.
+- `LEARNING.md` is an **append-only** notebook (in Spanish) of concepts learned while building.
+  Claude proposes topics, Elías writes them, Claude reviews afterwards. Nothing is deleted;
+  outdated entries get annotated as such.
+- When adding content, adding a `.mdx` file is enough — no code changes. Remember the reserved
+  editorial slugs (`software`, `career`, `aotearoa`).
+- When adding images, pick the slot from `lib/image-slots.ts` and export at the dimensions it
+  recommends, instead of inventing sizes per page.
