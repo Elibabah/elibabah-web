@@ -9,9 +9,11 @@ export const imageSlots = {
   },
   heroBand: {
     // banda ancha al tope de /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
+    // las tres rutas la montan dentro de `max-w-5xl px-6`: 1024px - 48px = 976px reales,
+    // nunca 100vw. Si cambias ese contenedor, recalcula sizes y exportPx.
     aspectClass: "aspect-21/9",
-    sizes: "100vw",
-    exportPx: { width: 2520, height: 1080 },
+    sizes: "(min-width: 1024px) 976px, calc(100vw - 48px)",
+    exportPx: { width: 1960, height: 840 }, // 2x de 976px, manteniendo 21:9
   },
   relatedThumb: {
     // mini-card "related project" en /editorial/[slug]
@@ -29,9 +31,13 @@ export const imageSlots = {
       // capturas de sitios/apps en web — portfolio y editorial/software
       maxWidthClass: "w-3/4",
       exportPx: { width: 1800 },
-      border: "border border-line"
     }
   },
+  video: {
+    demo: { 
+      maxWidthClass: "w-3/4",
+    }
+  }
 } as const;
 
 export type ImageSlot = keyof typeof imageSlots;
