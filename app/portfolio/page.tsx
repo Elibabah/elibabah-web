@@ -68,11 +68,13 @@ export default function PortfolioPage() {
                     </li>
                   ))}
                 </ul>
-                {project.caseStudy && (
-                  <span className="font-mono text-xs text-accent mt-2">
-                    Case study available
-                  </span>
-                )}
+                  {project.caseStudy && (
+                    <span className="mt-auto pt-4">
+                      <span className="inline-block font-mono text-[10px] uppercase tracking-[0.5px] text-accent bg-accent-soft px-2 py-1 rounded-[5px]">
+                        Case study available
+                      </span>
+                    </span>
+                  )}
               </div>
             </Link>
           </li>
