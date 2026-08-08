@@ -1,0 +1,126 @@
+---
+title: "Salud Walmart — Digital Membership Platform"
+slug: salud-walmart
+summary: "A responsive healthcare membership platform for discovering benefits, locating clinics, managing accounts, and validating coverage across Walmart and Bodega Aurrera."
+stack:
+  - Angular
+  - TypeScript
+  - Angular Material
+  - RxJS
+  - Reactive Forms
+  - Google Maps
+  - Google Places
+  - REST APIs
+role: Frontend Developer
+year: 2022
+featured: true
+links:
+  demo: null
+  repo: null
+caseStudy: null
+cardThumb: /images/portfolio/salud-walmart/cardThumb.jpg
+heroBand: /images/portfolio/salud-walmart/heroBand.jpg
+relatedThumb: /images/portfolio/salud-walmart/relatedThumb.jpg
+---
+
+## Healthcare memberships, made easier to understand and use
+
+Salud Walmart was a digital platform for presenting and managing healthcare memberships available through Walmart and Bodega Aurrera in Mexico.
+
+The experience brought together membership discovery, benefit information, clinic search, coverage validation, account creation, login, and member self-service in one responsive product.
+
+{/* IMAGE — desktop homepage: price anchor above the renewal ladder */}
+<Image
+  src="/images/portfolio/salud-walmart/home-overview.jpg"
+  variant="screenshotDesktop"
+  alt="Salud Walmart homepage anchoring the membership at forty-five pesos a month, above a three-column band showing the benefits earned by renewing: a dental cleaning at the third month, a full check-up at the sixth, a free membership at the twelfth"
+  caption="The homepage: one price up front, and the renewal ladder that rewards staying subscribed."
+/>
+
+## My role
+
+I worked as a Frontend Developer, building the Angular application and translating the product flows into responsive, reusable interfaces.
+
+My work included:
+
+- Developing responsive screens for membership discovery and benefits.
+- Building authentication, registration, password recovery, and account-management flows.
+- Integrating REST APIs for memberships, user data, appointments, and coverage.
+- Implementing reactive forms and validation states.
+- Creating flows for validating and registering memberships purchased in-store or through BAIT recharge.
+- Integrating Google Maps and Google Places to help users locate nearby Walmart and Bodega Aurrera clinics.
+- Supporting payment-related flows through a shared local Angular module.
+
+## A clear path from discovery to care
+
+The platform needed to explain healthcare plans in a way that felt approachable while helping members access practical services: medical consultations, dental care, laboratory services, nutrition, psychological support, and more.
+
+The information architecture organized the experience around three questions a member or prospective member would arrive with:
+
+1. Is the membership I already hold still active?
+2. Where is the nearest clinic I can actually use?
+3. How do I manage my membership, my data and my beneficiaries?
+
+Each one became its own surface, and the sections that follow take them in that order.
+
+## Validating a membership
+
+Memberships were not only bought online: many were acquired in-store or through a BAIT recharge, which meant the platform had to answer a simple question for anyone holding a folio — is this membership still active?
+
+The validation flow reduced that to a single field, with a supporting hint for members who did not know where to find their folio number, and a direct path to purchase for anyone arriving without a membership at all.
+
+{/* IMAGE — membership validation: folio lookup */}
+<Image
+  src="/images/portfolio/salud-walmart/validate-membership.jpg"
+  variant="screenshotDesktop"
+  alt="Membership validation screen with a single folio number field, a help link explaining where to find the folio, and a secondary path to purchase a membership"
+  caption="Validating a membership: one folio field, a hint for where to find it, and an exit into purchase for non-members."
+/>
+
+## Clinic discovery
+
+A clinic-search flow allowed users to look up nearby locations using address, neighborhood, postal code, or city. Google Places handled the ambiguity of how people actually type a location — partial addresses, a colonia name, just a postal code — resolving free text into coordinates through its autocomplete predictions. Those coordinates went to our own backend, which owned the clinic directory and returned the locations in range, and the results were rendered onto a Google Map alongside the list.
+
+The interesting part was not the map itself but the seam between the two providers of truth: Places knows about places in general, and the backend knows which of them are Walmart or Bodega Aurrera clinics with actual coverage. Keeping the search forgiving while the answer stayed authoritative was the work.
+
+## Member account and self-service
+
+For existing members, the account area gathered self-service into one place behind a persistent sidebar: beneficiaries, appointments, and privacy and password settings, alongside the member's own personal and membership data.
+
+The registration journey was designed as a guided, validated flow: a four-step wizard — create an account, verify it, complete additional data, finish — anchored on the membership folio, with dedicated screens for login, account recovery, password reset, and membership activation.
+
+{/* IMAGE — registration: step 1 of the four-step account wizard */}
+<Image
+  src="/images/portfolio/salud-walmart/create-account.jpg"
+  variant="screenshotDesktop"
+  alt="Step one of the account creation wizard, showing the four-step progress indicator above the membership holder's personal details and access credentials"
+  caption="Step one of four: the wizard keeps the membership folio in view while collecting holder details and credentials."
+/>
+
+Inside the account, beneficiary management was the most form-heavy surface: a full identity record per beneficiary — personal data, CURP, relationship to the holder, address resolved from postal code, and an emergency contact that could either inherit the holder's or be registered separately. It was the clearest case for Reactive Forms, with conditional sections appearing and validating based on earlier answers.
+
+{/* IMAGE — account area: beneficiary registration form */}
+<Image
+  src="/images/portfolio/salud-walmart/member-account.jpg"
+  variant="screenshotDesktop"
+  alt="Beneficiary registration form inside the account area, with the Mi Cuenta sidebar listing beneficiaries, appointments and privacy settings"
+  caption="The account area: adding a beneficiary, with the emergency contact section branching on the member's choice."
+/>
+
+## Technical approach
+
+The application was built with Angular and TypeScript, using Angular Material for interface primitives, Reactive Forms for structured user input, and RxJS for API-driven UI states.
+
+A local Angular payment library was integrated as a reusable module for purchase-related functionality. Environment-specific Angular configuration separated development and production API endpoints.
+
+## Outcome
+
+Salud Walmart unified multiple membership touchpoints into a single digital experience: discovering plans, activating a membership, finding care, validating coverage, and managing account details over time.
+
+{/* IMAGE — mobile: the same renewal ladder, stacked at a phone viewport */}
+<Image
+  src="/images/portfolio/salud-walmart/mobile-views.png"
+  variant="screenshotMobile"
+  alt="The Salud Walmart site at an iPhone viewport, with the navigation collapsed into a menu and the renewal benefits stacked into a single column: a dental cleaning at the third month, a full check-up at the sixth, a free membership at the twelfth"
+  caption="The same renewal ladder at a phone viewport: what reads as three columns on desktop collapses into one legible stack."
+/>

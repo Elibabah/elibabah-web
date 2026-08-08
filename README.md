@@ -184,6 +184,5 @@ Deployed on Vercel with CI/CD wired to GitHub:
 
 ## Repo conventions
 
-- [CLAUDE.md](CLAUDE.md) — project handoff and working agreement: architecture decisions, design system and build order. Read it before reopening a settled decision.
 - [LEARNING.md](LEARNING.md) — append-only technical notebook (in Spanish) of concepts learned while building the site. Nothing is deleted; outdated entries are annotated rather than removed.
-- [AGENTS.md](AGENTS.md) — notes for AI coding agents working in this repo.
+- [CLAUDE.md](CLAUDE.md) — project handoff and working agreement: architecture decisions, design system and build order. Read it before reopening a settled decision.

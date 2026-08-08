@@ -1,8 +1,8 @@
 import NextImage from "next/image";
-import { imageSize } from "image-size";
-import path from "path";
-import { readFileSync } from "fs";
 import type { ReactNode } from "react";
+import { imageSize } from "image-size";
+import path from "node:path";
+import { readFileSync } from "node:fs";
 
 type MdxImageRowProps = {
   src: string;
@@ -12,7 +12,7 @@ type MdxImageRowProps = {
   children: ReactNode;
 };
 
-export function MdxImageRow({ src, alt, caption, side = "left", children }: MdxImageRowProps) {
+export function MdxImageRow({ src, alt, caption, side = "left", children }: Readonly<MdxImageRowProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
 
@@ -28,7 +28,7 @@ export function MdxImageRow({ src, alt, caption, side = "left", children }: MdxI
           alt={alt}
           width={width}
           height={height}
-          className="w-full max-w-xs h-auto rounded-xl border border-line mx-auto"
+          className="w-full max-w-xs h-auto mx-auto"
         />
         {caption && (
           <figcaption className="font-mono text-xs text-ink-faint text-center">

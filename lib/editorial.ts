@@ -1,6 +1,6 @@
-import fs from "fs";
+import fs from "node:fs";
 import matter from "gray-matter";
-import path from "path";
+import path from "node:path";
 
 export type ArticleSection = "software" | "career" | "aotearoa";
 
@@ -12,7 +12,6 @@ export type Article = {
   publishedAt: string;
   readingTime: number;
   relatedProject: string | null;
-  relatedCaseStudy: string | null;
   heroBand: string | null; // hero -> /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
 };
 

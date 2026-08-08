@@ -9,45 +9,75 @@ stack:
 role: Frontend Developer
 year: 2022
 featured: true
-cardThumb: /images/portfolio/bait-world-cup/heroBand.png
-heroBand: /images/portfolio/bait-world-cup/heroBand.png
-relatedThumb: /images/portfolio/bait-world-cup/heroBand.png
-
-
+links:
+  demo: null
+  repo: null
+caseStudy: null
+cardThumb: /images/portfolio/bait-world-cup/cardThumb.jpg
+heroBand: /images/portfolio/bait-world-cup/heroBand.jpg
+relatedThumb: /images/portfolio/bait-world-cup/relatedThumb.jpg
 ---
 
 
 ## Overview
 
-Bait is Walmart Mexico's mobile carrier, and for the 2022 World Cup it ran a fan-facing campaign built around the tournament. The microsite gave users a single place to follow Mexico's group-stage journey: fixtures, live scores, group standings, and a set of engagement mechanics such as a World Cup trivia and a penalty game tied to the wider promotion.
+Bait is Walmart Mexico's mobile carrier, and for the 2022 World Cup it ran a fan-facing campaign built around the tournament. The microsite gave users a single place to follow the tournament, with Mexico's run as the anchor: fixtures, live scores, group standings, and a set of engagement mechanics such as a World Cup trivia and a penalty game tied to the wider promotion.
 
 I worked on this at Innovattia, delivering for Walmart and Bait. The UX team handed me a visual sketch of the intended layout, and I built the entire interface from scratch. This project predates the AI-assisted tooling common in frontend work today; every layout decision, interaction, and piece of state was hand-written.
 
-{/* IMAGE — homepage overview: hero, fixtures by group, how-to-participate, prizes, weekly winners */}
+{/* IMAGE — homepage: prizes carousel above the two-column fixtures/standings row */}
 <Image
   src="/images/portfolio/bait-world-cup/home-overview.jpg"
   variant="screenshotDesktop"
-  alt="Bait World Cup microsite homepage with the campaign hero, upcoming fixtures by group, how-to-participate steps, prizes, and weekly winners table"
-  caption="The campaign homepage: hero, fixtures by group, participation steps, prizes, and the weekly winners table."
+  alt="Bait World Cup microsite homepage: a prizes carousel across the top, and below it two side-by-side panels — featured fixtures with the knockout results, and a Group A standings table listing matches played, won, drawn, lost and goals for"
+  caption="The campaign homepage: the prizes carousel across the top, with featured fixtures and the group standings sitting side by side beneath it."
+/>
+
+{/* IMAGE — mobile: the same homepage, two panels collapsed into one column */}
+<Image
+  src="/images/portfolio/bait-world-cup/mobile-views.png"
+  variant="screenshotMobile"
+  alt="The same homepage at a phone viewport, with the navigation collapsed into a menu, the prizes carousel showing the official Mexico jersey, and the featured fixtures panel reporting the final: Argentina 3–3 France, 4–2 on penalties"
+  caption="The same page on a phone: the two panels that sit side by side on desktop stack into one column, and the navigation folds into a menu."
 />
 
 ## What I built
 
-The site was implemented in plain HTML, CSS, and JavaScript, with no framework and no UI library. That constraint shaped the whole approach. Layout and responsiveness were solved directly in CSS, component structure was expressed through disciplined markup and class conventions, and interactivity was wired up with the native DOM API rather than a rendering library.
+Having no framework and no UI library shaped the whole approach. Component structure had to be expressed through disciplined markup and class conventions rather than a component model, and every piece of interactivity went through the native DOM API rather than a rendering library. Nothing was free: each pattern I would normally reach for had to be built and kept consistent by hand.
 
-The core surfaces included a fixtures panel for Mexico's three group matches, a live statistics view for the group table, and campaign entry points into the trivia and penalty games. Data such as scores and standings was rendered into the DOM and updated as the tournament progressed, which meant thinking carefully about how to keep the markup, the styling, and the data in sync without the conveniences a framework would normally provide.
+The core surfaces included a fixtures panel for the tournament's headline matches, a statistics view with a per-group standings table, and campaign entry points into the trivia and penalty games. Data such as scores and standings was rendered into the DOM and updated as the tournament progressed, which meant thinking carefully about how to keep the markup, the styling, and the data in sync without the conveniences a framework would normally provide.
 
-{/* IMAGE — fixtures panel and Group C statistics table */}
+{/* IMAGE — trivia and penalty game entry points, plus participation steps */}
 <Image
-  src="/images/portfolio/bait-world-cup/fixtures-stats.jpg"
+  src="/images/portfolio/bait-world-cup/trivia.jpg"
   variant="screenshotDesktop"
-  alt="Bait World Cup microsite showing Mexico's Group C fixtures panel and the group statistics table"
-  caption="Mexico's Group C fixtures alongside the live statistics view and group table."
+  alt="Trivia Mundial and Penales game entry banners above the three-step participation block"
+  caption="Entry points into the trivia and penalty games, above the campaign participation steps."
+/>
+
+The prizes had a surface of their own: a second carousel cataloguing what was on offer, each item with its name, a short description and the legal disclaimer the campaign required. Two carousels with different content shapes, both hand-rolled — no slider library, just the DOM and the state to track which item was showing.
+
+{/* IMAGE — prizes catalogue carousel */}
+<Image
+  src="/images/portfolio/bait-world-cup/gifts.jpg"
+  variant="screenshotMobile"
+  alt="The Premios disponibles carousel showing the official Al Rihla match ball with its name, a short description explaining that Al Rihla means the journey, and an illustrative-image disclaimer"
+  caption="The prizes catalogue: a second hand-built carousel, one prize at a time with its description and disclaimer."
+/>
+
+Responsiveness came from the same place as everything else: hand-written media queries. Without a grid system or utility classes to lean on, every breakpoint was a decision about what the layout should become — the game banners going full width, the participation steps turning from a row into a sequence, the fixtures panel giving up its columns. Getting that right on a campaign that would be opened mostly on phones was a large part of the work.
+
+{/* IMAGE — mobile: game entry points and participation steps at a phone viewport */}
+<Image
+  src="/images/portfolio/bait-world-cup/mobile-views-play-do.png"
+  variant="screenshotMobile"
+  alt="The campaign section at a phone viewport, with the Trivia Mundial and Penales banners stacked full width above the participation steps, the first reading: top up your Bait line from fifty pesos"
+  caption="On a phone the two game banners take the full width, and the participation steps unfold one at a time."
 />
 
 ## Why it mattered
 
-This was one of my earliest professional portfolio, and it taught the fundamentals that still hold up under any framework: semantic markup, responsive layout, DOM manipulation, and the discipline of translating a design into a faithful, working interface. Building it without abstractions made the underlying mechanics visible, which is a foundation I have carried into component-based work at scale since.
+This was one of my earliest professional projects, and it taught the fundamentals that still hold up under any framework: semantic markup, responsive layout, DOM manipulation, and the discipline of translating a design into a faithful, working interface. Building it without abstractions made the underlying mechanics visible, which is a foundation I have carried into component-based work at scale since.
 
 It is also a project I return to for its symbolism. From one World Cup to the next, it marks a point of departure in a longer engineering journey.
 
