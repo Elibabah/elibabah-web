@@ -17,7 +17,7 @@ export function MdxImage({ src, alt, variant, caption }: Readonly<MdxImageProps>
   const { maxWidthClass } = imageSlots.body[variant];
 
   return (
-    <figure className="flex flex-col gap-2 items-center">
+    <figure className="not-prose flex flex-col gap-2 items-center my-8">
       <NextImage
         src={src}
         alt={alt}
@@ -26,7 +26,7 @@ export function MdxImage({ src, alt, variant, caption }: Readonly<MdxImageProps>
         className={`h-auto rounded-xl ${maxWidthClass}`}
       />
       {caption && (
-        <figcaption className="text-center">
+        <figcaption className="font-mono text-xs text-ink-faint text-center">
           {caption}
         </figcaption>
       )}

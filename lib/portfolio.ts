@@ -1,6 +1,6 @@
-import fs from "fs";
+import fs from "node:fs";
 import matter from "gray-matter";
-import path from "path";
+import path from "node:path";
 
 export type Project = {
   title: string;
