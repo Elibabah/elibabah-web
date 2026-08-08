@@ -27,8 +27,9 @@ export const imageSlots = {
     },
     screenshotDesktop: {
       // capturas de sitios/apps en web — portfolio y editorial/software
-      maxWidthClass: "w-3/4",    // usa todo el ancho de la columna de prosa
+      maxWidthClass: "w-3/4",
       exportPx: { width: 1800 },
+      border: "border border-line"
     }
   },
 } as const;
