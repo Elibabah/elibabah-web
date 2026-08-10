@@ -25,17 +25,19 @@ export const imageSlots = {
     screenshotMobile: {
       // capturas de apps/sitios en mobile — portfolio y editorial/software
       maxWidthClass: "max-w-xs", // ~320px, ancho de referencia de un celular
+      sizes: "320px",
       exportPx: { width: 750 },   // 2x de un viewport mobile típico (375px)
     },
     screenshotDesktop: {
       // capturas de sitios/apps en web — portfolio y editorial/software
-      maxWidthClass: "w-3/4",
+      maxWidthClass: "w-full md:w-3/4",
+      sizes: "(min-width: 1024px) 732px, (min-width: 768px) calc(75vw - 36px), calc(100vw - 48px)",
       exportPx: { width: 1800 },
     }
   },
   video: {
     demo: { 
-      maxWidthClass: "w-3/4",
+      maxWidthClass: "w-full md:w-3/4",
     }
   }
 } as const;

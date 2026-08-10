@@ -1,0 +1,182 @@
+---
+title: "Five Roles, One Tree: Permissions as the Backbone of Bait's SIM Portal"
+slug: bait-distribuidores-case
+project: bait-distribuidores
+problem: Bait's SIM inventory moved down a three-tier reseller chain by way of requests back to the operator, and the portal that replaced this had to serve five different roles from the same screens — each seeing different data, each allowed different actions — while fronting carrier operations that fail unless their preconditions are met first.
+role: Frontend Developer @ Innovattia
+stack:
+  - Angular 14
+  - TypeScript
+  - RxJS
+  - Angular Material
+  - Tailwind CSS
+  - SheetJS
+  - SweetAlert2
+readingTime: 8
+outcome: Shipped a role-aware console over the SIM lifecycle — batch inventory parsed and pruned in the browser, assignment down the reseller chain, activation gated on device compatibility, area-code change and number portability, and a per-section read/write permission matrix — with a single server-driven tree feeding navigation, route guards and write access alike.
+---
+
+Bait is the MVNO that Walmart de México runs on top of a leased network. In 2022, at
+Innovattia, I built the frontend of the portal its distribution channel used to move SIM
+inventory and operate on lines — the work that until then meant filing a request back to
+the operator and waiting.
+
+## A chain, not a user base
+
+The thing that shapes this product is that its users aren't peers. A distributor receives
+SIM stock and splits it among subdistributors; they hand it to the people standing behind
+a counter. Above the chain sits an administrator who decides which companies get to enter
+it at all. Beside it sits support, who needs to answer *what happened to this SIM* without
+being able to touch anything.
+
+Five roles, largely the same screens. A distributor opening the accounts section sees its
+subdistributors; a subdistributor sees its own users; the screen is the same screen. And
+a SIM isn't one identifier but three — ICCID, MSISDN and IMSI, a *tripleta* — arriving in
+batch files of thousands.
+
+So the portal had two problems stacked on each other. The obvious one is inventory: get
+stock in, split it, track where each SIM went. The one that actually drove the
+architecture is that **every screen had to answer "who is asking" before it could answer
+anything else**.
+
+## Permissions as the backbone
+
+The decision that everything else hangs from: the backend returns the menu *as* the
+permission model. One payload — sections, their routes, and an `escritura` flag per
+section — and three independent consumers read it.
+
+The sidebar renders it, so navigation is whatever the server says it is. A dedicated
+permission guard authorizes against it on both hooks — once to permit loading a lazy
+feature module, again to permit activating a route inside it, though how thoroughly it
+does the second is something I come back to. And a helper matches the current router URL back
+against the same tree to decide whether a screen's write controls render at all — so a
+read-only user doesn't get a disabled *Save* button, they get a screen with no *Save*
+button.
+
+The payoff is that adding a section is a backend change. The client has no hardcoded list
+of what exists or who may see it; it discovers both at sign-in.
+
+The cost is a coupling that isn't obvious from any one file. The tree's paths have to
+match the router's paths exactly, because the guard compares strings — and that agreement
+is enforced nowhere. Three files have to stay in step with a payload none of them owns.
+I'll come back to what that cost me four years later.
+
+## Making invalid states unsubmittable
+
+The operations here aren't CRUD. Activating a line, changing its area code, porting a
+number in from another carrier — these are carrier transactions with preconditions, and
+they fail server-side in ways that are slow and unhelpful to explain after the fact.
+
+Activation is the clearest case. A line can't be activated on a device the network won't
+accept, so the screen resolves compatibility first: the operator enters the IMEI, the
+portal answers whether the handset is supported, on which bands, with VoLTE or without.
+Only then does the offer selector unlock, and only then will the form submit. The
+preconditions aren't validated at submit time — they gate the controls that would let you
+submit at all.
+
+The same instinct runs through the rest. Portability collects the subscriber's NIP and
+CURP with format validation before it will accept a request. Area-code change resolves
+against a NIR catalog rather than a free text field. Batch inventory is parsed in the
+browser into tripleta rows and shown in a table where the operator prunes bad ones
+*before* anything is committed — the file isn't uploaded and then reconciled, it's read,
+reviewed, and only then posted.
+
+Underneath, every list in the app is one shape. The twelve paginated tables each merge
+their sort header, paginator and a debounced search emitter into a single stream, start it
+with an empty event to trigger the first load, and `switchMap` into the endpoint so an
+in-flight request is abandoned the moment the user types another character. Sorting,
+paging and searching all resolve server-side; no component holds request state of its own.
+Twelve screens, one behaviour, and no chance of a stale response overwriting a fresh one.
+
+## When something fails
+
+Components in this codebase don't branch on failure. They throw.
+
+There's a small family of typed error classes — a request failure, an invalid session, a
+missing field — each carrying its own title, icon and message, and a global handler
+renders them. Beside it an HTTP interceptor watches every response for a 401 and for the
+API's custom 512–518 session codes: account expired, credentials expired, account
+disabled, no role assigned, account blocked. Each maps to its own sentence, and the
+session teardown happens in one place rather than in every subscriber.
+
+The reason to keep those five codes distinct instead of collapsing them into *please sign
+in again* is that this is an internal tool. The person hitting the error is the person who
+will report it, often to me. "Your account has no role assigned" ends in a fix. "Something
+went wrong" ends in a meeting.
+
+The visible effect is that a screen's happy path reads start to finish. No error plumbing
+threaded between the steps that do the work.
+
+## Revisiting it in 2026
+
+To show this work without exposing company data, I stood the app back up against a mock
+backend. Angular gave me a cleaner seam than I expected: an `HttpInterceptor` sits in the
+same chain as the app's own error interceptor, matches the outgoing URL, and answers it.
+**Not one component or service changed.** The fake data enters through exactly the pipe
+the real data used.
+
+The work wasn't writing fixtures, it was recovering the contracts. There was no schema to
+read from — so each response shape had to be derived from the far end, from how components
+destructure and iterate what they receive. A list screen tells you it wants
+`{ success, total, lista }` because that's what its pipeline maps. A detail screen tells
+you its nesting because the template reaches four levels down into it.
+
+The permission tree was the hard part, and for a reason the architecture predicted. Getting
+it wrong doesn't produce an error — it produces an app that quietly refuses. A path that
+doesn't match sends you back to the root with no explanation; an `escritura` flag in the
+wrong place renders a screen with its actions silently missing. I had to satisfy all three
+consumers at once before a single screen behaved, which is the coupling I described above,
+felt from the outside.
+
+Running the whole thing end to end surfaced three things worth naming:
+
+1. **The dashboard queries while you type.** The landing screen summarises a period in
+   cards, and it re-runs that query on the end-date field's change event. Picking the
+   dates from the calendar fires it once. Typing them fires it repeatedly, against
+   half-parsed values, because the input reformats as characters arrive. Nobody typed the
+   dates, so nobody saw it.
+
+2. **Route protection leans on load order.** `AuthGuard` checks the session in `canLoad`,
+   the hook that permits loading a feature module; its `canActivate`, the hook that
+   permits activating a route inside that module, returns true unconditionally. Since the
+   app restores its session from storage before routing, the gap never opened in practice.
+   It's only visible once the module is already loaded and the session isn't.
+
+3. **The build no longer builds.** `moment` is imported directly by a component but was
+   never declared as a dependency — it had been arriving as a transitive peer, and the day
+   that stopped being true it stopped compiling. The spreadsheet parser points at a
+   *latest* archive URL whose contents have since changed, so the lockfile's integrity hash
+   no longer matches anything. Neither was wrong in 2022. Both are the same lesson about
+   what "pinned" actually means.
+
+The first two depend on timing and ordering — conditions the original environment happened
+to satisfy. The third depended on nothing but time passing. That's the pattern: the defects
+that survive are the ones whose symptoms need a circumstance you don't control.
+
+## What I would do differently
+
+**The error handler swallows real exceptions.** Its first branch returns early for
+anything that is `instanceof Error`. That only works because the custom error classes
+*implement* the `Error` interface rather than extending it — so they aren't instances,
+they fall past the guard, and they get rendered. Everything else takes the early return.
+A `TypeError` on an undefined field disappears without a console line. The custom types
+should have extended `Error` and been discriminated on their `name`, leaving the fallback
+to actually report instead of to hide.
+
+**The permission tree deserved a contract.** Three consumers agreeing on paths by string
+comparison, with the paths themselves owned by a server payload, is a lot of trust placed
+in nothing — and the guard doing the comparing reads URL segments positionally. One segment
+is matched against the menu; two are checked only when the second is `registro`; anything
+else is waved through. That is enough to let a route like `gestion-usuarios/:uuid` activate
+with no permission check at all, which is a hole rather than an untidiness. A single module
+that parses the tree once, validates it against the router's own configuration, and exposes
+typed queries — *can I see this, can I write here* — would have turned both the silent
+misroute and the silent bypass into a startup error. The design was right; it was missing
+the one place that owned it.
+
+**One character of type erasure.** The pagination interface declares its search field as
+the empty-string literal type rather than `string`. Assigning a real search term should
+not compile. It does, because the value arrives from an `any`-typed DOM event and nothing
+along that path ever asked. Small bug, general lesson: `any` at the boundary voids the
+guarantees everywhere downstream, and a type that was meant to document the contract ends
+up documenting nothing at all.
