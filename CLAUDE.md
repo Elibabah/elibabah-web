@@ -49,9 +49,11 @@ Also in place:
   Google site verification, Vercel Analytics and Speed Insights.
 - MDX pipeline: `gray-matter` for front matter, `next-mdx-remote` for the body,
   `lib/mdx-components.tsx` for the component mapping.
-- Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive `sizes`
-  and recommended export dimensions.
-- Content seeded: 3 projects, 2 case studies, 4 articles.
+- Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive widths,
+  `sizes` and recommended export dimensions.
+- Reading time derived from the body in `lib/reading-time.ts`, not declared per file.
+- Content seeded: 6 projects, 4 case studies, 4 articles — though three of those articles are
+  still placeholders whose body is literally "Article body here."
 
 ---
 
@@ -155,7 +157,7 @@ elibabah-web/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
     layout/                 # Nav, Footer, Logo, ThemeToggle
-    content/                # MdxImage, MdxImageRow
+    content/                # MdxImage, MdxImageRow, MdxVideo
     theme-provider.tsx
   content/
     portfolio/*.mdx
@@ -164,9 +166,11 @@ elibabah-web/
   lib/                      # content <-> app bridge
     portfolio.ts, editorial.ts, case-studies.ts
     mdx-components.tsx      # MDX -> React component mapping
-    image-slots.ts          # aspect ratios, responsive sizes, export dimensions
+    image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
+    reading-time.ts         # reading time derived from the MDX body
   public/
     images/{portfolio,editorial,case-studies}/<slug>/…
+    videos/portfolio/<slug>/…
     logo-light.svg, logo-dark.svg, resume.pdf
 ```
 
@@ -218,13 +222,15 @@ project: slug          # the project it expands on
 problem: string        # the starting challenge
 role: string
 stack: string[]
-readingTime: number
 outcome: string        # impact / learning
 ```
 
 The body (problem, decisions, alternatives, outcome) is the MDX content itself, not a
 front-matter field. Case studies currently have **no image field**; they reuse the
 narrative and body images.
+
+`readingTime` is **not** a front-matter field: it is derived from the body by
+`lib/reading-time.ts` when the file is read. Do not declare it — it would be ignored.
 
 ### Article (Editorial) — `content/editorial/[slug].mdx`
 
@@ -234,14 +240,15 @@ slug: string
 section: enum          # 'software' | 'career' | 'aotearoa'
 excerpt: string        # for the listing
 publishedAt: date      # quoted ISO string, e.g. "2026-05-15"
-readingTime: number
 relatedProject: slug | null      # cross-link to the portfolio
-relatedCaseStudy: slug | null
 heroBand: path | null
 ```
 
-All three models include **cross-linking** fields (`caseStudy`, `relatedProject`,
-`relatedCaseStudy`) to weave portfolio, case studies, and editorial together.
+Same as case studies: `readingTime` is derived, not declared.
+
+The models include **cross-linking** fields (`caseStudy` on a project, `relatedProject` on an
+article) to weave portfolio, case studies, and editorial together. There is no
+`relatedCaseStudy` on articles — an article reaches a case study through its project.
 
 ---
 

@@ -86,18 +86,25 @@ export default async function ProjectPage({
           )}
         </div>
         {project.caseStudy && (
-          <div className="bg-surface border border-line rounded-xl p-4 flex items-center justify-between gap-4 mt-2">
-            <div className="flex flex-col gap-1">
-              <span className="font-mono text-[10px] text-accent tracking-[0.6px] uppercase">Goes deeper</span>
-              <span className="font-heading text-base text-foreground">Case study available</span>
+          <Link
+            href={`/case-studies/${project.caseStudy}`}
+            className="group block mt-2 bg-surface border border-line rounded-xl p-4
+                      hover:border-accent transition-colors"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="font-mono text-[10px] text-accent tracking-[0.6px] uppercase">
+                  Goes deeper
+                </span>
+                <span className="font-heading text-base text-foreground">
+                  Case study available
+                </span>
+              </div>
+              <span className="font-mono text-xs text-accent shrink-0 group-hover:underline">
+                Read →
+              </span>
             </div>
-            <Link
-              href={`/case-studies/${project.caseStudy}`}
-              className="font-mono text-xs text-accent hover:underline shrink-0"
-            >
-              Read →
-            </Link>
-          </div>
+          </Link>
         )}
       </header>
 
