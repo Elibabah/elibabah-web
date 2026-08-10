@@ -1,69 +1,237 @@
 ---
-title: "Upgrading 2M+ Accounts: The BBVA Nómina Compliance Flow"
+title: "Five Modules, One Compliance Upgrade: BBVA's N2→N4 Flow"
 slug: nomina-upgrade-case
 project: nomina-upgrade
-problem: Mexican banking regulation required BBVA to collect complete identity and address data from all salary account holders — with no existing mobile flow to do it.
+problem: "Payroll customers inherited N2 accounts capped at 3,000 UDIs of deposits a month — around MXN $24,000 — and the only way to lift that cap was a morning in a branch. The identity file the regulator demands had to be assembled remotely, on a phone, to the same evidentiary standard."
 role: Frontend Developer @ BBVA
 stack:
   - Lit
   - TypeScript
   - Cells
   - Web Components
-outcome: Delivered a modular, accessible document collection flow across five regulatory modules, iterated across two production MVPs, and contributed to BBVA meeting national compliance requirements for the nómina product line.
+  - Jest
+  - Cypress
+outcome: "Five independently shippable modules behind one resumable journey, delivered by a two-person frontend team across two production MVPs. The architecture proved itself a year later, when one module was rebuilt from scratch in a new design system without touching the other four."
 ---
 
-## Context
+> The [project page](/portfolio/nomina-upgrade) describes what the flow is and what it asks
+> of a customer, with the public regulatory sources cited. This case study is about the
+> decisions — what we chose, what we rejected, and what each choice cost. No source code,
+> internal documentation, or customer data appears in either.
 
-In 2022, Mexican banking regulators mandated that financial institutions hold complete verified identity data for all account holders. For BBVA Mexico, this meant reaching millions of nómina (payroll) customers — people whose accounts had been opened years earlier with minimal documentation — and guiding them through a full compliance upgrade without friction.
+## The problem, stated precisely
 
-The challenge landed on the mobile team: build a flow that collects five categories of sensitive data (ID, proof of address, KYC declaration, FATCA status, and beneficiary information), integrates with existing backend APIs, and does all of it within the constraints of BBVA's internal Web Components ecosystem.
+A Mexican bank account is not a single product. It sits at one of four levels, and the level
+is a function of how complete the bank's identity file on you is. At **N2** — name, date of
+birth, official ID, address details — the account may receive **3,000 UDIs a month, around
+MXN $24,000**. At **N4**, with a fully verified file, there is no ceiling at all.
 
-## Team and scope
+Payroll customers are concentrated at the bottom of that ladder for a structural reason: the
+account was opened *for* them, by an employer, with the minimum file that would satisfy the
+regulator. Nobody chose N2. They inherited it. And they discover the ceiling the way you
+discover any invisible constraint — when a deposit bounces.
 
-Two of us owned the frontend entirely. There was no larger team to distribute complexity to — just my colleague and me, working directly with design, business analysts, compliance, and the backend API owners.
+The bank's answer, before this project, was a branch: bring a physical ID, a utility bill no
+older than three months, your CURP and your RFC, and a morning of your time. For a customer
+base that is overwhelmingly mobile, that answer is a filter, not a service.
 
-Our responsibilities covered the full lifecycle: UX/UI sessions with design and business to define the flow, frontend implementation across all modules, integration with existing bank APIs, unit and end-to-end tests, analytics tagging per the business tagging specification, and accessibility review.
+So the question was not "can we build a form". It was: **can the same evidentiary standard a
+branch officer applies in person be reproduced by someone alone with a phone, and can it be
+made survivable enough that people actually finish it?**
 
-## Architecture decisions
+## The constraints we did not choose
 
-### Modular by design
+Four of them, and they shaped everything downstream:
 
-The five document types — INE/ID verification, proof of address, KYC, FATCA, and beneficiary — are logically independent. A user might complete identity verification in one session and address in another. The regulation didn't require completion in one sitting.
+1. **The framework was decided.** Cells is BBVA's internal Web Components framework, built on
+   Lit and TypeScript. No npm packages, no external component library, no escape hatch. You
+   build with the catalogue the bank maintains or you do not build.
+2. **The APIs predated us.** We were consumers, not designers. Data shapes, validation
+   semantics and error codes arrived fixed.
+3. **The team was two people.** There was no larger frontend group to absorb complexity —
+   my colleague and me, working directly with design, business analysts, compliance and the
+   API owners.
+4. **Every change carries a review chain.** In a bank, shipping is not the bottleneck;
+   getting a change reviewed, tested and approved is. Anything that widened the blast radius
+   of a change was expensive in a way that had nothing to do with the code.
 
-We built each module as a self-contained unit: its own state, its own API contracts, its own error handling. The orchestration layer tracked which modules had been completed and resumed the user from where they left off. This meant we could ship, test, and fix each module without touching the others — important in a bank environment where changes go through multiple layers of review.
+Constraint 4 is the one that did most of the architectural work, and it is worth being
+explicit about, because it is the piece that does not transfer from consumer software. In a
+startup, coupling costs you a bug. Here, coupling costs you a review cycle across four
+modules to change one.
 
-### Cells framework
+## Decision 1 — Five modules, not one wizard
 
-BBVA's Cells framework is built on Lit and TypeScript. It's not a framework you choose — it's the framework the bank has standardised on for mobile web, with its own component catalogue, routing patterns, and state management conventions.
+The obvious shape for "collect five documents" is a linear wizard: step 1 of 5, next, next,
+done. It is simpler to build, simpler to reason about, and simpler to instrument.
 
-Working within Cells meant no npm packages, no external component libraries, no workarounds that deviate from the bank's standards. Every architectural decision had to work within those constraints. This turned out to be a useful forcing function: it pushed us toward simpler patterns that were easier to test and audit.
+We built five self-contained modules behind an orchestration layer instead — each with its
+own state, its own API contracts, its own error handling — and let the customer complete them
+in any order, across any number of sessions.
 
-### API integration without negotiation
+**Why.** Three reasons, in ascending order of weight:
 
-The backend APIs existed before this project. We were consumers, not designers. This meant adapting the UI flow to data shapes we didn't control — handling partial responses, edge cases in validation states, and error codes that didn't always map cleanly to user-facing messages.
+- *The regulation does not require one sitting.* It requires a complete file. Nothing about
+  the legal obligation implied a linear path, so imposing one would have been a constraint we
+  invented ourselves.
+- *The documents are genuinely independent.* An ID photograph, an address proof, a tax
+  self-declaration, a KYC questionnaire and a beneficiary record share no data and no
+  validation. The seam was already there in the domain; we were choosing whether to honour it.
+- *It matches how the change chain actually works.* A fix to the beneficiary module that
+  cannot possibly affect the ID module is a fix that gets reviewed as one module, not five.
 
-The front matter model we settled on: the API is the contract; the UI handles all the edge cases gracefully.
+**What it cost.** A wizard has one state machine; five modules plus an orchestrator have six,
+and the orchestrator has the hardest job in the system — knowing what is done, what is
+pending, and what a partially complete file means. It also means five places to get analytics
+tagging right instead of one, and a test surface that grows with the number of entry points
+rather than the number of steps.
 
-## Two MVPs
+**Was it right?** The evidence arrived a year later, and it is in Decision 4.
 
-**2023 — The full modular flow**
-The first production release covered all five modules. We prioritised getting the happy path into users' hands and validating the architecture. The proof of address module in this version worked, but it was built on an older UI pattern.
+{/* TODO — ELÍAS. This is the section that most needs your inside view, and the specific
+    thing to answer is: where did the completion state actually live? A server-side status
+    endpoint per module? A single aggregate the orchestrator polled? Something on the client?
+    Whatever is safe to say, say it — "resumable" is a claim until you name the mechanism,
+    and the mechanism is what a reviewer in NZ will ask about. */}
 
-**2024 — Address module rebuild**
-The second MVP was scoped to a single module: proof of address. By then, BBVA had introduced a new UX design language and updated tooling for certain component patterns. We rebuilt the address module from scratch within the new system while keeping the same API contracts — the surrounding flow didn't change from the user's perspective.
+## Decision 2 — Failing on the device rather than at the API
 
-This was a useful lesson in modular architecture paying off: one module could be rearchitected in isolation without touching the rest.
+The ID and proof-of-address modules are the only ones that leave the world of forms. They need
+the camera, and a photograph is the one input in the whole flow that can be *accepted by every
+validation layer and still be wrong* — out of focus, glare across the hologram, a corner
+cropped off.
 
-## What made it difficult
+If that judgment is made server-side, or worse, downstream by whatever verifies the document,
+the customer finds out they failed long after they have stopped paying attention. So the UI
+takes on work it would be easier to delegate: framing guidance, feedback before capture, an
+explicit review step where the customer confirms the image is legible before it is uploaded.
 
-Banking compliance flows operate under constraints that consumer apps don't. Every interaction is audited. Error states have legal implications. Accessibility is not optional — it's a regulatory requirement in Mexico for financial services.
+This is more code, in the least well-supported part of the stack, to prevent a failure the
+system could technically survive. It was still the right trade, because the cost of a late
+rejection is not one retake — it is a customer who has already given up.
 
-The analytics tagging requirement was particularly demanding: every user action, every API call result, every module entry and exit had to be instrumented per a business tagging guide maintained by a separate team. Getting this right required careful coordination and thorough E2E testing.
+{/* TODO — ELÍAS. Two specifics worth adding if you can:
+    1. What quality checks were actually done on-device vs. what came back from the backend.
+    2. One concrete error code you had to translate into a recoverable screen, and what made
+       it hard. A single named example here is worth three paragraphs of principle. */}
 
-Working without the ability to share code or screenshots publicly also sharpens how you talk about the work. The architecture and the decisions are the story — not the pixels.
+## Decision 3 — Treating analytics tagging as behaviour, not as a side effect
+
+Every module entry and exit, every user action, and every API outcome had to be instrumented
+against a tagging specification owned by a separate business team.
+
+The tempting way to do this is to sprinkle tag calls into event handlers as the last step
+before a release. We treated tag emission as behaviour the tests assert, for a reason that is
+easy to state and easy to underrate: **in a flow whose only purpose is completion, the tagging
+is the sole instrument that can tell anyone which of the five modules is losing people.** A
+missing tag is not a missing analytics row. It is a blind spot in the one feedback loop the
+product has.
+
+The tagging spec also arrived from outside the team, which made it a genuine interface — the
+same category of thing as the API contract, and deserving the same treatment.
+
+{/* TODO — ELÍAS. Did the E2E suite actually assert tags, or was that verified another way?
+    Be accurate here; it is a checkable claim. Also worth saying who consumed the data and
+    whether it ever changed a product decision. */}
+
+## Decision 4 — Rebuilding one module instead of restyling five
+
+In 2024, BBVA introduced a new UX design language and updated internal tooling. The proof of
+address module — shipped in 2023 on the older UI pattern — was the piece most visibly out of
+step.
+
+There were three options. **Leave it**, and accept a seam in the experience. **Restyle it in
+place**, cheapest in the short term and the option that quietly accumulates two design systems
+inside one component. Or **rebuild it from scratch** in the new system, keeping the existing
+API contracts so nothing outside the module needed to know.
+
+We rebuilt. Scoping the second MVP to exactly one module out of five meant the regression
+surface was the module's own contract with the orchestrator, and nothing else — the other four
+were not touched, not rebuilt, and not re-reviewed.
+
+This is the payoff of Decision 1, and it is worth being honest about the direction of the
+argument: modularity is usually justified in the abstract and validated never. Here the bet
+was placed in 2023 and settled in 2024. One fifth of a production banking flow was replaced in
+isolation, and the customer moving between modules saw a continuous journey.
+
+{/* PLACEHOLDER — mobile. The address module before and after the 2024 rebuild, composed
+    into one exported PNG (~750px wide). Redacted: no real address, no real document.
+    This is the single image that would carry the whole case study.
+    File: /images/case-studies/nomina-upgrade-case/address-v1-v2.png
+<Image
+  src="/images/case-studies/nomina-upgrade-case/address-v1-v2.png"
+  variant="screenshotMobile"
+  alt="The proof of address step shown twice side by side, on the left in the original 2023 interface and on the right rebuilt in BBVA's newer design language"
+  caption="One module, two design systems, the same API contract underneath — which is why only this module had to change."
+/>
+*/}
+
+## What made this harder than it looks
+
+**The failure states have legal weight.** In consumer software an error message is a UX
+problem. In a compliance flow, what you tell a customer about why their document was rejected
+is a statement the bank is making about their identity file. The copy is reviewed by people
+who are not designers, and "something went wrong, try again" is not always an acceptable
+answer.
+
+**Accessibility is not a checklist item here.** In 2023 the CNBV, with GIZ, assessed Mexican
+banks' web and mobile channels against WCAG 2.1 and published recommendations grounded in
+disability as a protected category. The stakes are concrete rather than procedural: a
+compliance flow a screen-reader user cannot finish leaves that person permanently capped at
+MXN $24,000 a month. The camera step is the hard case, and it is the hard case for everyone.
+
+**You cannot show the work.** No repository, no screenshots of the real thing, no numbers you
+did not earn the right to publish. That constraint turned out to be clarifying: if the only
+thing you can carry out of a project is the reasoning, you find out quickly whether the
+reasoning was any good.
+
+{/* TODO — ELÍAS. If the accessibility review had a defined shape — automated tooling, a
+    specialist team, manual screen-reader passes, a checklist from a central group — name it.
+    Otherwise soften the claim; do not let the page imply more rigour than there was. */}
+
+## What I would do differently
+
+{/* TODO — ELÍAS. Leave this section as real regrets or delete the heading entirely — a
+    hedged version is worse than none. The project page has the same section; make them
+    different: there, the regret should be about the code; here, about the decisions.
+    Prompts, if useful:
+      - Was five the right number of seams? Did KYC and FATCA belong together?
+      - Did the orchestrator end up owning more than it should have?
+      - What did the tagging data reveal after launch that you would have designed around
+        from the start?
+      - Would you make the same on-device vs. server-side split again?
+    Two or three paragraphs, each anchored to something concrete. */}
 
 ## Outcome
 
-The flow shipped to production and reached BBVA's nómina customer base at scale. The modular design meant the 2024 address module rebuild could be delivered without regression risk to the other four modules.
+The flow shipped to production and serves BBVA México's payroll base — a base the bank
+publicly reports in the tens of millions, three quarters of it operating through mobile. Its
+value is structural rather than impressive: it converts a morning in a branch into a task you
+can finish on the bus, for the specific population least likely to be able to spare the
+morning.
 
-For me personally: this was the project where I moved from executing tickets to owning a product surface — designing the architecture, making tradeoffs across competing constraints, and being accountable for the full delivery.
+The architecture held. That is the claim I am most willing to defend, because it was tested
+rather than asserted — the 2024 rebuild is the experiment, and it came back clean.
+
+Personally, this was the project where I stopped executing tickets and started owning a
+surface: in the room for the design and business sessions, arguing tradeoffs against
+compliance and API constraints I could not change, and accountable for the whole delivery
+rather than a slice of it.
+
+{/* TODO — ELÍAS, NUMBERS. If any of these can be published — even as a direction rather than
+    a figure — they belong here and nowhere else:
+      completion rate, weakest module, upgrades per month, branch visits displaced,
+      support contacts about rejected deposits.
+    If none can, write one honest line saying so. That reads better than a vague one.
+    NOTE: the previous title of this case study claimed "2M+ accounts". I removed it because
+    I could not source it publicly. If it is a real, publishable figure, put it back — it is
+    the strongest sentence available to you. If it was an estimate, leaving it out is right. */}
+
+## Sources
+
+Regulatory and market figures on this page are public. See the
+[project page](/portfolio/nomina-upgrade) for the full source list — Banco de México's
+Circular 14/2011 and the CNBV provisions under article 115 of the LIC for the account-level
+scheme, BBVA México's own financial-education site for the N1–N4 ceilings, BBVA's 2024
+results for the customer and mobile figures, INEGI and CNBV's ENIF 2024 for payroll account
+prevalence, and the CNBV/GIZ 2023 accessibility study.
