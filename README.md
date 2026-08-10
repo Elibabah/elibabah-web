@@ -64,7 +64,7 @@ app/
 
 components/
   layout/                 # Nav, Footer, Logo, ThemeToggle
-  content/                # MdxImage, MdxImageRow
+  content/                # MdxImage, MdxImageRow, MdxVideo
   theme-provider.tsx
 
 content/                  # all site content, as MDX
@@ -77,10 +77,12 @@ lib/                      # bridge between content/ and app/
   case-studies.ts
   editorial.ts
   mdx-components.tsx      # MDX -> React component mapping
-  image-slots.ts          # canonical image aspect ratios / sizes / export dimensions
+  image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
+  reading-time.ts         # reading time derived from the MDX body
 
 public/
   images/{portfolio,editorial,case-studies}/<slug>/…
+  videos/portfolio/<slug>/…
   logo-light.svg, logo-dark.svg, resume.pdf
 ```
 
@@ -123,7 +125,6 @@ project: slug            # the project it expands on
 problem: string
 role: string
 stack: string[]
-readingTime: number
 outcome: string
 ```
 
@@ -135,13 +136,13 @@ slug: string
 section: 'software' | 'career' | 'aotearoa'
 excerpt: string
 publishedAt: date        # quoted ISO string
-readingTime: number
 relatedProject: slug|null
-relatedCaseStudy: slug|null
 heroBand: path|null
 ```
 
-Images referenced from front matter live under `public/images/<collection>/<slug>/`. The canonical aspect ratio, responsive `sizes` attribute and recommended export dimensions for every image slot are defined once in [lib/image-slots.ts](lib/image-slots.ts) — use it instead of hardcoding values.
+`readingTime` is not declared anywhere: it is derived from the MDX body by [lib/reading-time.ts](lib/reading-time.ts) as the file is read, so it can never drift from the text.
+
+Images referenced from front matter live under `public/images/<collection>/<slug>/`. The canonical aspect ratio, responsive width, `sizes` attribute and recommended export dimensions for every image slot are defined once in [lib/image-slots.ts](lib/image-slots.ts) — use it instead of hardcoding values.
 
 ---
 
