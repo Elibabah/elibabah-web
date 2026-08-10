@@ -1,3 +1,4 @@
+import { MdxFigcaption } from "./MdxFigcaption"
 import NextImage from "next/image";
 import type { ReactNode } from "react";
 import { imageSize } from "image-size";
@@ -9,11 +10,13 @@ type MdxImageRowProps = {
   src: string;
   alt: string;
   caption?: string;
+  sourceLabel?: string;
+  sourceHref?: string;
   side?: "left" | "right";
   children: ReactNode;
 };
 
-export function MdxImageRow({ src, alt, caption, side = "left", children }: Readonly<MdxImageRowProps>) {
+export function MdxImageRow({ src, alt, caption, sourceLabel, sourceHref, side = "left", children }: Readonly<MdxImageRowProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
   const { maxWidthClass, sizes } = imageSlots.body.screenshotMobile;
@@ -33,11 +36,7 @@ export function MdxImageRow({ src, alt, caption, side = "left", children }: Read
           height={height}
           className={`w-full ${maxWidthClass} h-auto mx-auto rounded-xl`}
         />
-        {caption && (
-          <figcaption className="font-mono text-xs text-ink-faint text-center">
-            {caption}
-          </figcaption>
-        )}
+        <MdxFigcaption caption={caption} sourceLabel={sourceLabel} sourceHref={sourceHref} />
       </figure>
       <div className="font-body text-base text-ink-soft leading-relaxed sm:w-3/5">
         {children}
