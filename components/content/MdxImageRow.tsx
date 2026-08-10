@@ -1,6 +1,7 @@
 import NextImage from "next/image";
 import type { ReactNode } from "react";
 import { imageSize } from "image-size";
+import { imageSlots } from "@/lib/image-slots";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 
@@ -15,6 +16,7 @@ type MdxImageRowProps = {
 export function MdxImageRow({ src, alt, caption, side = "left", children }: Readonly<MdxImageRowProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
+  const { maxWidthClass, sizes } = imageSlots.body.screenshotMobile;
 
   return (
     <div
@@ -26,9 +28,10 @@ export function MdxImageRow({ src, alt, caption, side = "left", children }: Read
         <NextImage
           src={src}
           alt={alt}
+          sizes={sizes}
           width={width}
           height={height}
-          className="w-full max-w-xs h-auto mx-auto"
+          className={`w-full ${maxWidthClass} h-auto mx-auto rounded-xl`}
         />
         {caption && (
           <figcaption className="font-mono text-xs text-ink-faint text-center">
