@@ -1,0 +1,120 @@
+---
+title: "SIM Distribution Portal — Bait (Walmart México)"
+slug: "bait-distribuidores"
+summary: "Role-aware B2B console for Bait's MVNO distribution channel: batch SIM inventory moving down a three-tier reseller chain, carrier operations on the line — activation, area-code change, number portability — and a server-driven permission tree that drives navigation, route guards and write access alike."
+stack:
+  - Angular 14
+  - TypeScript
+  - RxJS
+  - Angular Material
+  - Tailwind CSS
+  - SheetJS
+  - SweetAlert2
+role: Frontend Developer @ Innovattia
+year: 2022
+featured: false
+links:
+  demo: null
+  repo: null
+caseStudy: bait-distribuidores-case
+cardThumb: /images/portfolio/bait-distribuidores/cardThumb.jpg
+heroBand: /images/portfolio/bait-distribuidores/heroBand.jpg
+relatedThumb: /images/portfolio/bait-distribuidores/relatedThumb.jpg
+---
+
+> **On the visuals in this page.** The walkthrough below was recorded from a local demo
+> build whose HTTP layer is intercepted and answered with **fictional, generated data**.
+> No real customer, commercial or operational information from the company is shown, no
+> backend is reachable, and the source repository is not published. What I share here are
+> visual renders only, for the purpose of documenting my own work.
+
+<Video
+  src="/videos/portfolio/bait-distribuidores/demo.mp4"
+  variant="demo"
+  poster="/images/portfolio/bait-distribuidores/poster.webp"
+  caption="End-to-end walkthrough — distributor sign-in, activation counters re-queried by month, SIM activation (line lookup → IMEI compatibility → offer assignment), device compatibility check, batch assignment to a subdistributor, portability request, per-user permission matrix, then the admin role reviewing a distributor application and the support role tracing a SIM's movement history. Three of the five roles, silent, no narration."
+/>
+
+Walmart de México sells mobile service as Bait, and not directly: SIM stock travels down a
+chain of resellers before it reaches anyone's hands. At Innovattia I built the frontend of
+the portal that chain used to move that inventory and to act on the lines themselves —
+operations that, before it existed, each meant a ticket back to the operator.
+
+## The problem
+
+Bait sells through a tiered channel: a distributor receives SIM stock, splits it among
+subdistributors, and they in turn hand it to the people behind a counter. A SIM is not one
+identifier but three — ICCID, MSISDN and IMSI, a *tripleta* — and stock arrives as batch
+files of thousands of them.
+
+Two things made this awkward to build. First, every level of the chain sees a different
+portal: the same screen has to show a distributor its subdistributors and show a
+subdistributor its own users, with write access granted section by section. Second, the
+operations aren't CRUD — activating a line, changing its area code, porting a number in
+from another carrier are carrier transactions with preconditions. A line can't be
+activated on a device the network won't accept, so compatibility has to be resolved
+before the activation form will even submit.
+
+## What I built
+
+A console over the SIM lifecycle, shaped by whoever is signed in:
+
+1. **Dashboard** — the landing screen, summarising the account's activation and movement
+   counters for a period in a row of cards, the range set from a date picker. Read-only
+   and visual; nothing here is exported.
+2. **Inventory** — batch files parsed in the browser into tripleta rows, reviewed and
+   pruned in a table before anything is committed, then assigned whole or SIM by SIM to
+   an account further down the chain.
+3. **Operations on the line** — activation gated behind an IMEI compatibility check
+   (band 28, VoLTE) and an offer selection that previews data, minutes, SMS and validity;
+   area-code change against a NIR catalog; port-in collecting NIP and CURP from the
+   subscriber.
+4. **Accounts and permissions** — subdistributors and users, each with a permission
+   matrix where read and write toggle independently per section.
+
+Two roles sit outside the chain: an **administrator** who reviews the documentation of
+incoming distributor applications through a four-step validation flow, and a **support**
+role that traces the complete movement history of a single SIM — activation, area-code
+change, portability — on one timeline.
+
+## Technical notes
+
+**Permissions are one tree, read by three consumers.** The backend returns the menu *as*
+the permission model: sections, paths, and an `escritura` flag per section. The sidebar
+renders it, a route guard authorizes lazy-module loads and route activations against it,
+and a helper matches the current router URL back to it to decide whether write controls
+render at all. Navigation, authorization and UI affordances come from a single payload,
+so a new section is a backend change and the client follows.
+
+**Failures are thrown, not handled at the call site.** Components don't branch on errors.
+They `throw` typed classes — `ErrorRequest`, `ErrorInvalidSession`, `ErrorEmptyParam` —
+each carrying its own title, icon and message, and a global `ErrorHandler` renders them.
+Beside it an HTTP interceptor watches for 401 and the API's custom 512–518 session codes
+(expired account, expired credentials, disabled, no role assigned, blocked) and tears the
+session down centrally. The effect is that a screen's happy path reads start to finish
+without error plumbing threaded through it.
+
+**Every table is the same stream.** The twelve paginated lists share one RxJS shape: a
+`merge` of the sort header, the paginator and a debounced search emitter, `startWith({})`
+to trigger the first load, then `switchMap` into the endpoint so an in-flight request is
+abandoned the moment the user types again. Sorting, paging and search all resolve
+server-side; the component holds no request state of its own.
+
+## What I would do differently
+
+**The global error handler swallows real exceptions.** Its first branch is
+`if (error instanceof Error) return;`, and the only reason the custom error classes reach
+the renderer is that they `implement` the `Error` interface instead of extending it. So
+every genuine runtime exception takes that early return and disappears without a console
+line.
+
+**Authorization is thinner than it looks.** `AuthGuard.canActivate` returns `true`
+unconditionally; only `canLoad` checks the session, so protection leans on a module not
+having been loaded yet. The permission guard has its own version of the same problem,
+matching URL segments positionally and leaving whole shapes of route unchecked. Neither
+is expensive to fix and neither should have shipped that way.
+
+**One character of type erasure.** `IPaginador` declares `buscar: ""` — the empty-string
+literal type, not `string` — so assigning a real search term should be a compile error.
+It isn't, because the value arrives from an `any`-typed DOM event and nothing along that
+path ever asked. `any` at the boundary quietly voids the guarantees everywhere downstream.

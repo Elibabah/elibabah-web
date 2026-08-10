@@ -14,13 +14,14 @@ type MdxImageProps = {
 export function MdxImage({ src, alt, variant, caption }: Readonly<MdxImageProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
-  const { maxWidthClass } = imageSlots.body[variant];
+  const { maxWidthClass, sizes } = imageSlots.body[variant];
 
   return (
     <figure className="not-prose flex flex-col gap-2 items-center my-8">
       <NextImage
         src={src}
         alt={alt}
+        sizes={sizes}
         width={width}
         height={height}
         className={`h-auto rounded-xl ${maxWidthClass}`}
