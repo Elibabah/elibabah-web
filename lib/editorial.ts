@@ -1,19 +1,21 @@
 import fs from "node:fs";
 import matter from "gray-matter";
 import path from "node:path";
+import { readingTimeOf } from "./reading-time"
 
 export type ArticleSection = "software" | "career" | "aotearoa";
 
-export type Article = {
+type ArticleFrontmatter = {
   title: string;
   slug: string;
   section: ArticleSection;
   excerpt: string;
   publishedAt: string;
-  readingTime: number;
   relatedProject: string | null;
   heroBand: string | null; // hero -> /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
 };
+
+export type Article = ArticleFrontmatter & { readingTime: number };
 
 export type ArticleWithContent = Article & {
   content: string;
@@ -27,8 +29,8 @@ export function getAllArticles(): Article[] {
     .filter((f) => f.endsWith(".mdx"))
     .map((filename) => {
       const raw = fs.readFileSync(path.join(EDITORIAL_DIR, filename), "utf-8");
-      const { data } = matter(raw);
-      return data as Article;
+      const { data, content } = matter(raw);
+      return { ...(data as ArticleFrontmatter), readingTime: readingTimeOf(content) };
     })
     .sort((a, b) => (a.publishedAt > b.publishedAt ? -1 : 1));
 }
@@ -41,5 +43,5 @@ export function getArticleBySlug(slug: string): ArticleWithContent {
   const filepath = path.join(EDITORIAL_DIR, `${slug}.mdx`);
   const raw = fs.readFileSync(filepath, "utf-8");
   const { data, content } = matter(raw);
-  return { ...(data as Article), content };
+  return { ...(data as ArticleFrontmatter), content, readingTime: readingTimeOf(content) };
 }
