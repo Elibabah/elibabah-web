@@ -1,3 +1,4 @@
+import { MdxFigcaption } from "./MdxFigcaption"
 import NextImage from "next/image";
 import { imageSize } from "image-size";
 import { imageSlots } from "@/lib/image-slots";
@@ -9,9 +10,11 @@ type MdxImageProps = {
   alt: string;
   variant: keyof typeof imageSlots.body;
   caption?: string;
+  sourceLabel?: string;
+  sourceHref?: string;
 };
 
-export function MdxImage({ src, alt, variant, caption }: Readonly<MdxImageProps>) {
+export function MdxImage({ src, alt, variant, caption, sourceLabel, sourceHref }: Readonly<MdxImageProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
   const { maxWidthClass, sizes } = imageSlots.body[variant];
@@ -26,11 +29,7 @@ export function MdxImage({ src, alt, variant, caption }: Readonly<MdxImageProps>
         height={height}
         className={`h-auto rounded-xl ${maxWidthClass}`}
       />
-      {caption && (
-        <figcaption className="font-mono text-xs text-ink-faint text-center">
-          {caption}
-        </figcaption>
-      )}
+      <MdxFigcaption caption={caption} sourceLabel={sourceLabel} sourceHref={sourceHref} />
     </figure>
   );
 }
