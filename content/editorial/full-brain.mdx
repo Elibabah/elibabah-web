@@ -1,0 +1,55 @@
+---
+title: "Full Brain"
+slug: full-brain
+section: software
+excerpt: "What building with AI at the bank actually taught me: not to type less, but to become the slowest and most necessary part of the loop, the one who understands."
+publishedAt: "2026-08-05"
+relatedProject: null
+heroBand: null
+---
+
+{/* Image suggestion — heroBand (wide): something quiet and human against the machine. Hands over a keyboard in low light, or an open road with a hard corner ahead, echoing the "knowing when to brake" metaphor. */}
+
+*At the start I needed my whole brain to write the code. I need it just as much now. Only later.*
+
+That is not a complaint. It is the truth of the work, and the truth is more interesting than the complaint.
+
+## The bottleneck is the point
+
+AI arrived with a speed I was not used to. I used to want to build faster; now something builds fast for me, and the two are not the same. There is a part of me I cannot hand over. I can delegate the typing, the boilerplate, the first draft of a test; I cannot delegate understanding. And understanding is slow. So I become the bottleneck in the loop, the human pause in a machine that would rather not pause. For a while that felt like failure. It is not. I cannot read every line, true; but because I know the system, I know which lines to read. Knowing what to review, what to trust, and what to refuse: that is the job now.
+
+## Context is everything
+
+The AI is good at building, at analysing, at drawing relations. It is not a fortune teller. When the result comes back wrong, it is rarely wrong the way a bug is wrong; it is built well, and it is still not what I needed. The distance between *correct* and *what I needed* is where I live. Close that distance and the tool is extraordinary; leave it open and you get clean code that solves the wrong problem.
+
+## Building blind
+
+Here is the harder thing. Much of what I work in is a private, proprietary framework, and I not only cannot hand it all to the AI, I must not. But the AI works with the known; it cannot see the unknown. So how does it build what it cannot see? It builds blind. It writes against a system it will never run, validated only by the logic of the code; it drafts unit, accessibility, and end-to-end tests it cannot execute. The answer is never to give it the private tools. The answer is to give it the right instructions. I hold the context it lacks. I have to be its sight without handing over my eyes.
+
+## The handmade part
+
+Nowhere is this truer than with UI. It is tempting to pass the model a screenshot and ask it to reproduce the screen; it will, by its own means, and it will miss the point. A visual match is not the contract. We build with the internal component library, not by styling divs until they impersonate a UX; that library has its own rules, its own methods and behaviours, invisible to the AI. So I become the bridge, and the bridge is handmade: I read the design, I find the real components, I make sure nothing is reinvented from zero and nothing is hardcoded, that every colour and size is drawn from decisions already made. If I ask for a visual, receive an identical visual, and stop there, that is a red flag. The screen will look right and the project will seize up later; and later is always worse.
+
+## Where the real weight sits
+
+If the UI is a challenge, translating business logic into software logic is the centre of everything. You cannot simply ask the AI to connect an API and refresh the data on screen. So much of what matters lives only in me: what I heard in the boardroom, in the meetings with business, with risk, with compliance, with legal. That human residue has to end up in the code, and only I can put it there; the exceptions, the small tricks I have learned, the weak point I already know will fail before it fails. Security is not something you delegate. Everyone uses AI now; the question was never whether, only how, and how far.
+
+## Green does not mean done
+
+Everything must build in the pipeline. If it breaks, that tells me something; if it passes, that tells me less than it seems. A green build means the static checks ran, nothing more. The dynamic tests remain, and QA, compliance, governance, and human reviewers who read line by line and either approve or send it back. Merged into the production branch is a milestone and still a long way from production; that is where code shows its true worth, its resistance to fatigue. If something breaks, better it not be the case I failed to validate because the business swore it would never happen; my job is to imagine the improbable, and to make sure that when it arrives the user has an exit, not a broken screen.
+
+{/* Image suggestion — inline (optional): a winding road or a hairpin bend, to sit beside the driving metaphor below. */}
+
+## The easy part is the code
+
+Spitting out code quickly is the easy part. The hard part is knowing where to brake. Like driving: the difficulty was never zero to a hundred, it is the corners, it is knowing when to slow. Speed matters, but it was never a race; what matters is being sustainable, scalable, and flexible over time. The AI can leave a bug hidden without meaning to, because its goal is to satisfy what I asked, and without enough context it will find its own way there; an undetected bug like that is a time bomb.
+
+And when the rollout is finally live and something breaks, the question is brutally simple: do you know how your own system works? If the AI wrote all of it, if it passed once and has now broken production and you cannot fix it because you did not build it and do not understand it, you are finished, and rightly so. Not because the AI failed; the AI is never to blame. The author of the commits is. That is the whole distinction. My work was never to direct a machine to build something. My work is to build, with the machine's help.
+
+## Millions at once
+
+Because the point is not to ship a product. I work in a bank, one where millions of people keep not only their money but their trust; failure is not an option. Badly written code, handed to the AI, is a failure that scales millions of times over, and the echo is instant. Reputation falls and the losses run into the millions in a matter of minutes; the hours a system stays down are measured in real people and real money. So no, the AI is not the easy path, not the fast lane, because shipping fast was never the reason. The client comes first; it always has. The code is in service of that, and of nothing else.
+
+## What it taught me
+
+It is nearly the opposite of what I expected. AI did not make me type less and think less. It made me the slowest, most necessary part of the loop: the one who understands. I still use my whole brain. I just use it later in the sentence.

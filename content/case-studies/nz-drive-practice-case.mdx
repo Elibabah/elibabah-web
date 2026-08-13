@@ -10,148 +10,101 @@ stack:
   - expo-speech-recognition + OpenAI TTS
   - Supabase (Postgres, RLS, OAuth)
   - Claude (Haiku + Sonnet) via Edge Function proxy
-outcome: work-in-progress # narrative reflects the state of the build as of July 2026
+outcome: work-in-progress # narrative reflects the state of the build as of August 2026
 ---
-
-{/*
-  GUIDE — This is a scaffold, not finished prose. Each section carries a note on
-  what to develop and which source material to draw on. Fill at your own pace.
-  Voice: first person, but keeping the dialectical build, triadic rhythm, British
-  spelling, no em dashes, no rhetorical questions. Switch to third person only if
-  you decide to align this with the MAM research register.
-*/}
 
 ## Context and problem
 
-{/*
-  DEVELOP: Why this app, and why you specifically.
-  - The concrete problem: rehearsing the NZ full-licence practical test, aimed at
-    drivers converting an overseas full licence, a path many new residents walk.
-  - The personal thread: your own migration, the licence-conversion journey. This
-    is where the project stops being a generic demo and becomes yours. Keep it
-    brief but let it carry weight; it connects to your wider narrative of the self
-    as becoming.
-  - The stakes: the real question a learner asks is not "what percentage did I
-    score" but "would I have passed". Name that early; it justifies ADR-0005 later.
-  Open with the core claim, not a preamble. One tight paragraph on the problem,
-  one on why it matters to you.
-*/}
+A learner preparing for the New Zealand full-licence practical test does not want a score out of a hundred. They want to know whether they would have passed. Those are different questions, and almost every practice tool answers the easier one, because a weighted percentage is trivial to invent and a verdict has to be earned. NZ Drive Practice is built around the harder question: an AI examiner directs a twenty-minute drive on real roads near you, quizzes you on hazards and road rules as you go, and finishes with a pass or fail modelled on the categories a real testing officer uses.
+
+The problem is not hypothetical to me. I moved to New Zealand holding an overseas full licence, and conversion means sitting the practical test on unfamiliar roads, under unfamiliar rules, in a car you may have owned for a week. It is a path a great many new residents walk, and the anxiety it produces is specific: not a fear of driving, but a fear of the assessment. You know how to drive. You do not know what they are watching for. That gap between competence and confidence is the thing the app is trying to close, and it is why the project stopped being a portfolio exercise for me somewhere in its second week.
 
 ## The approach: process over improvisation
 
-{/*
-  DEVELOP: This is the spine of the whole piece, your differentiator.
-  - State the thesis plainly: this is not vibecoding; it is AI-assisted
-    engineering with process.
-  - The three pillars (a natural triad): ADRs for every structural decision, an
-    MVP roadmap with explicit exit criteria, and deterministic replay tests.
-  - The tension worth naming: AI-assisted development is often caricatured as
-    improvisation without rigour. This project is a deliberate counter-example.
-    Note the link to your MAM research on AI's impact on professional practice and
-    identity; this app is, in a sense, an empirical artefact of that same question.
-  Do not enumerate the pillars as a list in the prose; develop them as an argument.
-*/}
+This project is not vibecoding. It is AI-assisted engineering with process, and the distinction is the entire point of writing it up.
+
+The caricature of AI-assisted development is a developer prompting their way to a working demo, accumulating code nobody can reason about, and discovering the architecture only when it fails. That caricature is not baseless. It describes a real failure mode, and it is the reason a lot of experienced engineers regard the whole approach with suspicion. I wanted to build the counter-example: a codebase where the speed is real and the reasoning is recoverable, where you can read why a structural choice was made without excavating it from a diff.
+
+Three commitments carry that weight. Every structural decision gets an architecture decision record, written at the point of choosing rather than reconstructed afterwards, so the reasoning survives the context that produced it. The roadmap is divided into MVPs with explicit exit criteria, phrased as falsifiable statements rather than aspirations, so "done" is a thing you can check instead of a thing you feel. And the exam logic is covered by deterministic replay tests, which means a synthetic drive produces byte-identical results on every run and a regression cannot hide behind timing.
+
+None of this slows the work down in the way the objection assumes. It changes where the effort lands. My master's research examines how AI is reshaping professional practice and identity, and this app is, in a modest way, an empirical artefact of that same question: what does craft look like when the typing is no longer the bottleneck. My provisional answer is that it moves upstream, into judgement, framing, and knowing which decisions deserve to be recorded.
 
 ## Decision one: a pure, deterministic session engine (ADR-0006)
 
-{/*
-  DEVELOP: Your flagship decision. Give it the most room.
-  - The before: exam logic lived in a ~350-line hook, leaning on useRef to dodge
-    stale closures and on module-level singletons. Slow to test (jest-expo renders
-    hooks; the suite took ~10 minutes) and fragile on state reset.
-  - The decision: extract the logic into a pure engine (src/engine/) with no React,
-    Expo, or globals. Plain data in (GPS fixes, clock ticks, voice exchanges),
-    plain data out (events, speech requests, state transitions). useDrivingSession.ts
-    becomes a thin adapter to device APIs.
-  - The payoff (the trade-off accepted): a large refactor cost, but it unlocks
-    deterministic replay, a real GPS track plus a transcript replayed in a unit
-    test in milliseconds, and it makes the later Android port (MVP-5) feasible by
-    reusing the engine intact. The suite now runs in ~4s, down from ~10min.
-  - Why this is the decision that best demonstrates judgement: it trades short-term
-    effort for testability, portability, and confidence. That is engineering, not
-    output.
-*/}
+The exam logic began where such logic usually begins, inside the React hook that owned the screen. By the time it worked it was 372 lines with eighteen separate `useRef` calls, most of them there to dodge stale closures, plus a handful of module-level singletons holding monitoring state. It functioned. It was also close to untestable: the suite rendered hooks through jest-expo and took around ten minutes, state reset between sessions was fragile, and every behavioural question required standing up a React tree to ask it.
+
+The decision was to extract the exam core into a pure module under `src/engine/`, with no React, no Expo, no globals, and no clocks. Timestamps are injected rather than read, which is the detail that makes determinism possible. Plain data goes in: GPS fixes, injected times, spoken exchanges. Commands come out. `useDrivingSession.ts` became a thin adapter that executes those commands, and it is now the only layer in the app that touches the outside world.
+
+An abstract claim about purity persuades nobody, so consider the shape of the commands. A `speak` command carries a priority. Safety and navigation interrupt whatever is currently being said, because a speed warning that waits its turn is useless. Coaching is dropped entirely if speech is already playing, because the examiner talking over himself is worse than the nudge is valuable. A `requestReroute` is not a network call; the engine emits it, the adapter fetches the route and hands the result back through `applyReroute`, and the engine never learns that a network exists. The engine decides. The adapter acts. Every hard question about exam behaviour can be asked without a device, a map, or a microphone.
+
+The cost was a large refactor in the middle of a working build, and I want to be precise about what it bought rather than overclaim. The adapter did not shrink dramatically, from 372 lines to 305, because owning GPS, speech, persistence and React state is genuinely a lot of work. The logic moved rather than evaporated: roughly 1,200 lines of pure, dependency-free TypeScript that a test can drive directly. The suite now runs in about four seconds rather than ten minutes, and it covers 254 tests across 16 suites. A full synthetic session, complete with a speeding burst and an off-route detour, replays in a unit test in milliseconds and produces an identical transcript every time.
+
+Two further payoffs arrived later, which is the usual pattern with structural decisions. The NZTA verdict and the deviation-classification flow were both built almost entirely inside the engine, with tests written before either had ever run on a phone. And the Android port scheduled for MVP-5 becomes tractable, because the engine ports intact and only the audio stack is platform-specific. This is the decision I would point to if asked to demonstrate judgement rather than output: it traded a fortnight of unglamorous refactoring for testability, portability, and the confidence to change things later.
 
 ## Decision two: real NZTA scoring, not an invented percentage (ADR-0005)
 
-{/*
-  DEVELOP: Your product-judgement decision, not just technical.
-  - The choice: align scoring to official NZTA categories (critical errors,
-    immediate-fail conditions) rather than a percentage score invented for effect.
-  - Why it matters: it answers the user's real question, "would I have passed",
-    instead of a number that looks precise but means nothing.
-  - The trade-off accepted: it requires maintaining an event-to-category mapping
-    table by hand, and the NZTA-aligned engine is still MVP-1 work, not yet
-    complete. Be honest about that here.
-  - CAVEAT to flag: alignment to NZTA categories is a design intent, not a claim of
-    official equivalence or endorsement. Keep the wording careful.
-*/}
+The first scoring implementation produced a weighted percentage: hazard awareness at thirty per cent, speed compliance at twenty, and so on, with the weights chosen because they looked reasonable. It was precise, legible, and meaningless. No testing officer computes anything of the kind, so a driver scoring 82 learned nothing about whether they were ready.
 
-## Decision three: the honest gap, hands-free audio (ADR-0003)
+The real test is assessed by counting errors in defined categories. Critical errors are serious mistakes; immediate-fail errors are dangerous ones. Aligning to that structure meant the verdict became a pass or fail with an error tally, which is the answer the learner actually came for. Fail is any immediate-fail error, or more than one critical error.
 
-{/*
-  DEVELOP: The decision that shows honesty and risk-thinking. Do not hide it.
-  - The core product constraint: a truly hands-free session, phone untouched for
-    the full twenty minutes. This is the vision.
-  - The reality: the original voice library crashed on an AVAudioPCMBuffer
-    exception and was replaced by expo-speech-recognition, but true always-listening
-    is unresolved. Today it is tap-to-speak, which contradicts the central
-    constraint. This is the largest gap between product vision and current code.
-  - The framing: name it as an open spike (full-duplex vs half-duplex), a known
-    unknown being worked deliberately, not a failure swept aside. MVP-2 is blocked
-    on this spike, and saying so is a strength, not an apology.
-*/}
+Shipping it forced a correction I had not anticipated, and it is the part of this decision I find most instructive. Aligning the categories meant aligning the thresholds, and the official ones are sharper than the ones I had invented. Exceeding the limit by ten km/h or more is an immediate fail at any duration. Exceeding it by five or more for five seconds or longer is equally an immediate fail. A brief excursion of five to ten km/h that ends inside five seconds is a critical error, not an immediate one. My original monitor had treated sustained five-to-ten as merely critical, which is materially more lenient than the real test. Worse, the brief case cannot be classified while it is happening, since its severity depends on when it ends, so the engine now reports it at incident close rather than on detection. Fidelity to the domain changed the control flow, not just a constant.
+
+The numeric score survives, demoted to a secondary trend metric. It is genuinely useful for watching improvement across sessions, and genuinely useless as a verdict, so it now occupies the role it deserves.
+
+Two costs come with this. The first is maintenance: the mapping from recorded events to official categories lives in a sourced table that has to be kept current against the assessment guide by hand. That is ongoing work, not a one-off, and pretending otherwise would be dishonest. The second is more interesting. A phone with GPS and a microphone cannot observe mirror checks, head checks, signalling, lane position, or vehicle control, and those are real categories in the real assessment. So the verdict declares what it did not assess, in the interface and in the debrief. A partial assessment that states its own limits is more useful than a complete-looking one that quietly guesses, and it is the only version I would be willing to put in front of a nervous learner.
+
+One caveat belongs in the product as much as in this write-up: alignment to NZTA categories is a design intent, not a claim of official equivalence or endorsement. The app models the published criteria as faithfully as its sensors allow. It is not the test.
+
+## Decision three: getting lost is not a fail (deviation evaluation)
+
+On the real test, getting lost is not an error. Disobeying signs and markings is. A driver who misses a turn is told the new route and assessed on how they drive it; a driver who rolls through a stop sign has failed regardless of how well they navigate. The naive implementation gets this exactly backwards, because a wrong turn is trivial to detect and a rulebook is tedious to read.
+
+My first version was the naive one. Straying more than 300 metres from the route triggered an immediate spoken reprimand naming the missed instruction, then a reroute. That is wrong against the rubric, and it is hostile at precisely the moment a driver is most cognitively loaded: lost, off-plan, and now being told off by a machine.
+
+The replacement runs in three beats. The deviation triggers a silent reroute, recorded in the event log with no reprimand at all. Once the new route is applied, the engine emits an `askDeviation` command. Only then does the examiner ask what happened, and the driver's spoken answer is classified as either justified, meaning a closure, an obstruction or a safety decision, which carries no penalty and adds a positive note about judgement, or as a manoeuvring error, which keeps the mild navigation penalty it always had.
+
+The trade-off is a model round trip inside a live drive, and a classification that can be wrong. The mitigation is the fallback: if the AI is unreachable or the response cannot be parsed, the result is `manoeuvring_error`, which is exactly the behaviour that existed before the feature was built. An offline session is never worse off than it was, and that is the principle I would generalise from this. A new dependency should degrade to the old behaviour rather than to a broken one. Features that fail closed are features you can ship.
+
+The wider point is where the work actually was. The engineering here is unremarkable: a state flag, a command, a classification prompt, a fallback. The difficulty was reading the assessment criteria closely enough to know that the obvious penalty was the wrong penalty. Domain research does not usually look like research. It looks like a small function that behaves unexpectedly well.
+
+## Decision four: the honest gap, hands-free audio (ADR-0003)
+
+The central product constraint is that the phone is never touched during a session. Twenty minutes, mounted, hands on the wheel, everything by voice. It is the constraint that makes the app a simulation of a test rather than an app you consult while driving, and it is also a road-safety position: any feature requiring a glance at the screen is a design failure.
+
+The app does not currently meet it. The original voice library crashed with an AVAudioPCMBuffer exception whenever the microphone opened after speech playback, and replacing it with `expo-speech-recognition` fixed the crash without solving the harder problem. Today the microphone opens for eight seconds after an examiner question, or on a tap. A continuous-listening path exists in the code and is deliberately not wired up. Tap-to-speak contradicts the central constraint, and it is the largest gap between the product vision and the shipped code.
+
+I have framed it as an open spike rather than a defect, because that is what it is. Continuous speech recognition interleaved with text-to-speech on iOS raises real unknowns: echo handling when the examiner's own voice reaches the microphone, Apple's recogniser session limits over a twenty-minute drive, and audio-session interruptions from calls and notifications. The spike is timeboxed, the fallback position is already chosen, strict half-duplex with the microphone open except while the examiner speaks, and MVP-2 is explicitly blocked until it resolves. Naming a known unknown and refusing to build on top of it is not an apology. It is the reason the rest of the roadmap can be trusted.
 
 ## Other decisions worth noting
 
-{/*
-  DEVELOP (briefly, one short paragraph each or a tight prose cluster):
-  - ADR-0001: all AI calls go through a Supabase Edge Function proxy. One extra
-    network hop (tens of ms) in exchange for never shipping API keys in the client
-    bundle, a blocker for TestFlight distribution.
-  - ADR-0002: guest tier fully ephemeral, nothing persisted. Loses local-to-account
-    progress migration, but avoids orphaned data and gives the simplest privacy
-    story.
-  - ADR-0004: OSM/Overpass as the source of speed limits and checkpoints, replacing
-    a hardcoded 50 km/h limit and a sign-detection path that never fired. Costs an
-    extra network call and imperfect NZ data coverage.
-  - Positioning: MapView.onUserLocationChange as the authoritative source (not
-    followsUserLocation, unreliable with PROVIDER_GOOGLE); watchPositionAsync as
-    fallback.
-  - Dynamic rerouteing: no fixed route; recalculated from current GPS whenever a
-    leg completes or the driver strays >300m, with a 20s debounce.
-*/}
+Several decisions were smaller in scope but load-bearing in effect.
+
+All AI and speech calls route through a Supabase Edge Function proxy rather than going direct (ADR-0001). The client authenticates with the user's own JWT, the server holds the provider keys and enforces a model allowlist, and the cost is one extra network hop measured in tens of milliseconds. Without it there are provider keys in the app bundle, which is a distribution blocker long before it is an ethical one.
+
+The guest tier is fully ephemeral, persisting nothing server-side (ADR-0002). That forfeits the ability to migrate local progress into an account later, which is a genuine loss. It buys the simplest possible privacy story and no orphaned rows belonging to users who never existed.
+
+Road data comes from OpenStreetMap via the Overpass API (ADR-0004), replacing a hardcoded 50 km/h limit and a sign-detection path that never once fired in the field. A corridor is prefetched per route carrying speed-limit zones, stop signs, traffic signals, give-way signs, and level and pedestrian crossings, all evaluated by GPS proximity. It costs an additional network call and depends on data coverage that is uneven across New Zealand, with a fallback to the old heuristics when Overpass is unreachable. It also fixed a field bug that no amount of unit testing would have surfaced: queueing at a red light was being recorded as an unexpected stop and harsh braking, so the app scolded the driver for obeying a signal. Known signals now suppress both nudges.
+
+Destination selection validates against the road network (2026-08-04). A single Overpass query checks all eight candidate compass bearings for drivable urban streets and snaps the destination onto the nearest one. The part I like is what the design does not contain: there is no special case for the sea, for motorways, or for unformed paper roads. Those bearings simply return no qualifying streets, so they are never chosen. A constraint expressed as data rather than as a rule is a constraint that cannot drift out of date.
+
+Two smaller notes. Position during a session comes from the map's `onUserLocationChange` callback rather than `followsUserLocation`, which proved unreliable with the Google provider, with `watchPositionAsync` retained as a fallback. And there is no fixed route: the app recalculates from the current position whenever a leg completes or the driver strays past 300 metres, debounced at twenty seconds so a noisy fix cannot trigger a cascade.
 
 ## The honest state of the work
 
-{/*
-  DEVELOP: This section is a strength; frame it as method, not confession.
-  - Active technical debt: true hands-free not yet implemented (the biggest gap);
-    stop/intersection detection mid-migration from Google-text parsing to OSM; the
-    NZTA-aligned scoring engine still MVP-1; simulate_drive.sh referenced in
-    CLAUDE.md but absent from the repo, its Maestro-based replacement scheduled for
-    MVP-4.
-  - Roadmap status (per docs/ROADMAP.md, updated 2026-07-18, progress through 21
-    July): MVP-0 complete (AI proxy in production, schema v2 with 60s checkpointing,
-    false reroutes fixed, CI green with the suite at ~4s). MVP-1 in progress (pure
-    engine extracted; real OSM data, justified-detour classification, and NZTA
-    scoring outstanding). MVP-2 blocked on the ADR-0003 spike. MVP-3, 4, 5 not
-    started.
-  - The argument to make: documenting debt precisely is itself an engineering
-    practice. Knowing exactly what is not done, and why, is a form of control.
-*/}
+Documenting what is not finished is not a confession. It is a working method, and it is the section of this case study I would read first if someone else had written it.
+
+The active debt is short and specific. True hands-free is not implemented, as described above, and remains the largest gap. OSM coverage in New Zealand is uneven, so the engine falls back to instruction-text heuristics and a 50 km/h default wherever the data is thin. And `simulate_drive.sh`, a GPS simulation script referenced in the project documentation, no longer exists in the repository; its replacement, a proper route replayer, is scheduled for MVP-4 and the documentation now says so.
+
+The distinction that matters most is between code complete and field complete. MVP-1 is code complete. Two of its exit criteria remain open, and both need a car rather than a simulator: that a replayed real-drive GPS track produces identical event streams across runs, and that a mapped stop sign taken at 15 km/h is recorded as a violation while a genuine full stop is recorded as compliant. Everything provable in a unit test has been proven, 254 of them. Nothing has been marked done on the strength of a passing test alone. Drawing that line explicitly, between tested and validated, is the point, and a great deal of software ships without anyone drawing it at all.
+
+The roadmap position as of August 2026 is straightforward. MVP-0 is complete: the AI proxy is in production with no extractable key, schema v2 with sixty-second checkpointing was verified on a device by killing the app mid-session, false reroutes on long straight legs are fixed, and CI runs typecheck plus the full suite in about four seconds. MVP-1 is code complete, covering the pure engine, real road data, deviation classification, the NZTA verdict and destination validation, with the two field criteria outstanding. MVP-2, the hands-free work, is next and blocked on the ADR-0003 spike. MVP-3 covers user tiers, MVP-4 product quality and TestFlight, and MVP-5 the Android port and research features.
+
+Knowing precisely what is not done, and why, is a form of control. Vagueness about the remaining work is how projects quietly stop being finishable.
 
 ## Reflection: what this says about how I work
 
-{/*
-  DEVELOP: The synthesis. Earn it; do not merely summarise.
-  - Tie the three threads together: a real problem from lived experience, an
-    AI-augmented build, and an interface that must stay calm while someone does
-    something demanding.
-  - Return to the opening claim with new weight: process is not the enemy of speed
-    in AI-assisted work; it is what makes the speed trustworthy.
-  - Connect to the larger arc: your MAM research on AI and professional identity,
-    and your sense of the developer's craft as something that deepens rather than
-    dissolves under AI. This is where the case study stops being about an app and
-    becomes about a way of working.
-*/}
+Three threads run through this build, and they only make sense together. A real problem taken from my own migration, which is what kept the domain research honest when it would have been easier to guess at the rules. An AI-augmented process, which is what made a solo build of this scope possible in the time available. And an interface that has to stay calm while somebody does something genuinely demanding, which is what disciplined every decision about when the examiner speaks and when it stays quiet.
+
+The claim I opened with has more weight now than it could have had at the start. Process is not the enemy of speed in AI-assisted work; it is the thing that makes the speed trustworthy. I can move quickly through this codebase precisely because the exam logic is pure and replayable, because a decision I made three weeks ago is written down with its alternatives, and because "done" is defined before the work begins rather than negotiated after it. Remove any one of those and the velocity turns into a liability within a fortnight. The ADRs are not ceremony. They are what lets me change my mind about scoring thresholds without re-deriving why the old ones existed.
+
+That is also the answer forming in my research. The developer's craft under AI does not dissolve into prompting; it deepens, and it relocates. The scarce skill is no longer producing the code. It is deciding what should exist, recognising which choices are structural and which are reversible, reading a rulebook closely enough to know that punishing a wrong turn is the wrong instinct, and being willing to state in the product itself what the product cannot see. Those are judgements, and they remain stubbornly, usefully human.

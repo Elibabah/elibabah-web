@@ -2,7 +2,7 @@
 title: "Five Modules, One Compliance Upgrade: BBVA's N2→N4 Flow"
 slug: nomina-upgrade-case
 project: nomina-upgrade
-problem: "Payroll customers inherited N2 accounts capped at 3,000 UDIs of deposits a month — around MXN $24,000 — and the only way to lift that cap was a morning in a branch. The identity file the regulator demands had to be assembled remotely, on a phone, to the same evidentiary standard."
+problem: "Payroll customers inherited N2 accounts capped at 3,000 UDIs of deposits a month, around MXN $24,000, and the only way to lift that cap was a morning in a branch. The identity file the regulator demands had to be assembled remotely, on a phone, to the same evidentiary standard."
 role: Frontend Developer @ BBVA
 stack:
   - Lit
@@ -16,20 +16,20 @@ outcome: "Five independently shippable modules behind one resumable journey, del
 
 > The [project page](/portfolio/nomina-upgrade) describes what the flow is and what it asks
 > of a customer, with the public regulatory sources cited. This case study is about the
-> decisions — what we chose, what we rejected, and what each choice cost. No source code,
+> decisions: what we chose, what we rejected, and what each choice cost. No source code,
 > internal documentation, or customer data appears in either.
 
 ## The problem, stated precisely
 
 A Mexican bank account is not a single product. It sits at one of four levels, and the level
-is a function of how complete the bank's identity file on you is. At **N2** — name, date of
-birth, official ID, address details — the account may receive **3,000 UDIs a month, around
+is a function of how complete the bank's identity file on you is. At **N2**, with name, date
+of birth, official ID and address details, the account may receive **3,000 UDIs a month, around
 MXN $24,000**. At **N4**, with a fully verified file, there is no ceiling at all.
 
 Payroll customers are concentrated at the bottom of that ladder for a structural reason: the
 account was opened *for* them, by an employer, with the minimum file that would satisfy the
 regulator. Nobody chose N2. They inherited it. And they discover the ceiling the way you
-discover any invisible constraint — when a deposit bounces.
+discover any invisible constraint: when a deposit bounces.
 
 The bank's answer, before this project, was a branch: bring a physical ID, a utility bill no
 older than three months, your CURP and your RFC, and a morning of your time. For a customer
@@ -48,7 +48,7 @@ Four of them, and they shaped everything downstream:
    build with the catalogue the bank maintains or you do not build.
 2. **The APIs predated us.** We were consumers, not designers. Data shapes, validation
    semantics and error codes arrived fixed.
-3. **The team was two people.** There was no larger frontend group to absorb complexity —
+3. **The team was two people.** There was no larger frontend group to absorb complexity:
    my colleague and me, working directly with design, business analysts, compliance and the
    API owners.
 4. **Every change carries a review chain.** In a bank, shipping is not the bottleneck;
@@ -60,13 +60,13 @@ explicit about, because it is the piece that does not transfer from consumer sof
 startup, coupling costs you a bug. Here, coupling costs you a review cycle across four
 modules to change one.
 
-## Decision 1 — Five modules, not one wizard
+## Decision 1: Five modules, not one wizard
 
 The obvious shape for "collect five documents" is a linear wizard: step 1 of 5, next, next,
 done. It is simpler to build, simpler to reason about, and simpler to instrument.
 
-We built five self-contained modules behind an orchestration layer instead — each with its
-own state, its own API contracts, its own error handling — and let the customer complete them
+We built five self-contained modules behind an orchestration layer instead, each with its
+own state, its own API contracts and its own error handling, and let the customer complete them
 in any order, across any number of sessions.
 
 **Why.** Three reasons, in ascending order of weight:
@@ -81,7 +81,7 @@ in any order, across any number of sessions.
   cannot possibly affect the ID module is a fix that gets reviewed as one module, not five.
 
 **What it cost.** A wizard has one state machine; five modules plus an orchestrator have six,
-and the orchestrator has the hardest job in the system — knowing what is done, what is
+and the orchestrator has the hardest job in the system: knowing what is done, what is
 pending, and what a partially complete file means. It also means five places to get analytics
 tagging right instead of one, and a test surface that grows with the number of entry points
 rather than the number of steps.
@@ -94,11 +94,11 @@ rather than the number of steps.
     Whatever is safe to say, say it — "resumable" is a claim until you name the mechanism,
     and the mechanism is what a reviewer in NZ will ask about. */}
 
-## Decision 2 — Failing on the device rather than at the API
+## Decision 2: Failing on the device rather than at the API
 
 The ID and proof-of-address modules are the only ones that leave the world of forms. They need
 the camera, and a photograph is the one input in the whole flow that can be *accepted by every
-validation layer and still be wrong* — out of focus, glare across the hologram, a corner
+validation layer and still be wrong*: out of focus, glare across the hologram, a corner
 cropped off.
 
 If that judgment is made server-side, or worse, downstream by whatever verifies the document,
@@ -108,14 +108,14 @@ explicit review step where the customer confirms the image is legible before it 
 
 This is more code, in the least well-supported part of the stack, to prevent a failure the
 system could technically survive. It was still the right trade, because the cost of a late
-rejection is not one retake — it is a customer who has already given up.
+rejection is not one retake; it is a customer who has already given up.
 
 {/* TODO — ELÍAS. Two specifics worth adding if you can:
     1. What quality checks were actually done on-device vs. what came back from the backend.
     2. One concrete error code you had to translate into a recoverable screen, and what made
        it hard. A single named example here is worth three paragraphs of principle. */}
 
-## Decision 3 — Treating analytics tagging as behaviour, not as a side effect
+## Decision 3: Treating analytics tagging as behaviour, not as a side effect
 
 Every module entry and exit, every user action, and every API outcome had to be instrumented
 against a tagging specification owned by a separate business team.
@@ -127,17 +127,17 @@ is the sole instrument that can tell anyone which of the five modules is losing 
 missing tag is not a missing analytics row. It is a blind spot in the one feedback loop the
 product has.
 
-The tagging spec also arrived from outside the team, which made it a genuine interface — the
+The tagging spec also arrived from outside the team, which made it a genuine interface, the
 same category of thing as the API contract, and deserving the same treatment.
 
 {/* TODO — ELÍAS. Did the E2E suite actually assert tags, or was that verified another way?
     Be accurate here; it is a checkable claim. Also worth saying who consumed the data and
     whether it ever changed a product decision. */}
 
-## Decision 4 — Rebuilding one module instead of restyling five
+## Decision 4: Rebuilding one module instead of restyling five
 
 In 2024, BBVA introduced a new UX design language and updated internal tooling. The proof of
-address module — shipped in 2023 on the older UI pattern — was the piece most visibly out of
+address module, shipped in 2023 on the older UI pattern, was the piece most visibly out of
 step.
 
 There were three options. **Leave it**, and accept a seam in the experience. **Restyle it in
@@ -146,7 +146,7 @@ inside one component. Or **rebuild it from scratch** in the new system, keeping 
 API contracts so nothing outside the module needed to know.
 
 We rebuilt. Scoping the second MVP to exactly one module out of five meant the regression
-surface was the module's own contract with the orchestrator, and nothing else — the other four
+surface was the module's own contract with the orchestrator, and nothing else; the other four
 were not touched, not rebuilt, and not re-reviewed.
 
 This is the payoff of Decision 1, and it is worth being honest about the direction of the
@@ -189,9 +189,11 @@ reasoning was any good.
     specialist team, manual screen-reader passes, a checklist from a central group — name it.
     Otherwise soften the claim; do not let the page imply more rigour than there was. */}
 
-## What I would do differently
+{/* TODO — ELÍAS. The "## What I would do differently" heading lived here and is commented
+    out, not deleted: an empty heading was rendering on the published page. Restore the
+    heading together with the content when you write it.
 
-{/* TODO — ELÍAS. Leave this section as real regrets or delete the heading entirely — a
+    Leave this section as real regrets or delete the heading entirely; a
     hedged version is worse than none. The project page has the same section; make them
     different: there, the regret should be about the code; here, about the decisions.
     Prompts, if useful:
@@ -204,14 +206,14 @@ reasoning was any good.
 
 ## Outcome
 
-The flow shipped to production and serves BBVA México's payroll base — a base the bank
+The flow shipped to production and serves BBVA México's payroll base, a base the bank
 publicly reports in the tens of millions, three quarters of it operating through mobile. Its
 value is structural rather than impressive: it converts a morning in a branch into a task you
 can finish on the bus, for the specific population least likely to be able to spare the
 morning.
 
 The architecture held. That is the claim I am most willing to defend, because it was tested
-rather than asserted — the 2024 rebuild is the experiment, and it came back clean.
+rather than asserted; the 2024 rebuild is the experiment, and it came back clean.
 
 Personally, this was the project where I stopped executing tickets and started owning a
 surface: in the room for the design and business sessions, arguing tradeoffs against
@@ -230,7 +232,7 @@ rather than a slice of it.
 ## Sources
 
 Regulatory and market figures on this page are public. See the
-[project page](/portfolio/nomina-upgrade) for the full source list — Banco de México's
+[project page](/portfolio/nomina-upgrade) for the full source list: Banco de México's
 Circular 14/2011 and the CNBV provisions under article 115 of the LIC for the account-level
 scheme, BBVA México's own financial-education site for the N1–N4 ceilings, BBVA's 2024
 results for the customer and mobile figures, INEGI and CNBV's ENIF 2024 for payroll account

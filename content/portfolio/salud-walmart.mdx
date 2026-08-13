@@ -1,7 +1,7 @@
 ---
 title: "Salud Walmart — Digital Membership Platform"
 slug: salud-walmart
-summary: "A responsive healthcare membership platform for discovering benefits, locating clinics, managing accounts, and validating coverage across Walmart and Bodega Aurrera."
+summary: "Healthcare memberships sold over the counter at Walmart and Bodega Aurrera, brought online: folio validation for memberships bought in store, clinic search over Google Places and our own directory, and a member account where beneficiaries, appointments and privacy settings live in one place."
 stack:
   - Angular
   - TypeScript
@@ -23,11 +23,10 @@ heroBand: /images/portfolio/salud-walmart/heroBand.jpg
 relatedThumb: /images/portfolio/salud-walmart/relatedThumb.jpg
 ---
 
-## Healthcare memberships, made easier to understand and use
-
-Salud Walmart was a digital platform for presenting and managing healthcare memberships available through Walmart and Bodega Aurrera in Mexico.
-
-The experience brought together membership discovery, benefit information, clinic search, coverage validation, account creation, login, and member self-service in one responsive product.
+Walmart de México and Bodega Aurrera sell healthcare memberships over the counter: a low
+monthly fee that buys consultations, dental work, laboratory tests, nutrition and
+psychological support. At Innovattia I built the frontend of the platform where those
+memberships are discovered, activated, validated and managed.
 
 {/* IMAGE — desktop homepage: price anchor above the renewal ladder */}
 <Image
@@ -37,37 +36,30 @@ The experience brought together membership discovery, benefit information, clini
   caption="The homepage: one price up front, and the renewal ladder that rewards staying subscribed."
 />
 
-## My role
+## The problem
 
-I worked as a Frontend Developer, building the Angular application and translating the product flows into responsive, reusable interfaces.
+A membership bought at a checkout is not yet a membership anyone can use. It arrives as a
+folio printed on a receipt, or attached to a BAIT recharge, and from there the holder has
+three questions, all of them practical: is this still active, where is the nearest clinic
+that will honour it, and how do I manage my data and the people I have added to it.
 
-My work included:
+Each question has a different source of truth, which is what made this more than a
+brochure with a login. Activity lives in the membership backend, keyed on a folio the
+customer often cannot find. Clinics are a directory we own, but people search for them
+with whatever they happen to remember: a colonia, a postal code, half an address. And
+beneficiaries are a complete identity record per person, collected from someone sitting
+alone with a phone rather than across a desk from an agent who can prompt them.
 
-- Developing responsive screens for membership discovery and benefits.
-- Building authentication, registration, password recovery, and account-management flows.
-- Integrating REST APIs for memberships, user data, appointments, and coverage.
-- Implementing reactive forms and validation states.
-- Creating flows for validating and registering memberships purchased in-store or through BAIT recharge.
-- Integrating Google Maps and Google Places to help users locate nearby Walmart and Bodega Aurrera clinics.
-- Supporting payment-related flows through a shared local Angular module.
-
-## A clear path from discovery to care
-
-The platform needed to explain healthcare plans in a way that felt approachable while helping members access practical services: medical consultations, dental care, laboratory services, nutrition, psychological support, and more.
-
-The information architecture organized the experience around three questions a member or prospective member would arrive with:
-
-1. Is the membership I already hold still active?
-2. Where is the nearest clinic I can actually use?
-3. How do I manage my membership, my data and my beneficiaries?
-
-Each one became its own surface, and the sections that follow take them in that order.
+So the information architecture follows the questions rather than the org chart. Three
+surfaces, in the order a member actually arrives at them.
 
 ## Validating a membership
 
-Memberships were not only bought online: many were acquired in-store or through a BAIT recharge, which meant the platform had to answer a simple question for anyone holding a folio — is this membership still active?
-
-The validation flow reduced that to a single field, with a supporting hint for members who did not know where to find their folio number, and a direct path to purchase for anyone arriving without a membership at all.
+The first surface answers the folio question and nothing else. One field, a hint for
+members who do not know where to look for their number, and a direct path into purchase
+for anyone who arrives without a membership at all. Someone standing in a queue with a
+receipt in their hand should not have to create an account to find out whether the thing
+they already paid for works.
 
 {/* IMAGE — membership validation: folio lookup */}
 <Image
@@ -79,15 +71,27 @@ The validation flow reduced that to a single field, with a supporting hint for m
 
 ## Clinic discovery
 
-A clinic-search flow allowed users to look up nearby locations using address, neighborhood, postal code, or city. Google Places handled the ambiguity of how people actually type a location — partial addresses, a colonia name, just a postal code — resolving free text into coordinates through its autocomplete predictions. Those coordinates went to our own backend, which owned the clinic directory and returned the locations in range, and the results were rendered onto a Google Map alongside the list.
+Search accepts an address, a neighbourhood, a postal code or a city. Google Places
+absorbs the ambiguity of how people actually type a location, resolving free text into
+coordinates through its autocomplete predictions; those coordinates go to our own backend,
+which owns the clinic directory and returns what is in range; the results land on a Google
+Map beside the list.
 
-The interesting part was not the map itself but the seam between the two providers of truth: Places knows about places in general, and the backend knows which of them are Walmart or Bodega Aurrera clinics with actual coverage. Keeping the search forgiving while the answer stayed authoritative was the work.
+The interesting part was never the map. It was the seam between two providers of truth:
+Places knows about places in general, and only our backend knows which of them are Walmart
+or Bodega Aurrera clinics with real coverage. Keeping the search forgiving while the answer
+stayed authoritative was the work.
 
 ## Member account and self-service
 
-For existing members, the account area gathered self-service into one place behind a persistent sidebar: beneficiaries, appointments, and privacy and password settings, alongside the member's own personal and membership data.
+For existing members the account area gathers self-service behind a persistent sidebar:
+beneficiaries, appointments, privacy and password settings, alongside the member's own
+personal and membership data.
 
-The registration journey was designed as a guided, validated flow: a four-step wizard — create an account, verify it, complete additional data, finish — anchored on the membership folio, with dedicated screens for login, account recovery, password reset, and membership activation.
+Getting in is a four-step wizard, anchored on the folio throughout: create the account,
+verify it, complete the additional data, finish. Around it sit the screens that carry the
+rest of the lifecycle, login, account recovery, password reset and membership activation,
+each of which has to work for someone who may only visit once a year.
 
 {/* IMAGE — registration: step 1 of the four-step account wizard */}
 <Image
@@ -97,7 +101,12 @@ The registration journey was designed as a guided, validated flow: a four-step w
   caption="Step one of four: the wizard keeps the membership folio in view while collecting holder details and credentials."
 />
 
-Inside the account, beneficiary management was the most form-heavy surface: a full identity record per beneficiary — personal data, CURP, relationship to the holder, address resolved from postal code, and an emergency contact that could either inherit the holder's or be registered separately. It was the clearest case for Reactive Forms, with conditional sections appearing and validating based on earlier answers.
+Beneficiary management is the most form-heavy surface in the product, and the clearest
+case for Reactive Forms in the whole build. Each beneficiary is a full record: personal
+data, CURP, relationship to the holder, an address resolved from the postal code, and an
+emergency contact that either inherits the holder's or is registered separately. That last
+choice branches the form underneath it, so sections appear and begin validating on the
+strength of an answer given three fields earlier.
 
 {/* IMAGE — account area: beneficiary registration form */}
 <Image
@@ -107,15 +116,18 @@ Inside the account, beneficiary management was the most form-heavy surface: a fu
   caption="The account area: adding a beneficiary, with the emergency contact section branching on the member's choice."
 />
 
-## Technical approach
+## Technical notes
 
-The application was built with Angular and TypeScript, using Angular Material for interface primitives, Reactive Forms for structured user input, and RxJS for API-driven UI states.
+**Reactive Forms carry the domain.** Angular Material supplies the primitives and RxJS
+drives the API-backed UI states, but the structure that mattered is the form model:
+conditional sections, cross-field validation, and a shape that mirrors what the backend
+expects rather than what the layout happens to look like. Where a form branches, it
+branches in the model first and in the template second.
 
-A local Angular payment library was integrated as a reusable module for purchase-related functionality. Environment-specific Angular configuration separated development and production API endpoints.
-
-## Outcome
-
-Salud Walmart unified multiple membership touchpoints into a single digital experience: discovering plans, activating a membership, finding care, validating coverage, and managing account details over time.
+**Payments came in as a module, not as code.** Purchase-related functionality was
+integrated through a local Angular payment library, kept as a reusable module rather than
+absorbed into the app. Environment-specific configuration separated development and
+production endpoints, so the same build behaved correctly on either side.
 
 {/* IMAGE — mobile: the same renewal ladder, stacked at a phone viewport */}
 <Image
@@ -124,3 +136,22 @@ Salud Walmart unified multiple membership touchpoints into a single digital expe
   alt="The Salud Walmart site at an iPhone viewport, with the navigation collapsed into a menu and the renewal benefits stacked into a single column: a dental cleaning at the third month, a full check-up at the sixth, a free membership at the twelfth"
   caption="The same renewal ladder at a phone viewport: what reads as three columns on desktop collapses into one legible stack."
 />
+
+{/* TODO — ELÍAS. This page is missing the section that every other project page has, and
+    it is the one a New Zealand hiring manager reads most closely: "What I would do
+    differently". I have deliberately not invented it, because a fabricated regret is
+    worse than an absent one. Look at how bait-distribuidores.mdx does it: three specific,
+    named, slightly uncomfortable things. Candidates worth thinking about here:
+      - The beneficiary form: did the conditional branching stay legible, or did the
+        form model end up carrying logic that belonged elsewhere?
+      - The Places / backend seam: what broke when the two disagreed?
+      - The four-step wizard: was step state recoverable if someone dropped out at step 3?
+      - Anything about the payment module boundary that you would draw differently now.
+    Two or three paragraphs, each with a concrete detail. */}
+
+## Outcome
+
+The platform pulled scattered touchpoints into one place: discovering a plan, activating
+a membership bought at a till, finding care nearby, checking that coverage is still live,
+and keeping a household's records current over time. Unglamorous work, and the kind that
+decides whether somebody uses the healthcare they have already paid for.

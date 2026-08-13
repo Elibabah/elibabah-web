@@ -25,28 +25,35 @@ export default function CareerPage() {
         </p>
       </header>
 
-      <ul>
-        {articles.map((article) => (
-          <li key={article.slug}>
-            <Link
-              href={`/editorial/${article.slug}`}
-              className="group flex items-center justify-between gap-6 py-4.5 border-t border-line"
-            >
-              <div className="flex flex-col gap-2 min-w-0">
-                <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">
-                  {article.title}
+      {articles.length === 0 ? (
+        <p className="font-body text-base text-ink-faint border-t border-line pt-6">
+          Nothing published here yet. I am writing the first pieces.
+        </p>
+      ) : (
+        <ul>
+
+          {articles.map((article) => (
+            <li key={article.slug}>
+              <Link
+                href={`/editorial/${article.slug}`}
+                className="group flex items-center justify-between gap-6 py-4.5 border-t border-line"
+              >
+                <div className="flex flex-col gap-2 min-w-0">
+                  <span className="font-heading text-lg leading-[1.32] text-foreground group-hover:text-accent transition-colors duration-200">
+                    {article.title}
+                  </span>
+                  <span className="font-body text-sm text-ink-soft line-clamp-2">
+                    {article.excerpt}
+                  </span>
+                </div>
+                <span className="font-mono text-xs text-ink-faint whitespace-nowrap shrink-0 text-right">
+                  {article.readingTime} min<br />{article.publishedAt}
                 </span>
-                <span className="font-body text-sm text-ink-soft line-clamp-2">
-                  {article.excerpt}
-                </span>
-              </div>
-              <span className="font-mono text-xs text-ink-faint whitespace-nowrap shrink-0 text-right">
-                {article.readingTime} min<br />{article.publishedAt}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
 
     </main>
   );
