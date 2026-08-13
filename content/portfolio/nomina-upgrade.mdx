@@ -1,7 +1,7 @@
 ---
 title: "Nómina Account Upgrade — BBVA México"
 slug: nomina-upgrade
-summary: "Modular in-app flow that takes a payroll customer from an N2 account — capped at 3,000 UDIs of deposits a month — to a fully documented N4, collecting ID, proof of address, KYC, tax residency and beneficiary as five independent, resumable modules inside BBVA's Cells/Lit stack."
+summary: "Modular in-app flow that takes a payroll customer from an N2 account (capped at 3,000 UDIs of deposits a month) to a fully documented N4, collecting ID, proof of address, KYC, tax residency and beneficiary as five independent, resumable modules inside BBVA's Cells/Lit stack."
 stack:
   - Lit
   - TypeScript
@@ -30,7 +30,7 @@ relatedThumb: /images/portfolio/nomina-upgrade/relatedThumb.jpg
 
 ## What this is
 
-BBVA México's payroll customers — people whose salary lands in a `nómina` account — mostly
+BBVA México's payroll customers, people whose salary lands in a `nómina` account, mostly
 hold a **level 2 (N2)** account. It was opened years ago, often by their employer's HR
 department, on the minimum identity file the regulator allows. That file caps what the
 account can receive.
@@ -39,7 +39,7 @@ This project is the flow that lets those customers lift the cap themselves, from
 in one sitting or across several: a modular document-collection journey that takes an account
 from **N2 to N4**, the fully documented level with no deposit ceiling.
 
-Two of us owned the frontend end to end — UX/UI sessions with design and business,
+Two of us owned the frontend end to end: UX/UI sessions with design and business,
 implementation, API integration, unit and E2E tests, analytics tagging against the business
 tagging spec, and accessibility review.
 
@@ -52,12 +52,12 @@ which trade identity requirements against transactional risk. The less the bank 
 you, the less money your account is allowed to receive. BBVA publishes the resulting ladder
 on its own financial-education site:
 
-- **N1** — name and date of birth. Ceiling: 750 UDIs a month, about **MXN $6,083**.
-- **N2** — name, date of birth, official ID, address details. Ceiling: 3,000 UDIs,
+- **N1**: name and date of birth. Ceiling: 750 UDIs a month, about **MXN $6,083**.
+- **N2**: name, date of birth, official ID, address details. Ceiling: 3,000 UDIs,
   about **MXN $24,333**.
-- **N3** — the above plus proof of address, tax record, phone and email. Ceiling:
+- **N3**: the above plus proof of address, tax record, phone and email. Ceiling:
   10,000 UDIs, about **MXN $81,112**.
-- **N4** — the same file as N3, fully verified. **No deposit ceiling.**
+- **N4**: the same file as N3, fully verified. **No deposit ceiling.**
 
 Limits are denominated in UDIs, an inflation-indexed unit, so the peso equivalences drift
 daily; the figures above are BBVA's own published ones, from
@@ -79,11 +79,11 @@ daily; the figures above are BBVA's own published ones, from
 />
 
 The consequence for a payroll customer is concrete. An N2 ceiling of roughly MXN $24,000 a
-month is fine until it isn't — a bonus, an *aguinaldo*, a settlement, a second job, a
+month is fine until it isn't: a bonus, an *aguinaldo*, a settlement, a second job, a
 transfer from a relative abroad. When the deposit exceeds the ceiling it does not silently
 succeed; it is rejected. BBVA's own guidance is explicit that an N2 customer will
 **receive a notification prompting them to move up to N4** and unlimited monthly deposits,
-triggered by their transaction volume — *"si tienes una cuenta N2 básica podrás recibir una
+triggered by their transaction volume: *"si tienes una cuenta N2 básica podrás recibir una
 notificación para ascender a una cuenta N4 y poder disfrutar de depósitos mensuales
 ilimitados"*.
 
@@ -98,12 +98,12 @@ evidentiary standard, by someone standing in their kitchen with a phone.
 
 ## The scale that shapes the constraints
 
-None of the public numbers below are mine to claim as project outcomes — they are the
+None of the public numbers below are mine to claim as project outcomes; they are the
 environment the flow shipped into, and they explain why the engineering decisions look the
 way they do:
 
 - BBVA México closed 2024 with **32.4 million customers**, of whom **24.7 million operate
-  through mobile** — 76.2% of the base, growing 11.2% year over year. **70%** of the bank's
+  through mobile**, 76.2% of the base, growing 11.2% year over year. **70%** of the bank's
   4,192 million financial transactions that year happened in digital channels
   ([BBVA México, 2024 results](https://www.bbva.com/es/mx/bbva-mexico-crecio-su-cartera-de-credito-en-262-mil-millones-de-pesos-y-practicamente-ya-alcanzo-un-saldo-total-de-2-billones-de-pesos-en-2024/)).
 - BBVA disperses payroll for **more than 100,000 client companies**, reaching **over 10
@@ -112,14 +112,14 @@ way they do:
 - Nationally, INEGI and the CNBV's
   [ENIF 2024](https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2025/enif/ENIF2024_CP.pdf)
   found **63.0%** of adults aged 18–70 hold a formal savings account, and among those, a
-  **payroll or pension account is the most common one — 36.2%**. Financial inclusion among
+  **payroll or pension account is the most common one, at 36.2%**. Financial inclusion among
   the economically active population is 80.9% against 62.7% for the non-active: for a very
   large number of Mexicans, the payroll account *is* the relationship with the financial
   system.
 
 Two things follow. First, the addressable population is enormous and overwhelmingly mobile,
 so a flow with a 5% drop-off at any step is losing people by the hundred thousand. Second,
-this is not an audience self-selected for digital fluency — the account arrived with the job.
+this is not an audience self-selected for digital fluency; the account arrived with the job.
 The flow has to work for someone who has never intentionally used a banking app before.
 
 {/* PLACEHOLDER — desktop. BBVA's public app page or payroll-for-companies page, as evidence
@@ -138,16 +138,16 @@ The flow has to work for someone who has never intentionally used a banking app 
 The regulator does not ask for "documents". It asks for five distinct things, each with its
 own legal basis, its own failure modes, and its own definition of done. That is why the flow
 is five modules and not one wizard: a user can finish identity on the bus and address at
-home, and each module is independently shippable, testable and fixable — which matters in a
+home, and each module is independently shippable, testable and fixable, which matters in a
 bank, where every change carries its own review chain.
 
 The steps below are the ones BBVA documents publicly for an N2→N4 upgrade in the app.
 
-### 1 — Official ID (INE)
+### 1. Official ID (INE)
 
 Front, back, and a selfie. The INE credential is the identity anchor of the Mexican
 financial system; the capture has to be good enough for downstream verification, which means
-the UI is doing real work before anything is uploaded — framing guidance, glare and blur
+the UI is doing real work before anything is uploaded: framing guidance, glare and blur
 feedback, retake affordances, and a review step where the customer confirms the image is
 legible before it leaves the device.
 
@@ -166,12 +166,12 @@ legible before it leaves the device.
 </ImageRow>
 */}
 
-### 2 — Proof of address
+### 2. Proof of address
 
 Address data entered as structured fields, plus a photograph of a supporting document. BBVA
 publicly accepts a utility bill (electricity, water), a bank statement, or the INE itself,
 dated within the last three months. This module is the one that was later rebuilt from
-scratch — see *Two MVPs* below.
+scratch; see *Two MVPs* below.
 
 {/* PLACEHOLDER — mobile.
     File: /images/portfolio/nomina-upgrade/module-address.png
@@ -186,13 +186,13 @@ scratch — see *Two MVPs* below.
 </ImageRow>
 */}
 
-### 3 — Tax residency (FATCA / CRS)
+### 3. Tax residency (FATCA / CRS)
 
 The customer declares whether they have tax obligations only in Mexico, or in Mexico and
 elsewhere. This is not BBVA's curiosity: since the 2012 intergovernmental agreement between
 the SHCP and the US Treasury implementing FATCA, and under the OECD's Common Reporting
 Standard, Mexican financial institutions must identify, classify and report accounts held by
-customers with tax obligations abroad, via the SAT — an obligation the whole sector documents
+customers with tax obligations abroad, via the SAT; an obligation the whole sector documents
 in near-identical terms
 ([Santander México, FATCA/CRS FAQ](https://www.santander.com.mx/PDF/personas/faqs-externas-fatca-crs-151221v1.pdf)).
 
@@ -214,10 +214,10 @@ the design work.
 </ImageRow>
 */}
 
-### 4 — KYC questionnaire
+### 4. KYC questionnaire
 
-A four-section declaration — general information, account information, financial operations,
-and use of credit — that establishes the customer's expected transactional profile. This is
+A four-section declaration (general information, account information, financial operations,
+and use of credit) that establishes the customer's expected transactional profile. This is
 the module where the regulation is least visible to the user and most consequential to the
 bank: the answers become the baseline against which future activity is judged.
 
@@ -234,10 +234,10 @@ bank: the answers become the baseline against which future activity is judged.
 </ImageRow>
 */}
 
-### 5 — Beneficiary
+### 5. Beneficiary
 
-Who inherits the balance. Sensitive in a way the other modules are not — it is the only step
-that asks the customer to think about their own death — and the only one that collects
+Who inherits the balance. Sensitive in a way the other modules are not, being the only step
+that asks the customer to think about their own death, and the only one that collects
 personal data about a *third party*, which brings its own obligations under Mexico's data
 protection law.
 
@@ -268,7 +268,7 @@ protection law.
 
 ## Architecture
 
-**Modules, not steps.** Each of the five is self-contained — its own state, its own API
+**Modules, not steps.** Each of the five is self-contained: its own state, its own API
 contracts, its own error handling. An orchestration layer tracks which are complete and
 returns the customer to where they stopped. Nothing about the regulation demands one sitting,
 so nothing about the implementation assumes one. The payoff was structural rather than
@@ -276,14 +276,14 @@ theoretical: it is what made the 2024 rebuild of a single module possible withou
 risk to the other four.
 
 **Cells, Lit, TypeScript.** Cells is BBVA's internal Web Components framework, built on Lit.
-It is not a framework you choose — it is the one the bank has standardised on, with its own
+It is not a framework you choose; it is the one the bank has standardised on, with its own
 component catalogue, routing and state conventions. In practice that meant no npm packages,
 no external component library, no escape hatch. The constraint turned out to be a useful
 forcing function: with no library to reach for, the answer to most problems was a smaller
 amount of plainer code, which is also the code that is easiest to audit.
 
 **The API is the contract.** The backend endpoints predated the project. We were consumers,
-not designers — adapting to data shapes we did not control, handling partial responses,
+not designers, adapting to data shapes we did not control, handling partial responses,
 validation states that did not map cleanly onto a screen, and error codes that did not map
 cleanly onto a sentence a customer could act on. Every one of those had to become a specific,
 recoverable UI state rather than a generic failure.
@@ -303,7 +303,7 @@ recoverable UI state rather than a generic failure.
 **Analytics tagging was a first-class requirement, not an afterthought.** Every module entry
 and exit, every user action, and every API result had to be instrumented against a tagging
 specification owned by a separate business team. In a flow whose entire purpose is completion,
-the tagging *is* the product feedback loop — it is the only way anyone finds out which of the
+the tagging *is* the product feedback loop; it is the only way anyone finds out which of the
 five modules is losing people. Getting it right meant treating tag emission as behaviour under
 test, not as a side effect sprinkled into event handlers.
 
@@ -326,11 +326,11 @@ whether a customer succeeds.
 
 ## Two MVPs
 
-**2023 — the full modular flow.** The first production release covered all five modules. The
+**2023, the full modular flow.** The first production release covered all five modules. The
 priority was getting the happy path into customers' hands and validating that the modular
 architecture held. The address module worked, but it was built on the previous UI pattern.
 
-**2024 — the address module, rebuilt.** BBVA introduced a new UX design language and updated
+**2024, the address module rebuilt.** BBVA introduced a new UX design language and updated
 internal tooling. The second MVP was scoped to exactly one module: proof of address, rebuilt
 from scratch in the new system while keeping the same API contracts, so nothing changed from
 the perspective of the other four modules or the customer moving between them.
@@ -350,9 +350,11 @@ product could be replaced in isolation.
 />
 */}
 
-## What I would do differently
+{/* TODO — ELÍAS. The "## What I would do differently" heading lived here and is commented
+    out, not deleted: an empty heading was rendering on the published page. Restore the
+    heading together with the content when you write it.
 
-{/* TODO — ELÍAS. This section is the one a New Zealand hiring manager reads most closely,
+    This section is the one a New Zealand hiring manager reads most closely,
     and it is the one I cannot write for you — it needs a real technical regret, not a
     diplomatic one. Look at how the bait-distribuidores page does it: three specific,
     named, slightly uncomfortable things. Candidates worth considering:
@@ -364,12 +366,12 @@ product could be replaced in isolation.
 
 ## Outcome
 
-The flow shipped to production and reached BBVA's payroll customer base — a base that, per
+The flow shipped to production and reached BBVA's payroll customer base, a base that, per
 the bank's public reporting, counts in the tens of millions, most of it mobile. Its function
 is unglamorous and load-bearing: it is the difference between a customer clearing their
 deposit ceiling from the sofa and a customer taking a morning off work to stand in a branch.
 
-For me it was the project where I moved from executing tickets to owning a product surface —
+For me it was the project where I moved from executing tickets to owning a product surface:
 sitting in the design and business sessions, arguing the tradeoffs, and being accountable for
 the whole delivery rather than a slice of it.
 
@@ -389,22 +391,22 @@ the whole delivery rather than a slice of it.
 Every figure and regulatory claim on this page comes from public material. Nothing here is
 drawn from internal BBVA documentation.
 
-- Banco de México — [Circular 14/2011](https://www.banxico.org.mx/marco-normativo/normativa-emitida-por-el-banco-de-mexico/circular-2019-95/%7B0690C53C-8EE8-046A-FD0B-EC75B003F44A%7D.pdf),
+- Banco de México, [Circular 14/2011](https://www.banxico.org.mx/marco-normativo/normativa-emitida-por-el-banco-de-mexico/circular-2019-95/%7B0690C53C-8EE8-046A-FD0B-EC75B003F44A%7D.pdf),
   the account-level scheme.
-- CNBV — [Disposiciones de carácter general aplicables a las instituciones de crédito](https://www.cnbv.gob.mx/Normatividad/Disposiciones%20de%20car%C3%A1cter%20general%20aplicables%20a%20las%20instituciones%20de%20cr%C3%A9dito.pdf),
+- CNBV, [Disposiciones de carácter general aplicables a las instituciones de crédito](https://www.cnbv.gob.mx/Normatividad/Disposiciones%20de%20car%C3%A1cter%20general%20aplicables%20a%20las%20instituciones%20de%20cr%C3%A9dito.pdf),
   the identity-file requirements behind article 115 of the LIC.
-- BBVA México — [Tipos de cuentas bancarias y sus características principales](https://www.bbva.mx/educacion-financiera/banca-digital/cuenta-tipos-de-cuentas-bancarias.html):
+- BBVA México, [Tipos de cuentas bancarias y sus características principales](https://www.bbva.mx/educacion-financiera/banca-digital/cuenta-tipos-de-cuentas-bancarias.html):
   the N1–N4 ladder, the UDI ceilings and their peso equivalences, and the N2→N4 upgrade
   notification.
-- BBVA México — [2024 results](https://www.bbva.com/es/mx/bbva-mexico-crecio-su-cartera-de-credito-en-262-mil-millones-de-pesos-y-practicamente-ya-alcanzo-un-saldo-total-de-2-billones-de-pesos-en-2024/):
+- BBVA México, [2024 results](https://www.bbva.com/es/mx/bbva-mexico-crecio-su-cartera-de-credito-en-262-mil-millones-de-pesos-y-practicamente-ya-alcanzo-un-saldo-total-de-2-billones-de-pesos-en-2024/):
   customer base, mobile share, digital transaction volume.
-- BBVA México — [real-time payroll dispersal](https://www.bbva.com/es/mx/bbva-mexico-pone-a-disposicion-de-las-empresas-la-dispersion-de-pagos-y-nomina-en-tiempo-real/):
+- BBVA México, [real-time payroll dispersal](https://www.bbva.com/es/mx/bbva-mexico-pone-a-disposicion-de-las-empresas-la-dispersion-de-pagos-y-nomina-en-tiempo-real/):
   client companies and employees paid monthly.
-- INEGI and CNBV — [Encuesta Nacional de Inclusión Financiera 2024](https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2025/enif/ENIF2024_CP.pdf):
+- INEGI and CNBV, [Encuesta Nacional de Inclusión Financiera 2024](https://www.inegi.org.mx/contenidos/saladeprensa/boletines/2025/enif/ENIF2024_CP.pdf):
   account ownership, and the share of formal savings accounts that are payroll or pension
   accounts.
-- CNBV and GIZ — [Inclusión financiera de las personas con discapacidad: retos y
+- CNBV and GIZ, [Inclusión financiera de las personas con discapacidad: retos y
   recomendaciones](https://www.cnbv.gob.mx/Inclusi%C3%B3n/Anexos%20Inclusin%20Financiera/Inclusion_Financiera_Personas_Discapacidad-Accesible.pdf)
   (2023): WCAG 2.1 assessment of Mexican banks' web and mobile channels.
-- Santander México — [FATCA/CRS FAQ](https://www.santander.com.mx/PDF/personas/faqs-externas-fatca-crs-151221v1.pdf):
+- Santander México, [FATCA/CRS FAQ](https://www.santander.com.mx/PDF/personas/faqs-externas-fatca-crs-151221v1.pdf):
   the sector-wide reporting obligation and the tax-residency self-declaration.

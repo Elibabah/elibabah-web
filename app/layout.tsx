@@ -25,6 +25,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://elibabah.com"),
   title: {
     default: "Elibabah — Elías Hernández",
     template: "%s | Elibabah",

@@ -20,11 +20,23 @@ heroBand: /images/portfolio/drive-nz-app/heroBand.jpg
 relatedThumb: /images/portfolio/drive-nz-app/relatedThumb.jpg
 ---
 
-## Overview
+## What this is
 
-NZ Drive Practice is a personal project: a mobile app that rehearses the New Zealand full-licence practical test end to end. The driver mounts the phone, starts a session, and for twenty minutes an AI examiner named Sam directs them along a real route generated from their live location, asks them to identify hazards and answer road-rule questions, monitors speed, stops, and braking, silently re-routes when they deviate, and closes with a verdict modelled on the official NZTA assessment. The design goal is a fully hands-free session where the phone is never touched during the drive, and closing the gap to that goal is the project's central remaining challenge (see Known limitations).
+I moved to New Zealand holding an overseas full licence, which means sitting the practical
+test again on unfamiliar roads under unfamiliar rules. NZ Drive Practice is the app I built
+out of that: a rehearsal of the full-licence test, end to end.
 
-The app is aimed in particular at drivers converting an overseas full licence to an NZ full licence, a path many new residents go through. It pairs live GPS routing with a voice-led examiner and a scoring model built around Road Code criteria.
+The driver mounts the phone and starts a session. For twenty minutes an AI examiner named
+Sam directs them along a real route generated from their live location, asks them to
+identify hazards and answer road-rule questions, monitors speed, stops and braking,
+silently re-routes when they deviate, and closes with a verdict modelled on the official
+NZTA assessment. The design goal is a session in which the phone is never touched at all,
+and closing the remaining gap to that goal is the project's central open problem (see
+Known limitations).
+
+The audience I had in mind is the one I belong to: drivers converting an overseas full
+licence, a path a great many new residents walk. What they need is not more driving
+practice. It is to find out what the examiner is watching for.
 
 {/* IMAGE — cover / onboarding screen: "Pass your NZ practical test" with feature highlights */}
 <ImageRow
@@ -34,7 +46,7 @@ The app is aimed in particular at drivers converting an overseas full licence to
   caption="Onboarding: the app frames itself as a full simulation of the NZ full-licence test."
 >
 
-Beyond the product itself, this project is a deliberate case study in AI-assisted engineering with process. It is not vibecoding. Every structural decision is captured in an ADR, the build follows an MVP roadmap with explicit exit criteria, and the core logic is covered by deterministic replay tests.
+Beyond the product itself, I built this as a deliberate case study in AI-assisted engineering with process. It is not vibecoding. Every structural decision is captured in an ADR, the build follows an MVP roadmap with explicit exit criteria, and the core logic is covered by deterministic replay tests.
 
 </ImageRow>
 
@@ -58,7 +70,7 @@ The route is not fixed. It is recalculated from the current GPS position wheneve
 
 ## When the driver goes off route
 
-Getting lost is not what fails a driving test. Disobeying signs and markings is. The app models that distinction rather than penalising every wrong turn.
+Getting lost is not what fails a driving test. Disobeying signs and markings is. I built the app to model that distinction rather than to penalise every wrong turn, which is what my first version did.
 
 When the driver strays more than three hundred metres from the planned step, the engine records a navigation event and requests a reroute silently, with no reprimand. Only once the new route has been applied does the examiner ask what happened, and the driver answers by voice. Claude then classifies the explanation: a road closure, an obstruction, or a safety decision counts as justified, carries no penalty, and adds a positive note to the judgement, while anything else is treated as a manoeuvring error and keeps a mild penalty. If the AI cannot be reached the fallback is manoeuvring error, which is exactly the behaviour that existed before the flow was built, so an offline session loses nothing it previously had.
 
@@ -66,9 +78,13 @@ The road data behind the drive is real rather than inferred. At route build the 
 
 ## The debrief
 
-After each session the app produces a feedback screen. The headline is a PASS or FAIL, not a percentage, because that is the question a learner actually asks. The verdict is derived from the recorded events using the official NZTA error categories: speeding of ten km/h or more over the limit at any duration, five km/h or more sustained for five seconds, a stop sign taken without a complete stop, or a failure to give way all count as immediate fails, while a brief five to ten km/h excess counts as critical, and the session fails on a single immediate fail or more than one critical error. Below the verdict the screen summarises the drive in plain language, notes what went well and what to improve, and breaks the performance down by category, hazard awareness, road rules knowledge, speed compliance, stop compliance, navigation, and session completion. The live examiner runs on a fast conversational model, while the final debrief is generated by a stronger one, so the summary reads like a real examiner talking the driver through their result. From there the app offers a clear next step: drive again or return home.
+After each session the app produces a feedback screen. The headline is a PASS or a FAIL, never a percentage, because that is the question a learner actually asks.
 
-The verdict is also explicit about its own limits. It states what it did not assess, mirror and head checks, signalling, lane position, and vehicle control, none of which are observable from GPS and voice alone, so it is never mistaken for a complete assessment. Alignment to the NZTA categories is a design intent, not a claim of official equivalence.
+The verdict comes from the recorded events, read against the official NZTA error categories. Speeding of ten km/h or more over the limit counts as an immediate fail at any duration; so does five km/h or more sustained for five seconds, a stop sign taken without a complete stop, or a failure to give way. A brief five to ten km/h excess counts as critical instead. The session fails on a single immediate fail, or on more than one critical error.
+
+Below the verdict the screen summarises the drive in plain language, notes what went well and what to improve, and breaks the performance down by category: hazard awareness, road rules knowledge, speed compliance, stop compliance, navigation and session completion. The live examiner runs on a fast conversational model while the final debrief is generated by a stronger one, so the summary reads like an examiner talking the driver through their result rather than a form being filled in. From there the app offers one clear next step: drive again, or go home.
+
+The verdict is also explicit about its own limits. It states what it did not assess, mirror and head checks, signalling, lane position and vehicle control, none of which are observable from GPS and voice alone, so it can never be mistaken for a complete assessment. Alignment to the NZTA categories is a design intent, not a claim of official equivalence. A partial assessment that names its own blind spots is worth more to a nervous learner than a complete-looking one that quietly guesses.
 
 {/* IMAGE 2 — session feedback: observations, areas to improve, per-category score breakdown */}
 {/*
@@ -86,33 +102,28 @@ The scoring model is deliberately aligned to official NZTA categories, including
 
 ## Session history
 
-{/* IMAGE 3 — past sessions list (screen to be added). Reference your image here once captured. */}
-{/*
-<ImageRow
-  side="left"
-  src="/images/portfolio/drive-nz-app/home.png"
-  alt="TODO: past-sessions screen (list of previous practice sessions shown before starting a new one)"
-  caption="TODO: caption for the past-sessions screen."
->
-
 Before starting a new session, the driver sees their past practice sessions, so progress is visible over time and each drive builds on the last rather than standing alone.
 
-</ImageRow>
-*/}
+{/* IMAGE 3 — past-sessions screen, still to be captured. Once you have it, wrap the
+    paragraph above in an <ImageRow side="left"> with the real src, alt and caption,
+    the same way "The live drive" is set up. Until then the prose stands on its own
+    so the heading is never empty on the published page. */}
 
 ## Architecture
 
-The most important structural decision is captured in ADR-0006: the exam logic was extracted into a pure engine (`src/engine/`) with no React, Expo, globals, or clocks. It receives plain data, GPS fixes, injected timestamps, voice exchanges, and returns **commands** rather than performing actions. `useDrivingSession.ts` is the thin adapter that executes them against the device APIs, and it is the only layer that touches the outside world.
+The most important structural decision I made is captured in ADR-0006: I extracted the exam logic into a pure engine (`src/engine/`) with no React, Expo, globals, or clocks. It receives plain data, GPS fixes, injected timestamps, voice exchanges, and returns **commands** rather than performing actions. `useDrivingSession.ts` is the thin adapter that executes them against the device APIs, and it is the only layer that touches the outside world.
 
 That boundary shows up in small, concrete ways. A `speak` command carries a priority, so a safety or navigation utterance interrupts whatever the examiner is saying while a coaching remark is dropped if speech is already playing. A `requestReroute` command is fetched by the adapter and handed back through `applyReroute`, which keeps the network out of the engine entirely. And because timestamps are injected rather than read from a clock, a session replays identically every time.
 
-The trade-off is what makes this decision worth documenting. Previously the logic lived in a hook of around 350 lines, leaning on `useRef` to dodge stale closures and on module-level singletons. That was slow to test, since jest-expo renders hooks and the suite took roughly ten minutes, and it was fragile whenever state had to be reset. Separating the engine enables deterministic replay: a real GPS track plus a transcript can be replayed in a unit test in milliseconds. That is invaluable for testing exam logic without driving a car every time, and it is the piece that makes a later Android port (MVP-5) feasible by reusing the engine intact.
+The trade-off is what makes this decision worth documenting. The logic used to live in a hook of around 370 lines, leaning on `useRef` to dodge stale closures and on module-level singletons. It worked, and it was close to untestable: jest-expo renders hooks, so the suite took roughly ten minutes, and resetting state between sessions was fragile. Separating the engine bought deterministic replay. A real GPS track plus a transcript now replays in a unit test in milliseconds, which is what lets me test exam logic without driving a car every time, and it is the piece that makes a later Android port (MVP-5) feasible by reusing the engine intact.
 
-The AI layer is deliberately kept off the client. No provider key ships in the app: both the live examiner and the debrief, along with text to speech, go through a Supabase Edge Function proxy where the client authenticates with the user's own JWT and the server holds the keys and enforces a model allowlist. The backend is Supabase, with row-level security defined per operation and Google OAuth. Session state is checkpointed to Postgres every sixty seconds with idempotent upserts, so a crash at minute eighteen loses at most one minute of the drive.
+I keep the AI layer deliberately off the client. No provider key ships in the app: both the live examiner and the debrief, along with text to speech, go through a Supabase Edge Function proxy where the client authenticates with the user's own JWT and the server holds the keys and enforces a model allowlist. The backend is Supabase, with row-level security defined per operation and Google OAuth. Session state is checkpointed to Postgres every sixty seconds with idempotent upserts, so a crash at minute eighteen loses at most one minute of the drive.
 
 ## Process
 
-This project is structured to show engineering judgement, not just output. Each structural choice has an ADR that records the decision and the trade-off accepted with it. The build advances through MVPs with explicit exit criteria, so scope is bounded and progress is legible. And the deterministic replay tests mean the exam logic can be verified continuously, cheaply, and without a vehicle in the loop.
+I structured this project to show engineering judgement, not just output. Each structural choice has an ADR that records the decision and the trade-off I accepted with it, written at the point of choosing rather than reconstructed afterwards. The build advances through MVPs with explicit exit criteria, so scope is bounded and progress is legible. And the deterministic replay tests mean the exam logic can be verified continuously, cheaply, and without a vehicle in the loop.
+
+The fuller argument, decision by decision, is in the [case study](/case-studies/nz-drive-practice-case).
 
 ### Key decisions and their trade-offs
 
@@ -127,9 +138,9 @@ This project is structured to show engineering judgement, not just output. Each 
 
 ### Known limitations (active technical debt)
 
-Being candid about what is not done yet is part of the point. The largest gap between the product vision and the current code is that true hands-free is not implemented: the session is tap-to-speak today, which contradicts the central constraint, and MVP-2 is deliberately blocked on the ADR-0003 spike rather than guessed at.
+Being candid about what is not done yet is part of the point. The largest gap between the product vision and the current code is that true hands-free is not implemented: the session is tap-to-speak today, which contradicts the central constraint, and I have deliberately blocked MVP-2 on the ADR-0003 spike rather than guess at it.
 
-The exam itself is code complete but not yet field complete. Two MVP-1 exit criteria are still open because both need a real drive rather than a simulator: that a replayed real-drive GPS track produces identical event streams across runs, and that passing a mapped stop sign at fifteen km/h is recorded as a violation while a genuine full stop is recorded as compliant. Everything that can be proven in a unit test has been; what remains needs a car.
+The exam itself is code complete but not yet field complete. Two MVP-1 exit criteria are still open because both need a real drive rather than a simulator: that a replayed real-drive GPS track produces identical event streams across runs, and that passing a mapped stop sign at fifteen km/h is recorded as a violation while a genuine full stop is recorded as compliant. Everything provable in a unit test has been proven. What remains needs a car.
 
 Two smaller items sit behind those. OSM coverage in New Zealand is uneven, so the app falls back to instruction-text heuristics and a fifty km/h default whenever Overpass is unreachable or thin. And `simulate_drive.sh`, referenced in `CLAUDE.md`, does not actually exist in the repo; its replacement, a GPS route replayer, is scheduled for MVP-4.
 

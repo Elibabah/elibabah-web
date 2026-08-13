@@ -19,17 +19,23 @@ relatedThumb: /images/portfolio/bait-world-cup/relatedThumb.jpg
 ---
 
 
-## Overview
+## What this is
 
-Bait is Walmart Mexico's mobile carrier, and for the 2022 World Cup it ran a fan-facing campaign built around the tournament. The microsite gave users a single place to follow the tournament, with Mexico's run as the anchor: fixtures, live scores, group standings, and a set of engagement mechanics such as a World Cup trivia and a penalty game tied to the wider promotion.
+Bait is Walmart de México's mobile carrier, and for the 2022 World Cup it ran a fan-facing
+campaign built around the tournament. The microsite was where that campaign lived: fixtures,
+live scores, group standings, and the engagement mechanics attached to the wider promotion,
+a World Cup trivia and a penalty game, with Mexico's run as the anchor.
 
-I worked on this at Innovattia, delivering for Walmart and Bait. The UX team handed me a visual sketch of the intended layout, and I built the entire interface from scratch. This project predates the AI-assisted tooling common in frontend work today; every layout decision, interaction, and piece of state was hand-written.
+I built it at Innovattia, delivering for Walmart and Bait. The UX team handed me a visual
+sketch of the intended layout and I built the whole interface from it. This was before the
+AI-assisted tooling that is ordinary in frontend work now; every layout decision, every
+interaction, every piece of state was written by hand.
 
 {/* IMAGE — homepage: prizes carousel above the two-column fixtures/standings row */}
 <Image
   src="/images/portfolio/bait-world-cup/home-overview.jpg"
   variant="screenshotDesktop"
-  alt="Bait World Cup microsite homepage: a prizes carousel across the top, and below it two side-by-side panels — featured fixtures with the knockout results, and a Group A standings table listing matches played, won, drawn, lost and goals for"
+  alt="Bait World Cup microsite homepage: a prizes carousel across the top, and below it two side-by-side panels, one showing featured fixtures with the knockout results and the other a Group A standings table listing matches played, won, drawn, lost and goals for"
   caption="The campaign homepage: the prizes carousel across the top, with featured fixtures and the group standings sitting side by side beneath it."
 />
 
@@ -43,9 +49,9 @@ I worked on this at Innovattia, delivering for Walmart and Bait. The UX team han
 
 ## What I built
 
-Having no framework and no UI library shaped the whole approach. Component structure had to be expressed through disciplined markup and class conventions rather than a component model, and every piece of interactivity went through the native DOM API rather than a rendering library. Nothing was free: each pattern I would normally reach for had to be built and kept consistent by hand.
+Having no framework and no UI library shaped the whole approach. Component structure had to come out of disciplined markup and class conventions rather than a component model, and every piece of interactivity went through the native DOM API. Nothing was free. Each pattern I would normally reach for had to be built once and then kept consistent by hand, everywhere, by me.
 
-The core surfaces included a fixtures panel for the tournament's headline matches, a statistics view with a per-group standings table, and campaign entry points into the trivia and penalty games. Data such as scores and standings was rendered into the DOM and updated as the tournament progressed, which meant thinking carefully about how to keep the markup, the styling, and the data in sync without the conveniences a framework would normally provide.
+The core surfaces were a fixtures panel for the tournament's headline matches, a statistics view with a per-group standings table, and the campaign entry points into the trivia and penalty games. Scores and standings were rendered into the DOM and updated as the tournament advanced, which is the part that taught me the most: keeping markup, styling and data in agreement is trivial when a framework owns the relationship, and a genuine discipline when nothing does.
 
 {/* IMAGE — trivia and penalty game entry points, plus participation steps */}
 <Image
@@ -55,7 +61,7 @@ The core surfaces included a fixtures panel for the tournament's headline matche
   caption="Entry points into the trivia and penalty games, above the campaign participation steps."
 />
 
-The prizes had a surface of their own: a second carousel cataloguing what was on offer, each item with its name, a short description and the legal disclaimer the campaign required. Two carousels with different content shapes, both hand-rolled — no slider library, just the DOM and the state to track which item was showing.
+The prizes had a surface of their own: a second carousel cataloguing what was on offer, each item with its name, a short description and the legal disclaimer the campaign required. Two carousels with different content shapes, both hand-rolled; no slider library, just the DOM and the state to track which item was showing.
 
 {/* IMAGE — prizes catalogue carousel */}
 <Image
@@ -65,7 +71,7 @@ The prizes had a surface of their own: a second carousel cataloguing what was on
   caption="The prizes catalogue: a second hand-built carousel, one prize at a time with its description and disclaimer."
 />
 
-Responsiveness came from the same place as everything else: hand-written media queries. Without a grid system or utility classes to lean on, every breakpoint was a decision about what the layout should become — the game banners going full width, the participation steps turning from a row into a sequence, the fixtures panel giving up its columns. Getting that right on a campaign that would be opened mostly on phones was a large part of the work.
+Responsiveness came from the same place as everything else: hand-written media queries. Without a grid system or utility classes to lean on, every breakpoint was a decision about what the layout should become; the game banners going full width, the participation steps turning from a row into a sequence, the fixtures panel giving up its columns. On a campaign that would be opened mostly on phones, that was a large part of the work.
 
 {/* IMAGE — mobile: game entry points and participation steps at a phone viewport */}
 <Image
@@ -77,10 +83,10 @@ Responsiveness came from the same place as everything else: hand-written media q
 
 ## Why it mattered
 
-This was one of my earliest professional projects, and it taught the fundamentals that still hold up under any framework: semantic markup, responsive layout, DOM manipulation, and the discipline of translating a design into a faithful, working interface. Building it without abstractions made the underlying mechanics visible, which is a foundation I have carried into component-based work at scale since.
+This was one of my earliest professional projects, and it taught the fundamentals that still hold under any framework: semantic markup, responsive layout, and the discipline of translating a design into a faithful working interface. Building without abstractions makes the underlying mechanics visible. That visibility is what I carried into component-based work at scale, and it is why I can still read what a framework is doing on my behalf.
 
-It is also a project I return to for its symbolism. From one World Cup to the next, it marks a point of departure in a longer engineering journey.
+It is also a project I return to for its symbolism. From one World Cup to the next, it marks a point of departure in a longer journey; I wrote about that distance separately, in [From Cup to Cup](/editorial/from-cup-to-cup).
 
 ## Stack
 
-Vanilla JavaScript, HTML, and CSS. No framework, no build-time UI library, no AI assistance. Hand-coded from a UX sketch.
+Vanilla JavaScript, HTML and CSS. No framework, no build-time UI library, no AI assistance. Hand-coded from a UX sketch.
