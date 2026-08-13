@@ -10,7 +10,7 @@ stack:
   - expo-speech-recognition + OpenAI TTS
   - Supabase (Postgres, RLS, OAuth)
   - Claude (Haiku + Sonnet) via Edge Function proxy
-outcome: work-in-progress # narrative reflects the state of the build as of July 2026
+outcome: work-in-progress # narrative reflects the state of the build as of August 2026
 ---
 
 {/*
@@ -60,9 +60,15 @@ outcome: work-in-progress # narrative reflects the state of the build as of July
     stale closures and on module-level singletons. Slow to test (jest-expo renders
     hooks; the suite took ~10 minutes) and fragile on state reset.
   - The decision: extract the logic into a pure engine (src/engine/) with no React,
-    Expo, or globals. Plain data in (GPS fixes, clock ticks, voice exchanges),
-    plain data out (events, speech requests, state transitions). useDrivingSession.ts
-    becomes a thin adapter to device APIs.
+    Expo, globals, or clocks. Plain data in (GPS fixes, injected timestamps, voice
+    exchanges), COMMANDS out. useDrivingSession.ts becomes a thin adapter that
+    executes them, and is the only layer that touches the outside world.
+  - The detail that makes the boundary concrete, use it, an abstract claim about
+    purity persuades nobody: a speak command carries a priority, so safety and
+    navigation interrupt whatever is being said while coaching is dropped if TTS is
+    already playing; a requestReroute is fetched by the adapter and handed back
+    through applyReroute, which keeps the network out of the engine entirely. The
+    engine decides, the adapter acts.
   - The payoff (the trade-off accepted): a large refactor cost, but it unlocks
     deterministic replay, a real GPS track plus a transcript replayed in a unit
     test in milliseconds, and it makes the later Android port (MVP-5) feasible by
@@ -80,14 +86,53 @@ outcome: work-in-progress # narrative reflects the state of the build as of July
     immediate-fail conditions) rather than a percentage score invented for effect.
   - Why it matters: it answers the user's real question, "would I have passed",
     instead of a number that looks precise but means nothing.
-  - The trade-off accepted: it requires maintaining an event-to-category mapping
-    table by hand, and the NZTA-aligned engine is still MVP-1 work, not yet
-    complete. Be honest about that here.
+  - The shape of the decision, now that it has shipped (engine/nztaVerdict.ts,
+    2026-08-04): fail = any immediate-fail error, or more than one critical. The
+    speed monitor was realigned to the official thresholds, >=10 km/h over at any
+    duration, or >=5 km/h over sustained for >=5 s, as immediate fail; a brief 5-10
+    over as critical, reported at incident end. The old numeric score survives, but
+    demoted to a secondary trend metric rather than the verdict.
+  - The trade-off accepted: it requires maintaining a sourced event-to-category
+    mapping table by hand (docs/nzta-error-mapping.md), kept current against the
+    assessment guide. That is ongoing manual work, not a one-off.
+  - The honest boundary, and the part worth dwelling on: some official categories
+    are simply unobservable from GPS and voice, mirror checks, head checks,
+    signalling, lane position, vehicle control. So the verdict states what it did
+    NOT assess. A partial assessment that declares its own limits is more useful
+    than a complete-looking one that quietly guesses.
   - CAVEAT to flag: alignment to NZTA categories is a design intent, not a claim of
     official equivalence or endorsement. Keep the wording careful.
 */}
 
-## Decision three: the honest gap, hands-free audio (ADR-0003)
+## Decision three: getting lost is not a fail (deviation evaluation)
+
+{/*
+  DEVELOP: Your domain-fidelity decision. This one is about reading the rules of the
+  real test properly, not about code, and it is the freshest material you have
+  (shipped 2026-08-02, engine/__tests__/deviation.test.ts).
+  - The insight that drives it: on the real NZTA test, getting lost is not an error;
+    disobeying signs and markings is. The naive build punishes every wrong turn. That
+    is a simulation of a driving test, not a simulation of driving.
+  - The before: the app scolded the driver immediately on going off route, which is
+    both wrong against the rubric and hostile at exactly the moment a driver is most
+    loaded.
+  - The decision, in three beats (a natural triad, use it): deviation past 300 m
+    triggers a SILENT reroute with no reprimand; once the new route is applied the
+    engine emits askDeviation; only then does Sam ask why, and Claude classifies the
+    spoken answer as justified (closure, obstruction, safety, no penalty plus a
+    positive judgement note) or manoeuvring error (mild penalty retained).
+  - The trade-off accepted: a round trip to the model inside a live drive, and a
+    classification that can be wrong. The mitigation is the fallback, if the AI is
+    unreachable the result is manoeuvring_error, which is exactly the pre-existing
+    behaviour, so an offline session is never worse off than before the feature
+    existed. Name that principle explicitly: a new dependency should degrade to the
+    old behaviour, not to a broken one.
+  - The wider point to land: this is where domain research shows up as engineering.
+    The interesting work was reading the assessment criteria closely enough to know
+    that the obvious penalty was the wrong one.
+*/}
+
+## Decision four: the honest gap, hands-free audio (ADR-0003)
 
 {/*
   DEVELOP: The decision that shows honesty and risk-thinking. Do not hide it.
@@ -113,8 +158,18 @@ outcome: work-in-progress # narrative reflects the state of the build as of July
     progress migration, but avoids orphaned data and gives the simplest privacy
     story.
   - ADR-0004: OSM/Overpass as the source of speed limits and checkpoints, replacing
-    a hardcoded 50 km/h limit and a sign-detection path that never fired. Costs an
-    extra network call and imperfect NZ data coverage.
+    a hardcoded 50 km/h limit and a sign-detection path that never fired. Shipped
+    2026-07-23: a corridor is prefetched per route (maxspeed zones, stop signs,
+    signals, give-way, level and pedestrian crossings) and evaluated by GPS
+    proximity. Costs an extra network call and imperfect NZ data coverage, with a
+    fallback to the old heuristics when Overpass is down. Worth one line on the
+    field bug that motivated it: signals now suppress the unexpected-stop and
+    harsh-braking nudges, because queueing at a red light was being recorded as a
+    fault.
+  - Destination validation (2026-08-04): one Overpass query checks all 8 candidate
+    bearings for urban drivable streets and snaps the destination onto the nearest
+    one. The elegant part, and the reason it is worth a sentence: sea bearings are
+    not special-cased, they simply have no streets, so they are never picked.
   - Positioning: MapView.onUserLocationChange as the authoritative source (not
     followsUserLocation, unreliable with PROVIDER_GOOGLE); watchPositionAsync as
     fallback.
@@ -126,17 +181,27 @@ outcome: work-in-progress # narrative reflects the state of the build as of July
 
 {/*
   DEVELOP: This section is a strength; frame it as method, not confession.
-  - Active technical debt: true hands-free not yet implemented (the biggest gap);
-    stop/intersection detection mid-migration from Google-text parsing to OSM; the
-    NZTA-aligned scoring engine still MVP-1; simulate_drive.sh referenced in
-    CLAUDE.md but absent from the repo, its Maestro-based replacement scheduled for
-    MVP-4.
-  - Roadmap status (per docs/ROADMAP.md, updated 2026-07-18, progress through 21
-    July): MVP-0 complete (AI proxy in production, schema v2 with 60s checkpointing,
-    false reroutes fixed, CI green with the suite at ~4s). MVP-1 in progress (pure
-    engine extracted; real OSM data, justified-detour classification, and NZTA
-    scoring outstanding). MVP-2 blocked on the ADR-0003 spike. MVP-3, 4, 5 not
-    started.
+  - Active technical debt: true hands-free not yet implemented (the biggest gap,
+    tap-to-speak today); uneven OSM coverage in NZ, so the app falls back to
+    instruction-text heuristics and a 50 km/h default when Overpass is thin or down;
+    simulate_drive.sh referenced in CLAUDE.md but absent from the repo, its GPS
+    replayer replacement scheduled for MVP-4.
+  - The distinction worth drawing, and the strongest thing in this section: MVP-1 is
+    code complete but not field complete. Two exit criteria are still open because
+    both need a car rather than a simulator, that a replayed real-drive GPS track
+    produces identical event streams across runs, and that a mapped stop sign taken
+    at 15 km/h is recorded as a violation while a genuine full stop is recorded as
+    compliant. Everything provable in a unit test has been proven. Naming the
+    boundary between "tested" and "validated" is the point; a lot of software ships
+    without anyone drawing that line.
+  - Roadmap status (per docs/ROADMAP.md, progress through August 2026): MVP-0
+    complete (AI proxy in production with no extractable key, schema v2 with 60s
+    checkpointing verified on device, false reroutes fixed, CI green with typecheck
+    + 254 tests across 16 suites in ~4s, down from ~10min). MVP-1 code complete
+    (pure engine, real OSM data, deviation classification, NZTA verdict, destination
+    validation) with two field exit criteria open. MVP-2 next, blocked on the
+    ADR-0003 spike. MVP-3 (user tiers), MVP-4 (product quality, E2E, TestFlight) and
+    MVP-5 planned.
   - The argument to make: documenting debt precisely is itself an engineering
     practice. Knowing exactly what is not done, and why, is a form of control.
 */}
