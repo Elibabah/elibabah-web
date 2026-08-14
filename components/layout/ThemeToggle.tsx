@@ -1,7 +1,10 @@
 "use client";
 
+import { Moon, Sun } from "lucide";
 import { useEffect, useState } from "react";
 
+import { MorphIcon } from "morphicons/react";
+import { flushSync } from "react-dom";
 import { useTheme } from "next-themes";
 
 export function ThemeToggle() {
@@ -17,22 +20,27 @@ export function ThemeToggle() {
     return <div className="w-8 h-8" />;
   }
 
+  const toggleTheme = () => {
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+
+    if (!document.startViewTransition) {
+      setTheme(next);
+      return;
+    }
+
+    document.startViewTransition(() => {
+      flushSync(() => setTheme(next));
+    });
+  };
+
   return (
     <button
-        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+        type="button"
+        onClick={() => toggleTheme()}
         aria-label="Toggle theme"
         className="w-8 h-8 flex items-center justify-center text-foreground/50 hover:text-foreground transition-colors"
     >
-      {resolvedTheme === "dark" ? (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-        </svg>
-      )}
+      <MorphIcon icon={resolvedTheme === "dark" ? Moon : Sun} size={24} strokeWidth={2} spring="smooth"/>
     </button>
   );
 }
