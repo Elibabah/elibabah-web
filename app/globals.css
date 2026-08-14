@@ -12,6 +12,7 @@
   --color-accent: #0C5566;
   --accent-soft: #E0ECEE;
   --on-accent: #FFFFFF;
+  --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @theme inline {
@@ -66,4 +67,25 @@ body {
   --tw-prose-pre-bg: var(--surface);
   --tw-prose-th-borders: var(--line);
   --tw-prose-td-borders: var(--line);
+}
+
+html:active-view-transition body {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-new(root) {
+    mask: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><filter id="blur"><feGaussianBlur stdDeviation="2"/></filter></defs><circle cx="0" cy="0" r="18" fill="white" filter="url(%23blur)"/></svg>') top left / 0 no-repeat;
+    mask-origin: content-box;
+    animation: unmask 1s var(--expo-out) both;
+  }
+
+  ::view-transition-old(root) {
+    animation: unmask 1s var(--expo-out) both;
+    z-index: -1;
+  }
+}
+
+@keyframes unmask {
+  to { mask-size: 350vmax; }
 }
