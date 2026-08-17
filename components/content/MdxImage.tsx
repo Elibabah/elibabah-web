@@ -10,11 +10,12 @@ type MdxImageProps = {
   alt: string;
   variant: keyof typeof imageSlots.body;
   caption?: string;
+  credit?: string;
   sourceLabel?: string;
   sourceHref?: string;
 };
 
-export function MdxImage({ src, alt, variant, caption, sourceLabel, sourceHref }: Readonly<MdxImageProps>) {
+export function MdxImage({ src, alt, variant, caption, credit, sourceLabel, sourceHref }: Readonly<MdxImageProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
   const { maxWidthClass, sizes } = imageSlots.body[variant];
@@ -29,7 +30,7 @@ export function MdxImage({ src, alt, variant, caption, sourceLabel, sourceHref }
         height={height}
         className={`h-auto rounded-xl ${maxWidthClass}`}
       />
-      <MdxFigcaption caption={caption} sourceLabel={sourceLabel} sourceHref={sourceHref} />
+      <MdxFigcaption caption={caption} credit={credit} sourceLabel={sourceLabel} sourceHref={sourceHref} />
     </figure>
   );
 }

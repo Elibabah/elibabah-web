@@ -20,7 +20,7 @@ on where the epigraph lands — Home hero, About, or footer.
 
 ---
 
-## 2. Current state (as of July 2026)
+## 2. Current state (as of August 2026)
 
 Infrastructure:
 
@@ -40,7 +40,7 @@ The site is built and live. All routes from the architecture in §5 exist:
 Also in place:
 
 - Root layout with the three fonts via `next/font/google`, `ThemeProvider`, Nav (with mobile menu),
-  Footer, and Person JSON-LD.
+  Footer, and Person JSON-LD (with a stable `@id`, referenced from page-level blocks).
 - Design tokens as CSS variables in `app/globals.css`, exposed to Tailwind v4 via `@theme inline`.
 - Theme toggle (`next-themes`, `data-theme`), light/dark palettes.
 - Contact as an anchor: nav CTA `#contact` → `<footer id="contact">` with `mailto:elias@elibabah.com`,
@@ -50,10 +50,19 @@ Also in place:
 - MDX pipeline: `gray-matter` for front matter, `next-mdx-remote` for the body,
   `lib/mdx-components.tsx` for the component mapping.
 - Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive widths,
-  `sizes` and recommended export dimensions.
+  `sizes` and recommended export dimensions. Intrinsic dimensions are read at build time with
+  `image-size`, so MDX images never declare width/height by hand.
 - Reading time derived from the body in `lib/reading-time.ts`, not declared per file.
-- Content seeded: 6 projects, 4 case studies, 4 articles — though three of those articles are
-  still placeholders whose body is literally "Article body here."
+- Image credit and authorship: footer notice, per-image `credit` via `MdxFigcaption`, and a
+  `BlogPosting` + `ImageObject` JSON-LD on editorial articles only (see §7).
+- `lib/site.ts` as the single source of the absolute base URL, consumed by `sitemap.ts`,
+  `robots.ts`, `metadataBase` and every JSON-LD block.
+- Icons: `lucide` for icon data plus `morphicons` for spring-interpolated transitions
+  (the nav hamburger ↔ close morph).
+
+Content written so far: **6 projects, 4 case studies, 3 articles**. No placeholders remain — every
+`.mdx` in `content/` has a real body. The three articles cover one section each
+(`career`, `software`, `aotearoa`), which is the premise the §5 routing decision rests on.
 
 ---
 
@@ -67,6 +76,11 @@ Also in place:
 - Theming with **next-themes**, using `attribute="data-theme"`.
 - Package manager: **pnpm**.
 - Content lives in `.mdx` files, kept separate from route code.
+- Icons come from **`lucide`** (icon *data*, not `lucide-react` components) so `morphicons` can
+  interpolate their geometry. Both packages tree-shake and may coexist; see LEARNING.md for why a
+  morph cannot consume a rendered React component.
+- Structured data is hand-built JSON-LD in plain `<script type="application/ld+json">` tags —
+  not `next/script`, and not the Metadata API, which has no field for it.
 
 ---
 
@@ -157,7 +171,7 @@ elibabah-web/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
     layout/                 # Nav, Footer, Logo, ThemeToggle
-    content/                # MdxImage, MdxImageRow, MdxVideo
+    content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption
     theme-provider.tsx
   content/
     portfolio/*.mdx
@@ -168,6 +182,7 @@ elibabah-web/
     mdx-components.tsx      # MDX -> React component mapping
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
+    site.ts                 # SITE_URL — single source for absolute URLs
   public/
     images/{portfolio,editorial,case-studies}/<slug>/…
     videos/portfolio/<slug>/…
@@ -242,13 +257,77 @@ excerpt: string        # for the listing
 publishedAt: date      # quoted ISO string, e.g. "2026-05-15"
 relatedProject: slug | null      # cross-link to the portfolio
 heroBand: path | null
+heroAlt: string | undefined      # real description of the photo; falls back to title
+heroCredit: string | undefined   # display string, e.g. "Photo: Elías Hernández"
+heroCaption: string | undefined  # place / context line under the band
 ```
 
 Same as case studies: `readingTime` is derived, not declared.
 
+The three `hero*` companions are optional (`?:`, not `| null`) because they were added after the
+first articles existed and those files do not declare them. `gray-matter` simply omits the key.
+
 The models include **cross-linking** fields (`caseStudy` on a project, `relatedProject` on an
 article) to weave portfolio, case studies, and editorial together. There is no
 `relatedCaseStudy` on articles — an article reaches a case study through its project.
+
+### Authorship and image credit
+
+Images on this site do not all belong to the same person, and the collections differ in *how*
+they differ:
+
+- **Editorial** — photographs are Elías's own, taken by him. Not stock, not AI-generated.
+- **Portfolio** — **mixed ownership, item by item.** Most projects so far are professional work
+  where the client owns the brand, content, and often the design; screenshots show work done, not
+  work owned. But some projects are 100% personal and Elías owns them outright, and there will be
+  more. There is no blanket statement that holds for the whole collection — credit is decided per
+  project, never inferred from the folder.
+
+Three mechanisms carry this, from broadest to narrowest:
+
+1. **Global notice in the footer** — one mono line, no second `©` (the copyright line above it
+   already carries one). Covers the default case so individual images do not have to.
+2. **Per-image credit via `MdxFigcaption`** — it takes `caption`, `credit`, `sourceLabel` +
+   `sourceHref` and stacks up to three lines (`space-y-1`), all optional, returning `null` when
+   none are present. `MdxImage`, `MdxImageRow` and `MdxVideo` all accept `credit` and forward it;
+   the `/editorial/[slug]` hero band uses the same component with `heroCaption` / `heroCredit`.
+3. **JSON-LD `ImageObject`** — machine-readable authorship, see below.
+
+Copyright is automatic from the shutter, so none of this creates rights that did not exist. It
+exists to communicate authorship to readers and crawlers. Note that Next's image optimiser
+**strips EXIF/IPTC** when it converts to WebP/AVIF, so embedded metadata in the source file never
+reaches the visitor — only what is rendered on the page counts.
+
+### JSON-LD scope — editorial only, on purpose
+
+`app/layout.tsx` emits a `Person` node with a stable `@id` (`${SITE_URL}/#elias`). Because the
+layout wraps every route, that node is always present and can be referenced by `@id` from any
+page-level block; consumers merge nodes by `@id` within a single page.
+
+`app/editorial/[slug]/page.tsx` emits a `BlogPosting` whose `author`/`creator` point at that
+`@id`, with a nested `ImageObject` for the hero band carrying `creditText` and `copyrightNotice`.
+
+**Portfolio and case studies deliberately have no `ImageObject`.** A hardcoded
+`copyrightNotice: "© Elías Hernández"` would be false for client work, and since portfolio
+ownership is mixed per project (above), the collection cannot be covered by one rule. Extending
+this to portfolio requires an explicit per-project ownership field first — do not add it by
+pattern-matching the editorial code.
+
+Editorial is safe to cover uniformly because it contains no client screenshots and no sensitive
+project material. Articles may *link* to a project, but that is a cross-reference (`relatedProject`),
+not an embedded asset, and it carries no image rights with it.
+
+Three conventions baked into the current implementation, all worth knowing before touching it:
+
+- **`license` and `acquireLicensePage` are omitted on purpose.** They are the fields behind
+  Google's image-licensing feature: including them advertises that the photos can be licensed or
+  bought, which is the opposite of the intent. Their absence is a decision, not an oversight.
+  If a terms-of-use page ever exists, `license` would point at it.
+- **`heroCredit` is not reused as `creditText`.** The front-matter value is a display string with a
+  prefix ("Photo: …"); `creditText` takes the bare name so aggregators can format it themselves.
+- **"An editorial hero is Elías's own photo" is assumed**, and the copyright fields are emitted
+  whenever `heroBand` exists. The day an article uses someone else's photograph, that assumption
+  produces a false claim — add an explicit ownership flag then rather than editing the string.
 
 ---
 
@@ -263,9 +342,15 @@ article) to weave portfolio, case studies, and editorial together. There is no
 
 Contact (CTA + footer) was integrated into the layout in step 1, not as a separate step.
 
-The scaffolding phase is over. Work from here is **refinement and content**: writing real
-projects/case studies/articles, polishing responsive behaviour and imagery, and deciding where
-the Spanish epigraph goes (§1).
+The scaffolding phase is over. Work from here is **refinement and content**. Where that stands:
+
+- Real content is written for all 6 projects, 4 case studies and 3 articles — no placeholders left.
+- Authorship, credit and JSON-LD are in place for editorial (§7). Extending structured data to
+  portfolio needs a per-project ownership field first, and is deliberately not done yet.
+- Still open: the Spanish epigraph has **no home on the site yet** (§1) — the Home hero currently
+  runs the English headline. Candidates remain Home hero, About, or footer.
+- Still open: image credit exists as a mechanism but no `.mdx` body uses the `credit` prop yet; the
+  first article with its own photographs inside the body will be the one to exercise it.
 
 ---
 

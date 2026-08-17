@@ -9,12 +9,13 @@ type MdxVideoProps = {
     variant: keyof typeof imageSlots.video;
     poster: string;
     caption?: string;
+    credit?: string;
     sourceLabel?: string;
     sourceHref?: string;
     label: string;
 };
 
-export function MdxVideo({src, variant, poster, caption, sourceLabel, sourceHref, label}: Readonly<MdxVideoProps>){
+export function MdxVideo({src, variant, poster, caption, credit, sourceLabel, sourceHref, label}: Readonly<MdxVideoProps>){
     if (!label) throw new Error(`MdxVideo: missing label for ${src}`);
     
     const { width, height } = imageSize(readFileSync(path.join(process.cwd(), "public", poster)));
@@ -33,7 +34,7 @@ export function MdxVideo({src, variant, poster, caption, sourceLabel, sourceHref
             height={height}
             className={`h-auto rounded-xl ${maxWidthClass}`}
             />
-          <MdxFigcaption caption={caption} sourceLabel={sourceLabel} sourceHref={sourceHref} />
+          <MdxFigcaption caption={caption} credit={credit} sourceLabel={sourceLabel} sourceHref={sourceHref} />
         </figure>
     )
 }

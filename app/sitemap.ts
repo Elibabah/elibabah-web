@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next"
+import { SITE_URL } from "@/lib/site"
 import { getAllArticles } from "@/lib/editorial"
 import { getAllCaseStudies } from "@/lib/case-studies"
 import { getAllProjects } from "@/lib/portfolio"
 
-const BASE = "https://elibabah.com"
+const BASE = SITE_URL
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const projects = getAllProjects().map((p) => ({
