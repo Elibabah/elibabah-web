@@ -55,13 +55,7 @@ export function Nav() {
       <nav className="mx-auto max-w-5xl px-6 py-4 flex items-center justify-between">
 
         {/* 1. Brand — always visible */}
-        <div className="flex items-center gap-2.75">
-          <Logo />
-          <Link href="/" className="font-heading font-bold text-[21px] tracking-[-0.3px] text-foreground hover:text-foreground">
-            elibabah
-          </Link>
-        </div>
-      
+        <Logo includesName={true} />
         {/* 2. Desktop — hidden in mobile */}
         <div className="hidden md:flex items-center gap-8">
           <ul className="flex items-center gap-6">
@@ -75,6 +69,7 @@ export function Nav() {
               </li>
             )}
           </ul>
+          
           <ThemeToggle />
 
           <a
@@ -120,6 +115,7 @@ export function Nav() {
           </a>
         </div>
       )}
+
     </header>
   );
 }

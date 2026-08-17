@@ -1250,3 +1250,278 @@ el navegador, no en build ni en el editor.
 > tome cada campo tipo `cover`/imagen, y confirme con `fs.existsSync(path.join("public", src))` que el
 > archivo existe — fallando el build si no. No existe ese chequeo todavía en este proyecto; es la
 > extensión natural de la lección de esta sección, pendiente de implementar.
+
+---
+
+## Menú móvil, segunda iteración — solapamiento, cierre externo y foco
+
+Continuación de "Navegación responsive — patrón con Tailwind y `useState`". Aquel patrón dejaba el
+menú funcionando, pero con tres carencias que solo aparecen al usarlo de verdad en un móvil: el panel
+empujaba el contenido, no se cerraba al tocar fuera, y el teclado no tenía salida.
+
+### 1. `sticky` no saca del flujo
+
+Al abrir el menú, todo el contenido de la página bajaba. El instinto es mirar el `z-index`, y es el
+sitio equivocado: no había un problema de apilamiento, había un problema de layout.
+
+`position: sticky` **no saca al elemento del flujo normal** — el `<header>` sigue ocupando su altura
+real. Como el panel es hijo del header, al montarse hacía crecer el header, y el header empujaba todo
+lo de abajo. El `z-50` no tenía nada que ordenar porque no había solape.
+
+```
+❌ El panel crece dentro del header y empuja la página
+<header className="sticky top-0 z-50">
+  <nav>…</nav>
+  {isOpen && <div className="border-t …">…</div>}
+</header>
+
+✅ El panel se ancla bajo la barra, fuera del flujo
+<header ref={headerRef} className="sticky top-0 z-50">
+  <nav>…</nav>
+  {isOpen && <div className="absolute top-full inset-x-0 bg-background border-b …">…</div>}
+</header>
+```
+
+Tres detalles que acompañan al `absolute`:
+
+- **`bg-background` pasa a ser obligatorio.** Dentro del flujo, el panel heredaba visualmente el fondo
+  del header. Flotando encima del contenido, sin fondo propio se ve la página a través del menú.
+- **`border-t` → `border-b`.** El header ya dibuja su borde inferior bajo la barra; manteniendo el
+  `border-t` del panel salían dos líneas pegadas.
+- **`relative` en el header sobra.** Se añadió por reflejo, pensando en el bloque contenedor del
+  `absolute`. Pero `sticky` ya no es `static`, así que por sí solo establece ese bloque contenedor.
+  Peor aún: `sticky` y `relative` son dos utilidades de `position` compitiendo, y cuál gana no lo
+  decide el orden en el atributo `class` sino el orden en el CSS generado por Tailwind.
+
+### 2. `pointerdown` vs `click` — el bug que parecía de `Link`
+
+Para cerrar al pulsar fuera, el listener escucha `pointerdown` en `document`. Elegirlo sobre `click`
+tiene dos motivos:
+
+- Unifica ratón, táctil y lápiz en un solo evento.
+- Evita la reentrada clásica: si escuchas `click`, el mismo clic que abrió el menú puede llegar al
+  `document` justo después de que el efecto monte el listener, cerrándolo al instante.
+
+**El bug que costó el rato**: los enlaces del panel dejaron de navegar. Solo cerraban el menú. La
+causa era que el `ref` no estaba enganchado al `<header>`, así que `headerRef.current` era `null`,
+`headerRef.current?.contains(...)` devolvía `undefined`, y `!undefined` es `true` — *todo* clic
+contaba como "fuera", incluidos los del propio panel.
+
+La secuencia exacta al pulsar un enlace:
+
+```
+1. pointerdown → el handler cierra el menú
+2. React re-renderiza y el panel se desmonta
+3. click nunca se emite — el <a> ya no existe
+```
+
+El navegador solo emite `click` si `pointerdown` y `pointerup` caen sobre el mismo elemento. Al
+desaparecer el enlace entre medias, la navegación se evapora. El síntoma apunta a `Link` o al router,
+y el fallo está en un `ref` sin montar.
+
+**Lección de guardas**: el `?.` enmascaró el fallo. Guardando sobre una variable local, el mismo
+olvido habría dado un síntoma mucho más legible ("el clic fuera no cierra") en vez de romper la
+navegación:
+
+```tsx
+function handlePointerDown(event: PointerEvent) {
+  const header = headerRef.current;
+  if (header && !header.contains(event.target as Node)) {
+    setIsOpen(false);
+  }
+}
+```
+
+**Por qué el ref va en el `<header>` y no en el panel**: si la zona "interior" fuese solo el panel, el
+botón hamburguesa quedaría fuera. Al pulsarlo con el menú abierto se dispararían dos cosas — el
+handler de fuera cierra, y acto seguido el `onClick` del botón vuelve a abrir. El toggle parece
+muerto. Metiendo el botón dentro de la zona interior, el problema no existe. De regalo, cambiar de
+tema con el `ThemeToggle` tampoco cierra el menú.
+
+### 3. `as Node`, y por qué no `as HTMLElement`
+
+`contains()` está declarado como `contains(other: Node | null): boolean`, pero `event.target` viene
+tipado como `EventTarget | null` — el escalón de arriba, que incluye cosas fuera del DOM (`window`,
+`WebSocket`, `AbortSignal`). De ahí la aserción, que es puramente de compilación y se borra al
+transpilar.
+
+```
+EventTarget          ← lo que puede recibir eventos
+ └─ Node             ← lo que está en el árbol del DOM
+     └─ Element
+         ├─ HTMLElement    (<div>, <a>, <button>…)
+         └─ SVGElement     (<svg>, <path>…)
+```
+
+El detalle concreto de este componente: al pulsar el botón hamburguesa, el `target` real no es el
+`<button>` sino el `<path>` del SVG que hay dentro, porque el evento se origina en el elemento más
+profundo bajo el puntero y luego burbujea. Un `<path>` es `SVGPathElement`, que **no** es
+`HTMLElement`. Escribir `as HTMLElement` sería mentirle al compilador: aquí no rompe nada porque solo
+se usa en `contains`, pero habilita que alguien escriba luego `.dataset` y reviente en runtime.
+
+**La regla**: aserta al tipo más estrecho que realmente necesitas, no al más cómodo.
+
+### 4. Bloquear el scroll vs cerrar al hacer scroll
+
+La reacción por defecto ante un menú abierto es bloquear el scroll del body con
+`document.body.style.overflow = "hidden"`. Aquí se descartó, y el razonamiento importa más que la
+línea de código.
+
+Este panel **no es un overlay a pantalla completa**: es un desplegable anclado bajo la barra con
+cuatro enlaces. Congelar la página entera por algo tan pequeño se siente roto. Para un dropdown, la
+convención es cerrarlo al hacer scroll, no impedir el scroll.
+
+Además, el bloqueo arrastra problemas propios:
+
+- **iOS Safari ignora `overflow: hidden` en el body** en bastantes situaciones — y es justo la
+  plataforma objetivo, porque el menú solo existe en móvil. El apaño es `position: fixed` guardando y
+  restaurando el `scrollY`, con su propio riesgo de aterrizar en otro punto de la página.
+- **Estado obsoleto al rotar el dispositivo.** Si se cruza el breakpoint `md` con el menú abierto, el
+  botón y el panel desaparecen (`md:hidden`) pero `isOpen` sigue en `true`. Sin bloqueo eso es
+  inocuo; con bloqueo, el body queda congelado sin ningún control visible para liberarlo, y la página
+  está muerta hasta recargar.
+
+Descartado el bloqueo, ese segundo problema se desvanece — no hizo falta el efecto con `matchMedia`
+que se había planteado para rescatarlo.
+
+**Sobre el cierre al scroll**: el `pointerdown` ya lo cubría *de rebote*, porque un scroll táctil
+empieza con el dedo apoyándose sobre el contenido, fuera del header. Pero es incidental, no
+intencionado, y deja tres huecos: el arrastre que empieza sobre el propio panel, la rueda del ratón
+(que no emite `pointerdown` en ningún momento) y el scroll por teclado. Un listener explícito los
+cierra:
+
+```tsx
+window.addEventListener("scroll", handleScroll, { passive: true, once: true });
+```
+
+`once: true` encaja bien: el handler solo necesita dispararse una vez y se retira solo, en vez de
+quedarse vivo en un evento que se emite decenas de veces por segundo durante la inercia. El
+`removeEventListener` de la limpieza sigue haciendo falta para el caso en que el menú se cierre por
+otra vía y el scroll nunca llegue — llamarlo sobre un listener ya consumido es inofensivo.
+`passive: true` porque el handler no llama a `preventDefault`.
+
+### 5. La caja del ref no es su contenido
+
+Primer intento del retorno de foco: `buttonRef && buttonRef.current?.focus()`. Ese guard no hace
+nada, y entender por qué aclara qué es un ref.
+
+`useRef` devuelve una **caja estable**: un objeto `{ current: ... }` que React crea una vez y conserva
+entre renders. Esa caja siempre existe — es truthy desde el primer render y para siempre. Lo que
+puede ser `null` es su contenido, `.current`, que arranca en `null` y solo se rellena cuando React
+monta el elemento y le asigna el nodo del DOM.
+
+```tsx
+buttonRef &&                  // ❌ pregunta por algo que nunca es falso
+buttonRef.current?.focus()    // ✅ el guard útil está en el contenido
+```
+
+Es la misma distinción que en `handlePointerDown`: ahí se hace `const header = headerRef.current` y
+*luego* `header &&`. El guard va siempre sobre el contenido, nunca sobre la caja.
+
+### 6. `focus()` fuera del `if` — trampa de foco
+
+Al cerrar con `Escape`, el foco cae a `body` y el siguiente `Tab` reinicia el recorrido desde el
+principio de la página. Devolverlo al disparador es lo correcto, pero la primera versión se escribió
+sin llaves:
+
+```tsx
+❌ function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === "Escape") setIsOpen(false);
+  buttonRef.current?.focus()   // se ejecuta con CUALQUIER tecla
+}
+
+✅ function handleKeyDown(event: KeyboardEvent) {
+  if (event.key === "Escape") {
+    setIsOpen(false);
+    buttonRef.current?.focus();
+  }
+}
+```
+
+Con la versión rota, el menú abierto atrapa el foco: pulsas `Tab` estando en el botón → el handler lo
+devuelve al botón → el `Tab` por defecto avanza al primer enlace. Pulsas `Tab` otra vez → vuelta al
+botón → otra vez al primer enlace. Rebotas entre el botón y "Portfolio" sin llegar nunca al resto.
+Justo el escenario que el `focus()` pretendía mejorar, invertido.
+
+El retorno de foco va **solo** en el handler de teclado, no en el de puntero: si el usuario cierra
+pulsando en otro sitio, ya está interactuando ahí y robarle el foco sería peor.
+
+### 7. `aria-expanded` con nombre estable
+
+El botón tenía `aria-label={isOpen ? "Close menu" : "Open menu"}`. Cambiarlo a nombre fijo más estado
+en el atributo:
+
+```tsx
+aria-label="Menu"
+aria-expanded={isOpen}
+```
+
+Con `aria-expanded`, el estado ya lo anuncia el atributo. Cambiar además el nombre accesible hace que
+el lector de pantalla comunique lo mismo dos veces con palabras distintas. La convención es nombre
+estable + estado en ARIA.
+
+**`aria-controls` no se añadió** a propósito: apuntaría a un `id` que no existe mientras el panel está
+desmontado por el render condicional, y referenciar un `id` inexistente es markup inválido.
+`aria-expanded` por sí solo está bien soportado.
+
+> **Pregunta de entrevista**: un menú desplegable deja de navegar al pulsar sus enlaces — solo se
+> cierra. ¿Por dónde se empieza?
+> Por el orden de los eventos, no por el router. Si algo cierra el menú en `pointerdown` o
+> `mousedown`, el elemento se desmonta antes de que llegue el `click`, y el navegador solo emite
+> `click` cuando `pointerdown` y `pointerup` caen sobre el mismo elemento. La navegación nunca se
+> dispara porque el `<a>` ya no existe. La pista que descarta al router: el cierre sí funciona, y
+> funciona *demasiado* — se dispara también dentro del panel.
+
+---
+
+## Iconos como datos vs iconos como componentes — `lucide` y `morphicons`
+
+Para animar la transición hamburguesa ↔ cierre se instaló `morphicons`, que interpola entre dos
+iconos de trazo con física de muelles. El primer intento no compilaba, y la razón es una distinción
+que atraviesa todo el ecosistema de iconos.
+
+**`MorphIcon` no consume componentes, consume datos.** Necesita las coordenadas de los trazos para
+poder interpolarlas; un componente React ya renderizado no se las da. Por eso el import va al paquete
+`lucide` (datos, `IconNode`) y no a `lucide-react` (componentes):
+
+```tsx
+❌ import { Menu, X } from "lucide-react";   // componentes: no interpolables
+✅ import { Menu, X } from "lucide";         // datos: IconNode
+```
+
+Los dos paquetes coexisten por diseño y ambos hacen tree-shaking, así que una app puede usar
+`lucide-react` para iconos estáticos y `lucide` para los que morphean — manteniendo las versiones
+alineadas para que dibujen igual.
+
+```tsx
+<MorphIcon icon={isOpen ? X : Menu} size={20} strokeWidth={1.75} spring="smooth" />
+```
+
+El estado vive fuera; la animación es un detalle de implementación que el componente recoge al
+cambiar la prop. No hace falta `AnimatePresence`, ni `key`, ni declarar pares origen/destino.
+
+Detalles que importaron al integrarlo:
+
+- **Rejilla compartida.** Ambos extremos del morph deben vivir en el mismo sistema de coordenadas.
+  Lucide, Tabler, Heroicons e Iconoir dibujan en 24×24, por eso los morphs entre librerías funcionan.
+  Para un set en otra rejilla (Heroicons *solid* en 20, Carbon en 32) hay que re-encajarlo una vez con
+  `fitIcon`. Los bindings asumen `viewBox="0 0 24 24"` y admiten sobreescribirlo por prop.
+- **Accesibilidad por defecto.** Emite `aria-hidden` salvo que se le pase `label`. Como el `aria-label`
+  ya está en el `<button>`, pasarle `label` duplicaría el anuncio.
+- **`currentColor` y caps redondeados** salen de fábrica, igual que en `lucide-react`, así que el
+  icono sigue heredando el color del tema sin tocar los tokens.
+- **SSR limpio**: el servidor emite el SVG estático exacto y el runtime nace en la hidratación, sin
+  parpadeo ni desplazamiento de layout.
+- **Presets de muelle**: `smooth` (críticamente amortiguado, sin rebote), `snappy` (rápido, rebote
+  sutil) y `bouncy` (juguetón). Aquí se eligió `smooth` por coherencia con la sobriedad del resto.
+- **Movimiento reducido**: desde la 1.4.2 los morphs animan siempre por defecto
+  (`reducedMotion="never"`), con el argumento de que son micro-transiciones comunicativas.
+  `reducedMotion="user"` los degrada a cambio instantáneo mientras el ajuste del sistema esté activo.
+
+> **Pregunta de entrevista**: ¿por qué una librería de morphing de iconos no puede aceptar un
+> componente de `lucide-react`?
+> Porque el morph necesita la geometría — los comandos del atributo `d` de cada trazo — para
+> muestrearla, emparejar los puntos entre origen y destino e interpolarlos frame a frame. Un
+> componente React devuelve un elemento ya construido; sus paths son un detalle interno que no expone
+> como datos manipulables. De ahí que el ecosistema publique el mismo set en dos formatos: datos para
+> quien necesita operar sobre la geometría, componentes para quien solo necesita pintarla.

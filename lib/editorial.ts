@@ -13,6 +13,9 @@ type ArticleFrontmatter = {
   publishedAt: string;
   relatedProject: string | null;
   heroBand: string | null; // hero -> /portfolio/[slug], /case-studies/[slug], /editorial/[slug]
+  heroAlt?: string;
+  heroCredit?: string;
+  heroCaption?: string;
 };
 
 export type Article = ArticleFrontmatter & { readingTime: number };

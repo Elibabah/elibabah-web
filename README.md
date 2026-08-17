@@ -16,6 +16,8 @@ It is not a pure portfolio nor a pure blog: it is both, woven together. Projects
 | Content | MDX with YAML front matter, rendered via `next-mdx-remote` + `gray-matter` |
 | Theming | `next-themes` with `attribute="data-theme"` |
 | Fonts | `next/font/google` — Source Serif 4, Inter, JetBrains Mono |
+| Icons | `lucide` (icon data) + `morphicons` (spring-interpolated transitions) |
+| Images | `image-size` reads intrinsic dimensions at build time, so MDX images need no width/height |
 | Analytics | `@vercel/analytics`, `@vercel/speed-insights` |
 | Package manager | pnpm |
 | Hosting | Vercel (apex `elibabah.com`; `www` redirects to apex) |
@@ -64,7 +66,7 @@ app/
 
 components/
   layout/                 # Nav, Footer, Logo, ThemeToggle
-  content/                # MdxImage, MdxImageRow, MdxVideo
+  content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption
   theme-provider.tsx
 
 content/                  # all site content, as MDX
@@ -79,6 +81,7 @@ lib/                      # bridge between content/ and app/
   mdx-components.tsx      # MDX -> React component mapping
   image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
   reading-time.ts         # reading time derived from the MDX body
+  site.ts                 # SITE_URL — single source for absolute URLs (sitemap, robots, JSON-LD)
 
 public/
   images/{portfolio,editorial,case-studies}/<slug>/…
@@ -138,11 +141,22 @@ excerpt: string
 publishedAt: date        # quoted ISO string
 relatedProject: slug|null
 heroBand: path|null
+heroAlt: string?         # real description of the photo; falls back to the title
+heroCredit: string?      # e.g. "Photo: Elías Hernández"
+heroCaption: string?     # place / context line under the band
 ```
 
 `readingTime` is not declared anywhere: it is derived from the MDX body by [lib/reading-time.ts](lib/reading-time.ts) as the file is read, so it can never drift from the text.
 
 Images referenced from front matter live under `public/images/<collection>/<slug>/`. The canonical aspect ratio, responsive width, `sizes` attribute and recommended export dimensions for every image slot are defined once in [lib/image-slots.ts](lib/image-slots.ts) — use it instead of hardcoding values.
+
+### Image credit
+
+Editorial photographs are Elías's own. Portfolio imagery is mixed: most projects are professional work whose brand and content belong to the client, some are entirely personal. Ownership is therefore decided per item, never inferred from the collection.
+
+Credit is carried at three levels: a global notice in the footer, an optional per-image `credit` line rendered by `MdxFigcaption` (alongside `caption` and an optional source link), and a JSON-LD `ImageObject` on editorial articles.
+
+Structured data is a graph, not a per-page tag: the root layout emits a `Person` node with a stable `@id`, and `/editorial/[slug]` emits a `BlogPosting` that references it by that `@id` rather than duplicating the node. Portfolio and case studies deliberately emit no `ImageObject` — a single hardcoded copyright notice cannot be true for a collection with mixed ownership. See §7 of [CLAUDE.md](CLAUDE.md) for the full rationale, including which schema.org fields are omitted on purpose.
 
 ---
 

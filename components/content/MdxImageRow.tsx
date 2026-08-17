@@ -10,13 +10,14 @@ type MdxImageRowProps = {
   src: string;
   alt: string;
   caption?: string;
+  credit?: string;
   sourceLabel?: string;
   sourceHref?: string;
   side?: "left" | "right";
   children: ReactNode;
 };
 
-export function MdxImageRow({ src, alt, caption, sourceLabel, sourceHref, side = "left", children }: Readonly<MdxImageRowProps>) {
+export function MdxImageRow({ src, alt, caption, credit, sourceLabel, sourceHref, side = "left", children }: Readonly<MdxImageRowProps>) {
   const filePath = path.join(process.cwd(), "public", src);
   const { width, height } = imageSize(readFileSync(filePath));
   const { maxWidthClass, sizes } = imageSlots.body.screenshotMobile;
@@ -36,7 +37,7 @@ export function MdxImageRow({ src, alt, caption, sourceLabel, sourceHref, side =
           height={height}
           className={`w-full ${maxWidthClass} h-auto mx-auto rounded-xl`}
         />
-        <MdxFigcaption caption={caption} sourceLabel={sourceLabel} sourceHref={sourceHref} />
+        <MdxFigcaption caption={caption} credit={credit} sourceLabel={sourceLabel} sourceHref={sourceHref} />
       </figure>
       <div className="font-body text-base text-ink-soft leading-relaxed sm:w-3/5">
         {children}

@@ -1,12 +1,21 @@
-export function MdxFigcaption({ caption, sourceLabel, sourceHref }: Readonly<{
-  caption?: string; sourceLabel?: string; sourceHref?: string;
+export function MdxFigcaption({ caption, credit, sourceLabel, sourceHref }: Readonly<{
+  caption?: string; credit?: string; sourceLabel?: string; sourceHref?: string;
 }>) {
-  if (!caption && !sourceHref) return null;
+  if (!caption && !credit && !sourceHref) return null;
   return (
-    <figcaption className="font-mono text-xs text-ink-faint text-center">
-      {caption}
+    <figcaption className="font-mono text-xs text-ink-faint text-center space-y-1">
+      {caption && (
+        <div>
+          {caption}
+        </div>
+      )}
+      {credit && (
+        <div>
+          {credit}
+        </div>
+      )}
       {sourceHref && (
-        <div className="mt-1">
+        <div>
           <a href={sourceHref} target="_blank" rel="noopener noreferrer"
              className="text-accent hover:underline">
             {sourceLabel ?? "Source"}

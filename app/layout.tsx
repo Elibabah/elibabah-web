@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Footer } from "@/components/layout/Footer";
 import type { Metadata } from "next";
 import { Nav } from "@/components/layout/Nav";
+import { SITE_URL } from "@/lib/site"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -25,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://elibabah.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Elibabah — Elías Hernández",
     template: "%s | Elibabah",
@@ -39,9 +40,10 @@ export const metadata: Metadata = {
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": `${SITE_URL}/#elias`,
   name: "David Elías Hernández Morales",
   alternateName: ["Elías Hernández", "Elibabah"],
-  url: "https://elibabah.com",
+  url: SITE_URL,
   jobTitle: "Frontend Engineer",
   address: {
     "@type": "PostalAddress",
