@@ -7,8 +7,11 @@ import { MdxFigcaption } from "@/components/content/MdxFigcaption"
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site"
 import { findProjectBySlug } from '@/lib/portfolio'
+import { imageSize } from "image-size";
 import { imageSlots } from "@/lib/image-slots";
 import { mdxComponents } from "@/lib/mdx-components";
+import path from "node:path";
+import { readFileSync } from "node:fs";
 
 export async function generateMetadata({
   params,
@@ -17,9 +20,44 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = getArticleBySlug(slug);
+
+  let shareImage = [
+    {
+      url: `${SITE_URL}/opengraph-image`,
+      width: 1200,
+      height: 630,
+      alt: "Elibabah, the personal site of Elías Hernández",
+    },
+  ];
+
+  if (article.heroBand) {
+    const { width, height } = imageSize(
+      readFileSync(path.join(process.cwd(), "public", article.heroBand)),
+    );
+    shareImage = [
+      {
+        url: `${SITE_URL}${article.heroBand}`,
+        width,
+        height,
+        alt: article.heroAlt ?? article.title,
+      },
+    ];
+  }
+
   return {
     title: article.title,
     description: article.excerpt,
+    openGraph: {
+      type: "article",
+      title: article.title,
+      description: article.excerpt,
+      url: `${SITE_URL}/editorial/${article.slug}`,
+      publishedTime: article.publishedAt,
+      images: shareImage,
+    },
+    twitter: {
+      card: "summary_large_image",
+    },
   };
 }
 
