@@ -12,6 +12,12 @@ export const imageSlots = {
     sizes: "(min-width: 1024px) 976px, calc(100vw - 48px)",
     exportPx: { width: 1960, height: 840 },
   },
+  documentCover: {
+    // PDF — /research & /research/[slug].
+    aspectClass: "aspect-17/22",
+    sizes: "(min-width: 1024px) 220px, 150px",
+    exportPx: { width: 660, height: 854 },
+  },
   relatedThumb: {
     // mini-card "related project" in /editorial/[slug]
     aspectClass: "aspect-square",
