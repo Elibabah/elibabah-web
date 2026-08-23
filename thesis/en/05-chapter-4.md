@@ -427,7 +427,351 @@ as a poetic phenomenology so as to manage to perceive otherwise.[^47] For this r
 managing to cross the doors of perception lies in modifying not exterior reality but the conception we hold
 of it, and so recasting ourselves before it.
 
-*[Chapter 4 continues. This file covers pp. 131–149; the remainder, pp. 150–167, follows.]*
+As Brausen himself would say: "it is not the facts that matter, but what we feel".[^48] And finally,
+what are facts if not interpretations? Since reality does not signify a fact *per se* but a
+construction, Brausen, in interpreting it anew, transforms it. A view, without doubt, of Novalian
+echo, for whom: "if you cannot turn thoughts into exterior things, turn exterior things into
+thoughts".[^49]
+
+Brausen, in penetrating his everyday trap (money, wife, work), not only realises its lack of sense
+but is also shown by it the senselessness of life itself, the existential void before which Brausen
+wavers at the helm of his vessel, only to discover that it will be imagination, the path of access
+to the deepest in himself, that is the way of keeping awake before the song of the sirens of
+inauthenticity. Like Ulysses on his voyage, he binds himself with the ropes of imagination so as not
+to fall into the ocean of surfaces; with imagination he "subjects"[^50] himself.
+
+This nihilism that Brausen auscultates conceals, in turn, the secret of the search for happiness. In
+la Queca he already arrives at the two greatest sensory phenomena of existence: life and death.[^51]
+That is, he attends, by the carnal way (in the redoubt of carnival), upon the mystery of being. Is
+being not perhaps surrounded by non-being, to which Brausen returns in order to unstitch himself and
+be reborn as Arce? Such a sensory summit, the encounter with his erotic dimension, cannot be reduced
+to simple hedonism. Brausen's voluptuousness, illuminated by the tremulous flame of imagination,
+clears the interior immensity that can only be revealed in the carnal instant. Nevertheless, the
+paradox Brausen confronts is that of how to keep happiness from signifying an evanescence reduced
+solely to sensible pleasure.
+
+His great achievement therefore consists in extrapolating the act of love with la Queca to the
+founding of Santa María, in a manner not only of keeping alive a desire whose nature is ephemeral but
+of inhabiting it in its duration. Because what matters to Brausen about carnality is not its sexual
+fruit but its erotic one. Proof of this is given when Raquel, Gertrudis's younger sister and Brausen's
+old lover, visits him once he has been reborn as Arce, and he not only fails to recognise her at once
+but finds in her something that repels him; she is pregnant, and "the belly that grows on her amounts
+to the breast they cut from her sister". (230) Put another way, Brausen seeks to make of the sexual
+instant a lasting erotics.[^52] Does art, as creative expression, not manage to keep desire alive in
+its struggle against time? *Ars longa, vita brevis*. Santa María is an eternal midday for the hours of
+everydayness. A mythical provincial city, it thus represents the poetics of sensible excitation within
+a transcendence that wells up from the instant at the same time as it surpasses it. An instantaneous
+transcendence whose force, imposing for consciousness and uncontrollable for the senses, shows itself
+only once, like lightning in the storm: a snapshot of revelation.
+
+Finally, only Eros can communicate the ontological dimension with the metaphysical, or what amounts to
+the same, find totality in the everyday, eternity in the ephemeral and plenitude in transit. For this
+reason Brausen will very soon note, in the exercise of imagination, that the universal is found veiled
+within the ordinary singular. Seen thus, Santa María takes on the force of the instant that endures,
+voluptuousness incarnated in the body that transcends the physical; a provincial city founded by "the
+maniacal task of constructing eternities with elements made of fleetingness, transit and forgetting".
+(83)
+
+Carnality as eroticism thus signifies a path of knowledge. Brausen manages to converge fiction and
+self-fiction in his own flesh so as to find, within himself, the lost breast that was himself. The
+poetic instant already has a metaphysical perspective.[^53] The freedom so longed for must be found, in
+this way, in the exaltation of the senses in a descent through the well of his being.
+
+Understood thus, the work of salvation lies in inhabiting his interior immensity. An immensity to which
+anxiety is inherent, but also totality. An intimate immensity, Bachelard would say.[^54] And perhaps
+one can only imagine with plenitude from intimacy, that intimacy Brausen had lost; a loss, therefore,
+that suffocated him. For this reason Brausen, awake from his existential trap, comes in search of his
+intimacy so as to find himself, because as Bachelard notes: "the search for intimacy is a dialectic that
+no unhappy experience can arrest",[^55] for in it are found the hidden values of being; in it imagination
+"goes to the bottom of things, as if it had to find, in a final image, the rest of imagining".[^56]
+
+Salvation is not found, from this focus, only in the mind or, what amounts to the same, it is not a
+salvation achieved with pure mental speculation. Imagination occurs not only as a phenomenon of the
+psyche but of the whole body. A breath of sensations, it recasts corporeality, because there are demons
+that inhabit the abysses of the flesh. The instant, seen in this way in pursuit of a sensible salvation,
+reveals being and its reality.[^57] There is no consciousness of self without an anticipated
+consciousness of death. Yet if the instant reveals time, it also exceeds it: it becomes ardour. A way
+toward play with eternity, apprehended by the creative word, because as Paz saw:
+
+> the poetic word is never completely of this world: it always carries us beyond, to other lands, other
+> skies, other truths […]. The dual condition of the poetic word is no different from the nature of man,
+> a temporal and relative being but always launched toward the absolute. […] In every instant it wants
+> to realise itself as totality, and each of its hours is a monument to a momentary eternity.[^58]
+
+The salvation sought, finally, in the sensual happiness of love, has the weight of serving as a poetics
+of transcendence. Consciousness in a state of extreme lucidity is equivalent to a state of
+unconsciousness: the threshold of reason touches the limits of madness. The lucidity of dream and of
+wakefulness are two extremes of one and the same phenomenon: two paths of access to being. Brausen's
+pitiless consciousness presents itself to him as an intoxication.
+
+Love, lodged in the dialectic of imagination, thus represents a phenomenon of superhumanity. Through it
+Brausen finds the possibility of transcending himself: of penetrating his metaphysical dimension in the
+nature of myth, that is, in access to the real that dwells in him. Because myth, as Mircea Eliade saw,
+reveals a metaphysical position.[^59] Put another way, Brausen repositions, through imagination, his
+ontological position before his world. And such a poetic sensibility has the capacity to enter the
+unknown, in the last instance the unknown that he himself is, that forgotten essential value.
+
+It is important to note that myth, more than a historical time, signifies for man his imaginative
+dimension, a type of sensibility. As Mircea Eliade points out, myth has a present-day currency in the
+need for rites; that is, for narratives.[^60] Through the time of myth, being becomes round. In
+consequence, the aesthetic dimension (*aisthetikê*) does not refer, as modern philosophy has taken it,
+solely to beauty. Properly understood, it signifies sensibility.[^61] In this sense Brausen recasts his
+aesthetic dimension, that sensibility he holds of himself before his world, by reconfiguring his ethical
+position. Creative imagination crosses both thresholds simultaneously.[^62]
+
+In this way, through the work of the creative imagination, Brausen manages to find in fiction a form of
+authentic salvation insofar as he glimpses and reads in it the problem of his ordinary existence. It is a
+consciousness that not only dismantles immediate reality but also looks at fictional reality in a search
+for, and a construction of, the new foundation of the identity of his being. For this reason Brausen
+discovers himself symbolically at this other degree of referentiality: "I knew then what I wanted to
+resurrect now with the name of Díaz Grey. I knew the masculine speed of the girl (a young Gertrudis), her
+pitiless manner of suppressing the prologue, the phrases and gestures that are not fundamental". (37)
+
+Fiction and self-fiction become for him another way of examining himself. The acuteness of imagination in
+Brausen will lead him not only to construct fiction out of his reality but to find in fiction his own
+remains. Finally, Brausen imagines from the ruins he carries within. Santa María, perhaps a mirror of
+water, does not reveal his face directly and clearly but, as in all creation, reflects it ambiguously. It
+is a gaze that does not remain on the surfaces but approaches the depth where being drowns
+(voluptuousness) but is also reborn.
+
+Salvation, on the other hand and notwithstanding its relation with the world of myth, has no
+religious-theistic sense. Yet the only way of access to it is given in the arrival at the metaphysical
+dimension, whose nature is always divine. God, understood as a metaphor of the sensible and no longer only
+as an abstract category, will be the maximal being of that meta-human dimension. Put another way, man will
+be the only God of himself. In this way, through religious paths (writing, love, intoxication, as Onetti
+would say: forms of rite) it will be possible to inhabit myth, that is, to strive for an erotic salvation.
+Myth, therefore, lodged in human earthliness. In the parish priest's words:
+
+> Yo besaré los pies de aquel que comprenda que la eternidad es ahora, que él mismo es el único fin; que
+> acepte y se empeñe en ser él mismo, solamente porque sí, en todo momento y contra todo lo que se oponga,
+> arrastrado por la intensidad, engañado por la memoria y la fantasía. Beso sus pies, aplaudo el coraje de
+> aquel que aceptó todas y cada una de las leyes de un juego que no fue inventado por él, que no le
+> preguntaron si quería jugar. (216)
+>
+> I shall kiss the feet of the man who understands that eternity is now, that he himself is the only end;
+> who accepts and insists on being himself, simply because, at every moment and against everything that
+> opposes him, dragged along by intensity, deceived by memory and by fantasy. I kiss his feet, I applaud
+> the courage of the man who accepted each and every one of the laws of a game that was not invented by
+> him, who was not asked whether he wanted to play. (216)
+
+A parish priest who, recognising God's existence, confines himself to man's salvation on Earth. The
+experience of man on the way to salvation in an opening onto the divine occurs not in the search for
+paradise but in the experience of being as return.
+
+Consequently, the note Brausen finds from Gertrudis announcing her departure for Temperley, written on the
+back of a card bearing "The Great Invocation",[^63] carries hidden within it the key to his salvation, of
+which Brausen understands "almost all the words that were in capitals": "From", "God", "Let", "Will",
+"Love", "Power", "Plan", "Earth". (It is worth noting that such an invocation belongs to no religion in
+particular; on the contrary, it is a universal prayer that gives an indication of man's place in the
+cosmos.) Those key words will be the condition of Arce's life in his search to save himself in a creative
+happiness unleashed in the poetics of knowing that: "the whole science of living lies in the simple
+softness of settling into the hollows of the events we have not provoked with our will, not forcing
+anything, being, simply, every minute". (246) A poetics that reveals an attempt to approach the natural
+pre-ontological harmonic state. That is, to touch, through eroticism, the limits of the human condition in
+the return to its foundation.[^64] Such work implies, through imagination, descending to the sensible
+membrane that separates while it communicates the real, given and inaccessible, with reality as construct
+(the house of being). Here lies the dialectical force between trap and salvation, where the trap consists
+in the human condition and salvation in standing outside it, in the acceptance of living without will,
+outside all ethical dilemma, imitating immanence.[^65] And Onetti, nourished by a literary tradition for
+which imagination is the cornerstone, allows us to read here a dialogue at low pulse with Kafka's *The
+Trial*, where Mr K., in his will to die like a dog, beyond all negative reading, was perhaps attempting to
+save himself by managing, through imagination, to stand outside the human condition that had pursued and
+exhausted him to the point of absurdity. A will strengthened by his belief that he was suffering an
+unworthy death before a life he took to be authentic. Finally the question remains: of what was Mr K.
+guilty? Or with Dostoevsky's *A Writer's Diary*, where he noted: "Since, to my questions about happiness,
+it is declared to me in answer, by means of my consciousness, that I cannot be happy except in that harmony
+with the great whole which I neither conceive nor shall ever be capable of conceiving, it is evident…".[^66]
+
+Under such a view, "the crime" that drives every action in the novel acquires the value of "the murder of
+reality [for which] the corpse has never been found".[^67] And imagination, by contrast, becomes the search
+for the criminal, only to discover that "one is oneself murderer and victim",[^68] within a "society without
+narratives".[^69]
+
+Brausen attends, in consequence, upon the primal force of his most subjective and radical imagination
+(incarnated in Díaz Grey), where the most radical freedom (Arce) may also well up unbidden.[^70] An access
+given, as I have stressed, in the act of love with la Queca, because perhaps it is in the *petite mort* that
+Brausen touches the limits of his being; that is, his ontological limits in their metaphysical proximity.
+Brausen penetrated into his own depth, he remains suspended in totality.[^71]
+
+Hence love, in the order of the sensible and of happiness, accompanies Brausen's being on its journeys from
+the ontological to the metaphysical. Love would be, for him, the other face of his imagination: the hidden
+countenance of subjectivity. Finally, a poetic phenomenology (*A Brief Life*) is already a phenomenology of
+love. A phenomenology for which the other (Gertrudis, la Queca, Elena Sala, the violinist) is no longer
+other. Because as Hannah Arendt makes clear, love plays outside the political, in this case outside
+Brausen's public tensions of power. Paraphrasing Foucault,[^72] I would say that if the body signifies,
+within a modern society (Macleod Advertising), a political field reduced to its useful capacity, through
+love that body becomes, for Brausen, a territory of the encounter of being: an appropriation of unveiling.
+The amorous battle takes place, this time, in another order, a symbolic one that happens in the mystery
+between the carnal and the evanescent.
+
+Seen thus, for Brausen the other no longer represents a territory of combat where his identity is in danger
+and must be defended, but an encounter with totality, or with nothingness; a restitution of unity. And being
+already signifies incompleteness; ontologically limited, it cannot be total. Before such a feeling of
+fragmentariness, imagination rises as a search that builds on the threshold of evanescences. To imagine
+means to empower oneself. If man is condemned to live on an ontological plane through the senses, salvation
+is glimpsed in being able to inhabit another plane whose nature exceeds that limit; a metaphysical
+dimension. Only imagination manages to communicate one plane with the other. As we saw at the beginning of
+the novel, if the senses, as receivers of the exterior world, are limited to one plane of existence,
+volitional imagination attends upon them at the same time as it goes beyond them in the possibility of
+reconfiguring the interior world. Imagination is thus the faculty of creating ontological realities.
+
+In such a register, through erotic (creative) love, Brausen no longer sees himself as an ontologically
+limited being but as a metaphysically liberated one: Santa María is the other made space. An aesthetic
+liberation that implies liberation in an ethical order, that is, of Brausen's valuation before his world; an
+aesthetic perspective reveals a personality. Not for nothing, for Nietzsche (with whom we can weave a
+dialogue with *A Brief Life*): "what is done out of love always takes place beyond good and evil".[^73]
+
+*A Brief Life* is woven, along this line, between the "thirst" for otherness, in Paz's words, and the
+"water" of creation as recovered intimacy, in which the masculine and feminine tension survives, Juan and
+María; that is, creator and creature.[^74] Because love, the flame of imagination, is also an imaginary that
+impels us to imagine.
+
+At this degree, the limits of imagination show the limits of being. Brausen discovers that imagination is
+not in the surfaces but in the depths. Or what amounts to the same, the expression of imagination he can
+access and apprehend as a volitional act has its depth in the abysses of his "human condition". Imagination
+(as phenomenon) is already in itself inaccessible in a total way from a state of consciousness: it is within
+Brausen's will, but also outside his dominion. Nevertheless, in the work of gaining access to it, he
+discovers it, if as a faculty, then also as his being. Because as William Blake saw: "imagination is not a
+state: it is the human existence itself". Imagination is the "land" in which Brausen's identity puts down
+its roots.
+
+Consequently Brausen, a traveller of the sensible, realises that while imagination is the seed of the house
+of being,[^75] it also signifies a crack, a "fissure in the ontological edifice";[^76] that is, a wound of
+reality: the door of madness that calls him to the "mad world". Imagination thus rises upon the
+Orphic-Dionysian so as to re-veal what is hidden in his interiority: the Dionysian-Apollonian. And it is in
+this procedure that the questioning of the ontological foundation of reality and of fiction takes place.
+Because as Unamuno had already warned: "When a man… dreams something, which exists more: he as the
+consciousness that dreams, or his dream?" To which we may say: which is more real, Brausen or Arce, Buenos
+Aires or Santa María, the trap or salvation?
+
+From this angle of reflection, if we look in perspective and panoramically, we shall still realise that that
+provincial city made with the matter of water (*A Brief Life*, 1950) ends up consumed by flames (*Let the
+Wind Speak*, 1979), thus revealing its tension between water and fire, that is, between creation and
+destruction: a renewal of the spirit of imagination. Imagination already signifies violence and rupture, a
+radical negative force, as Žižek called it, channelled, through love and eroticism, into creative dynamism.
+Water and fire are two mythic elements whose natures oppose and complement each other: "water is the tomb of
+fire and the tomb of men".[^77]
+
+Santa María, a mythical city, rests in the depth of the sea (Thalassa), always at risk of being scorched by
+itself. And founded by and through water (fresh and salt), the way of salvation for its inhabitants is found
+in love, that is, in the flame of eroticism:[^78] fire is love and water is depth. Life and death, Eros and
+Thanatos. A wound of finitude and eternity. A contradiction in which Brausen-Arce-Díaz Grey struggles. Only
+when he reaches the fire of eroticism does he find himself submerged in the oceanic depth of his abysses. "The
+interior of man has a marine entrail, and whoever dreams at the edge of a sleeping water", Bachelard says,
+"never recovers from it".[^79] Who dares turn his gaze toward such a well of anxiety? "The soul is so great a
+matter! One does not dare contemplate it".[^80] Brausen submerges himself only to note that the deepest dream
+is light as a bird.
+
+Understood thus, *A Brief Life* is channelled into Thalassa. A sea that is love: man's burnt water. Because the
+whole plot is played out between finitude and eternity, between pieces of life and totality. Is that not
+perhaps salvation? A dismemberment of the soul before the concave mirror of fiction, so as to make of
+sensibility a communion beyond the flesh and at the same time beyond the body. A search at the doors of
+perception in the midst of the question of being. Man, neither animal nor God, is already the drama of the
+being who seeks the reconciliation lost perhaps for ever.
+
+Brausen shows us that to be a man means to be a threshold (every threshold is a wound); an inhabitant of a
+space always in between: between reality and fiction, dream and wakefulness, hope and failure, desire and
+anxiety.[^81] Brausen speaks on the threshold of being. Because unlike the hero who seeks to find, this
+demiurge seeks to create, in the knowledge that there is, in the world of men, no salvation upon which he
+might set out. It must be created out of himself. For this reason his *poiesis* leads to an autopoiesis. A
+creation for which he would be prepared, like Prometheus on his rock, to assume all suffering so that it may
+live: a Santa María that is himself.[^82] For this reason that being "bound like Prometheus to the rock", (162)
+far from all negativity, has the greatness of the will to confront the absurdity of life so as to live it in
+an authentic way. In this manner Brausen/Arce assumes himself as the titan who protects his genuine intimacy
+after granting it the divine fire. An intimacy that will found his new imaginary civilisation: Santa María and
+its men. Brausen/Arce will thus mediate between the animality of men ("like the dog to the bitch") and their
+aspiration to the gods ("like our immortal souls to divinity"). (163)
+
+In such a poietic logic, Brausen, a visitor of his ontological threshold, moves between the words that
+designate and the sensations that inhabit. "Things and words bleed from the same wound".[^83] And as Eduardo
+Becerra already saw, "Santa María, 'the accursed city' or 'the city beside the river', was destroyed not by
+fire but by the word that designates it. Yet it is not for that reason any less true. Because what is truth at
+this stage?".[^84] To which we may still ask: does love, made of words, not exceed words themselves? Does love
+not gather divinity and animality? As Edgar Morin saw: "love proceeds at the same time from the word and
+precedes the word";[^85] it founds reality, but it also surpasses it, destroys it.
+
+Thalassa, the end of *A Brief Life*, shows the reunion of Morpheus and Orpheus. Eros and Psyche. Divinity and
+Mortality. That is, the bond between Díaz Grey and the violinist. The encounter of Arce with Brausen. A bridge
+between fatality and salvation, fragmentariness and totality: the one and the multiple; a tension between the
+primitive elements and the *arche* (ἀρχή). Such a communion of opposites is achieved through love in pursuit of
+a salvation that, while it lives, is always a promise. And if the spirit of imagination is dialectical, so too
+is that of love. As Joaquín Xirau sees: "love is the dialectical force that aspires to surpass plurality so as
+to arrive at unity […]; like dialectic, love leads us to the doors of being […]: by its effort, it raises the
+inferior forms to the superior forms of existence".[^86]
+
+*A Brief Life*, like every living being, is born in water, and water, like the human soul, is an element of
+transition: "an essential ontological metamorphosis between fire and earth".[^87] Thalassa represents the
+excess of being, its overflowing, experienced from voluptuousness; an overspilling of the senses: "water that
+is going to well up everywhere, in being and outside being".[^88] Thalassa strips bare Brausen's depth: the
+labyrinth of his existence. He, born of water, finds his renewal in fire.
+
+In this way the dialectic of imagination, revealed in the dialectic of eroticism, brings with it the tension
+between trap and salvation, showing their depths not visible in the everyday. Lodged in Brausen's daily
+becoming, they answer to an ontological order. Put another way, the trap lies veiled in Brausen's most hidden
+being, in his condition as a man, and salvation can only be achieved in the descent into such an abyss. A work
+that leads Brausen to unfold his ontological and metaphysical dimension, that is, his ethical and aesthetic
+one, which he kept in forgetting insofar as what was forgotten was his being. Consequently both Díaz Grey and
+Arce represent new forms of existence in which Brausen's being moves among distinct levels of fiction, or
+levels of reality. Such journeys signify, in turn, transgressions between reality and fiction: a widening of
+the rationally bound being.[^89] Brausen, become imagination himself, is erected as the ontological tree that
+opens its crown to the metaphysical thresholds. And "Arce" is also the name of a tree, the maple, whose flower
+is found not in the crown but in its sap: in the metaphorical blood of itself. The sweetness of love wrapped in
+the hardness of the will. Arce is a tree, a tree of water, and it is known that: "a tree is a whole
+universe".[^90]
+
+Understood in this way, the plot of this novel, the hermeneutic return from which salvation takes on sense
+occurs in the disturbance of the reader's reality, of that non-textual referent to which the fictional being
+returns to the being that we are. "Señor Albano", the last chapter of *A Brief Life*, has the importance, on
+one side, of marking the narrative freedom of Díaz Grey, who has taken on the force of the narrative; a
+symptom of the existential totality of what was once a midday dream. On the other, of appealing to a "you"
+toward the violinist that at the same time calls upon the reader. In this way, if the novel was Brausen's
+voice,[^91] in the Díaz Grey-violinist tension there lies hidden the existential freedom of the reader, his
+ontological dominion.
+
+And the transpositions between levels of reality persist within *A Brief Life*, to the degree of finding
+ourselves before an Onetti in the "deception" of "Brausen Advertising":
+
+> El hombre que me había alquilado la mitad de la oficina se llamaba Onetti, no sonreía, usaba anteojos,
+> dejaba adivinar que sólo podía ser simpático a mujeres fantasiosas o amigos íntimos. […]. No hubo preguntas,
+> ningún síntoma del deseo de intimar; Onetti me saludaba con monosílabos a los que infundía una imprecisa
+> vibración de cariño, una burla impersonal. Me saludaba a las diez, pedía café a las once, atendía visitas y
+> el teléfono, revisaba papeles, fumaba sin ansiedad, conversaba con una voz grave, invariable y perezosa. (204)
+>
+> The man who had rented me half the office was called Onetti; he did not smile, he wore spectacles, he let it
+> be guessed that he could only be agreeable to fanciful women or intimate friends. […]. There were no
+> questions, no symptom of the desire for closeness; Onetti greeted me with monosyllables into which he
+> infused an imprecise vibration of affection, an impersonal mockery. He greeted me at ten, asked for coffee at
+> eleven, attended to visitors and to the telephone, went through papers, smoked without anxiety, conversed in a
+> grave, invariable and lazy voice. (204)
+
+In such a transposition and appeal, if we bring to mind the Ricoeurian notions of the triple mimesis,[^92] it
+may be understood that the value of the fictional narrative lies in its serving as a symbolic mediator between
+a world of before and a world of after, within a weave that grants sense. Because the singularity of the
+fictional narrative within a "human plot" lies, consequently, in its capacity to recast temporal experience and
+with it the notion of oneself.[^93] And here is the order of trap and salvation, in which imagination mediates
+between one and the other in the resignification of the world and of experience, insofar as the fictional
+narrative reconfigures our sensible experience. Because narration, understood thus, is the means by which man
+comes to be, insofar as it grants sense and meaning to a chaotic world. As Luz Aurora Pimentel would say, the
+journey of fiction runs from a world that makes narratives to narratives that make a world.[^94] For this
+reason the experience of imaginary worlds acquires a "real" character that goes beyond the "reality" instituted.
+
+Through Brausen's heuristic we can note that the trap is found in the fact that whoever loses his erotic
+dimension has lost himself as a man, and salvation in his search for it as a restitution of superhumanity.
+Brausen, in his journey inward, disturbs our interior life. The act of reading already implies an ontological
+foundering in which our being finds continuity insofar as it can be another.[^95] A confrontation with another
+form of living that interrogates and opens our own. An act in which the mind is obliged to create its own
+interior images that unveil the interiority of the one who imagines. And it is these private images that grant
+an authentic existence in the face of the traffic of impersonal and predetermined images with which we are
+invaded each day. "Fictional narratives" oblige us to leave the automatisation of the ordinary world toward a
+new perception, as the Russian Formalists saw.[^96]
+
+Seen thus, the novel as a genre lends dynamism, for an open society, to a world that in its aspiration to
+objectivity finds itself constantly at risk of losing its sense. Because the objectivity of the novel, that
+rational feature of its own, far from obeying the rationalisation of a mechanised world, is the manifestation of
+an Apollo who gives sense to the sensible experience of an anguished Dionysus. For this reason its importance,
+like Brausen's film script, lies not in a useful value but in an interior one, in the revelation of an intimate
+space that leads us to understand that, whether we wish it or not, we all inhabit imaginary places. Because to
+be a man means to be fiction.
 
 ---
 
@@ -523,4 +867,102 @@ of it, and so recasting ourselves before it.
 
 [^46]: As Ricoeur sees, if "ontology is not possible except as phenomenology, [then] phenomenology itself is only possible as hermeneutics" (Paul Ricoeur, *Tiempo y Narración, III. El tiempo narrado*, México, Siglo XXI, 1996, p. 721) [my translation].
 
-[^47]: See note 95. [Translator's note: the cross-reference is to the Spanish edition's continuous numbering; Chapter 4 restarts at 1, so this points outside the present chapter. Worth checking against the original.]
+[^47]: See the note on Hermes, the hermetic and hermeneutics in Chapter 2. [Translator's note: the Spanish reads "see note 95". Chapter 4 restarts its numbering at 1, so the reference points outside the chapter; on the evidence of the surrounding argument the target is the Hermes note in Chapter 2, and it is named descriptively here so that it survives renumbering.]
+
+[^48]: Juan Carlos Onetti, *La vida breve*, p. 231. For Zambrano: "Feeling constitutes us more than any other of the psychic functions; one might say that the others we have, whereas feeling we are" [my translation]. [María Zambrano, "Para una historia de la Piedad", in *Aurora: papeles del Seminario María Zambrano*, Barcelona, no. 1, 2012 (64–72), <https://www.raco.cat/index.php/Aurora/article/view/260744>, consulted 14 June 2020, p. 65.]
+
+[^49]: Rüdiger Safranski, *op. cit.*, p. 77 [my translation].
+
+[^50]: Let us recall that "subject" has been the modern category par excellence for naming "man", which must be read as the one who is conscious of himself and of his world. Nevertheless, we shall find its critique in Heidegger, who points out that this category has been sponsored from the enlightened reason that reduces the human condition to pure consciousness and to reason (Kant). Here is one of the many points of departure for his "phenomenology of being" in: *Kant y el problema de la metafísica* (México, FCE, 1981). What is fundamental in man, Heidegger says, is not reason (*episteme*) but being (*Dasein*).
+
+[^51]: Cf. Georges Bataille, *La felicidad, el erotismo y la literatura*, p. 92.
+
+[^52]: "The erotic act detaches itself from the sexual act" [my translation]. Octavio Paz, *La llama doble*, p. 13.
+
+[^53]: Cf. Gaston Bachelard, "Instante poético e instante metafísico", in *El derecho de soñar*, p. 222.
+
+[^54]: Cf. Gaston Bachelard, *La poética del espacio*.
+
+[^55]: Gaston Bachelard, *La tierra y las ensoñaciones del reposo. Ensayo sobre las imágenes de la intimidad*, p. 66 [my translation].
+
+[^56]: Gaston Bachelard, *La tierra y los ensueños de la voluntad*, p. 20 [my translation].
+
+[^57]: "If my being takes consciousness of itself only in the present instant, how can one not see that that instant is the only terrain on which reality is put to the test? […] How could the present instant not imprint its mark upon reality?" [my translation]. Gaston Bachelard, *La intuición del instante*, p. 12.
+
+[^58]: Octavio Paz, *El arco y la lira*, México, FCE, 2006 (facsimile edition), p. 187 [my translation]. Paz of course refers to the poem as against the novel. It would be worth studying their dissonances in depth.
+
+[^59]: "The symbol, the myth, the rite, at different levels and by the means proper to them, express a complex system of coherent affirmations about the ultimate reality of things, a system that may be considered in itself as a metaphysics" [my translation]. Mircea Eliade, *El mito del eterno retorno*, pp. 15–16.
+
+[^60]: Mircea Eliade, *Mito y realidad*.
+
+[^61]: The strict sense of aesthetics, from the Greek αἰσθητική (*aisthetikê*), is that of "sensation". If man's position in the cosmos is a position that is always aesthetic, culture may be translated as a specific sensibility.
+
+[^62]: Understood thus, "the aesthetic dimension" comes to recast the imaginative capacity of the individual and with it his critical and creative faculty for a reality that goes beyond the one instituted by the capitalist mechanisms of mass production. The aesthetic dimension is, fundamentally, a human dimension, whose loss leads to the severing of the possibility of sensible totality. Cf. Herbert Marcuse, "La dimensión estética", in *Eros y civilización*, Madrid, Sarpe, 1983, pp. 163–182.
+
+[^63]: "The New Invocation / From the point of Light within the Mind of God / Let light stream forth into the minds of men. / Let light descend on Earth. / From the centre where the Will of God is known / Let purpose guide the little wills of men / The purpose which the Master knows and serves. / Let light and Love and Power restore the Plan on Earth". (234) [Translator's note: the Spanish edition prints the English original followed by a Spanish translation, since the capitalised words Brausen recognises are English. The English edition needs only the original.]
+
+[^64]: "Eroticism is a rhythm: one of its chords is separation, the other is return, a coming back to reconciled nature […]. A return to primordial reality […], an understanding not intellectual but sensible: a knowledge of the senses" [my translation]. Octavio Paz, *La llama doble*, p. 28.
+
+[^65]: "Through death we participate in the cosmic tragedy, through birth we participate in the biological adventure, through existence we participate in the human destiny" [my translation]. Edgar Morin, *op. cit.*, p. 54.
+
+[^66]: Cited in Albert Camus, "Kirilov", in *El mito de Sísifo*, p. 137 [my translation].
+
+[^67]: Jean Baudrillard, *El crimen perfecto*, Barcelona, Anagrama, 2000, p. 7 [my translation].
+
+[^68]: "In the last instance, the murderer and the victim are one and the same person. We can conceive the unity of the human race only if we can conceive, in all its horror, the truth of this essential equivalence" [my translation]. Éric Gans, cited in Jean Baudrillard, *op. cit.*, p. 7.
+
+[^69]: Cf. Néstor García Canclini, *La sociedad sin relato. Antropología y estética de la inminencia*, México, Debolsillo, 2010.
+
+[^70]: Cf. Cornelius Castoriadis, *La institución imaginaria de la sociedad*.
+
+[^71]: "Voluptuousness for man is already animality" [my translation]. Bataille, *La felicidad, el erotismo y la literatura*, p. 83.
+
+[^72]: Cf. Michel Foucault, *Vigilar y castigar. Nacimiento de la prisión*, Buenos Aires, Siglo XXI, 1976.
+
+[^73]: Friedrich Nietzsche, *Más allá del bien y del mal*, aphorism 153.
+
+[^74]: "The consciousness of being alone is always the nostalgia of being two" [my translation]. Gaston Bachelard, "Fragmentos de un diario", in *El derecho de soñar*, p. 233.
+
+[^75]: In Heidegger's terms (*Ser y tiempo*).
+
+[^76]: Cf. Slavoj Žižek, *op. cit.*
+
+[^77]: Gaston Bachelard, *El agua y los sueños*, p. 123 [my translation].
+
+[^78]: "The original and primordial fire, sexuality, raises the red flame of eroticism, and this in turn sustains and lifts another flame, blue and tremulous: that of love. Eroticism and love: the double flame of life" [my translation]. Octavio Paz, *La llama doble*, p. 7.
+
+[^79]: Gaston Bachelard, *El agua y los sueños*, p. 141 [my translation].
+
+[^80]: *Ibidem*, p. 86 [my translation].
+
+[^81]: "Eros is neither a god nor a man: he is a demon, a spirit that lives between the gods and mortals. He is defined by the preposition *between* [...]. He is the son of Poverty and of Abundance, and this explains his nature as an intermediary: he communicates light with shadow, the sensible world with the ideas. As the son of Poverty, he seeks wealth; as the son of Abundance, he distributes goods. He is the desiring one who asks, the desired one who gives. Love is not beautiful: he desires beauty. All men desire" [my translation]. Octavio Paz, *La llama doble*, p. 42.
+
+[^82]: Prometheus, titan creator and protector of humanity, steals the Olympian fire so as to hand it to mortals and allow them to grow in civilisation. Zeus, enraged by such an act, condemns him to remain bound to a rock where an eagle gnaws his liver each day. Prometheus being immortal, during the night his liver regenerates so as to be devoured the following day. After a time, Zeus attempts to negotiate with him to withdraw the fire from among mortals and so avoid such a cruel punishment. Nevertheless Prometheus refuses, preferring to suffer eternally for his creation.
+
+[^83]: Octavio Paz, *El arco y la lira*, p. 29 [my translation].
+
+[^84]: Eduardo Becerra, *op. cit.*, p. 241 [my translation].
+
+[^85]: Edgar Morin, *Amor, poesía, sabiduría*, Montevideo, Trilce, 1996, p. 23 [my translation].
+
+[^86]: Joaquín Xirau, *Amor y mundo*, México, El Colegio de México, 1942, p. 12 [my translation].
+
+[^87]: "The being consecrated to water is a being in vertigo. It dies every minute, ceaselessly something of its substance collapses. Everyday death is not the exuberant death of fire that crosses the sky with its arrows; everyday death is the death of water. Water always runs, water always falls, it always concludes in its horizontal death […] the death of water is more dreamlike than the death of earth: the sorrow of water is infinite" [my translation]. Gaston Bachelard, *El agua y los sueños*, p. 15.
+
+[^88]: Gaston Bachelard, *El agua y los sueños*, p. 70 [my translation].
+
+[^89]: Not for nothing, for the Romantics: "we transform and increase ourselves and others through imagination" [my translation]. Cf. Rüdiger Safranski, *op. cit.*, p. 105.
+
+[^90]: Gaston Bachelard, *El aire y los sueños*, p. 277 [my translation].
+
+[^91]: Attending to Kundera, for whom "the novel is not a confession of the author but an exploration of what human life is within the trap the world has become" (*La insoportable levedad del ser*), I might say that Brausen, as character, narrates himself in search of authentic sense within his circumstantial trap. To recount oneself constitutes a way of seeking oneself.
+
+[^92]: Where mimesis II is that proper to the narrative (configured time), which lies between mimesis I (prefigured time) and mimesis III (refigured time).
+
+[^93]: "Narration has its full sense when it is restored to the time of the acting and the suffering of mimesis III: *mimesis praxeos* […]. Narration re-signifies what has already been pre-signified on the plane of human action" [my translation]. Paul Ricoeur, *Tiempo y narración I*, pp. 113–154.
+
+[^94]: Luz Aurora Pimentel, *El relato en perspectiva*, p. 7.
+
+[^95]: Cf. Adolfo Sánchez Vázquez, *De la estética de la recepción a una estética de la participación*, México, UNAM-FFYL, 2005.
+
+[^96]: Of course the Russian Formalists, in their eagerness to define literature by attending solely to language, could not see other aspects in it, such as its symbolic value. And while it is true that not all literary language is given in a poetic language, at least all *poiesis* implies a creation. The sober language of the novel is already the language of a representation. Cf. Terry Eagleton, *Una introducción a la teoría literaria*, pp. 14–20. Cf. Tzvetan Todorov (comp.), *Teoría de la literatura de los formalistas rusos*, México, Siglo XXI, 2010.

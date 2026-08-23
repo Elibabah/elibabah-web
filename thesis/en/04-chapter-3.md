@@ -760,7 +760,7 @@ human condition? What does imagination signify at this point? Such questions ope
 
 [^120]: María Zambrano, *El hombre y lo divino*, p. 28 [my translation].
 
-[^121]: Jean Paul, *op. cit.* The theme of the "death of God" has signified a crucial rupture for the beginning of the modern age, treated by those poets in whom imagination takes on special significance and in whom Onetti finds his tradition: Hölderlin, Vigny, Novalis, Nerval, Jean Paul. [Translator's note: see n. 115 on the attribution.]
+[^121]: Jean Paul, *op. cit.* The theme of the "death of God" has signified a crucial rupture for the beginning of the modern age, treated by those poets in whom imagination takes on special significance and in whom Onetti finds his tradition: Hölderlin, Vigny, Novalis, Nerval, Jean Paul. [Translator's note: see the note on the attribution of the dead-Christ text above.]
 
 [^122]: As Zambrano would say, only in man's mature age do "the gods appear impassive, indifferent" [my translation]. *El hombre y lo divino*, p. 27.
 

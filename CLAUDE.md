@@ -124,15 +124,29 @@ theming keeps working.
   - `/editorial/software` — technical articles.
   - `/editorial/career` — Career & Migration: identity, craft, transition.
   - `/editorial/aotearoa` — Life in Aotearoa: life in NZ, travel, Southland.
+- `Research` (/research) — listing + `/research/[slug]`. Academic work published in full,
+  each item carrying one or more **language editions** as PDFs.
 - `About` (/about) — static, scroll sections.
 - `Contact` — **NOT a navigable route**. Lives as a CTA in the nav and a block in the footer.
 - Case studies at `/case-studies/[slug]` — standalone routes, linked from project cards.
 
 ### Navigation
 
-- Nav with three items: **Portfolio, Editorial, About**.
+- Nav with four items: **Portfolio, Editorial, Research, About**.
 - The logo links to Home.
 - **Resume** prominent in the footer.
+
+### Key Research decision (August 2026)
+
+`/research` was added as a fourth collection and a fourth nav item, reopening the three-item nav
+this section had settled. The reason is scale: research stopped being one artifact. The UNAM
+thesis ships in Spanish and English, and the Master of Applied Management thesis will follow,
+which is directly relevant to the New Zealand professional audience the site is aimed at. A
+single artifact would have been better hidden inside About; a growing body of work earns a
+collection of its own.
+
+The model is **one work, N language editions**. A work with a single edition renders correct
+copy without configuration; adding a language is a frontmatter entry, not a code change.
 
 ### Key Editorial decision
 **Own routes** were chosen (not filters) for the three subsections, because each is a
@@ -167,6 +181,9 @@ elibabah-web/
       [slug]/page.tsx       # /editorial/article
     case-studies/
       [slug]/page.tsx       # /case-studies/case (no index for now)
+    research/
+      page.tsx              # /research (listing)
+      [slug]/page.tsx       # /research/work
     about/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
@@ -177,8 +194,9 @@ elibabah-web/
     portfolio/*.mdx
     editorial/*.mdx
     case-studies/*.mdx
+    research/*.mdx
   lib/                      # content <-> app bridge
-    portfolio.ts, editorial.ts, case-studies.ts
+    portfolio.ts, editorial.ts, case-studies.ts, research.ts
     mdx-components.tsx      # MDX -> React component mapping
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
@@ -187,6 +205,7 @@ elibabah-web/
     images/{portfolio,editorial,case-studies}/<slug>/…
     videos/portfolio/<slug>/…
     logo-light.svg, logo-dark.svg, resume.pdf
+    thesis/*.pdf          # research editions, one PDF per language
 ```
 
 Structure decisions made:
@@ -270,6 +289,41 @@ first articles existed and those files do not declare them. `gray-matter` simply
 The models include **cross-linking** fields (`caseStudy` on a project, `relatedProject` on an
 article) to weave portfolio, case studies, and editorial together. There is no
 `relatedCaseStudy` on articles — an article reaches a case study through its project.
+
+### Research work — `content/research/[slug].mdx`
+
+```yaml
+title: string            # display title, English
+originalTitle: string?   # title in the original language, when it differs
+slug: string
+kind: string             # 'Undergraduate thesis' | "Master's thesis" | …
+field: string
+institution: string
+degree: string
+year: number
+advisor: string?
+abstract: string         # listing card + page intro
+featured: boolean
+cover: path?             # documentCover slot (portrait; see lib/image-slots.ts)
+coverAlt: string?
+editions:                # one entry per language the work exists in
+  - lang: string         # ISO code
+    label: string        # as shown: 'Español', 'English'
+    file: path           # under /public
+    pages: number
+    primary: boolean?    # the language it was written in
+```
+
+Covers are generated from page 1 of the PDF, not hand-made:
+
+```bash
+pdftoppm -f 1 -l 1 -r 150 -png -singlefile work.pdf cover
+magick cover.png -resize 660x -bordercolor '#e2e3df' -border 1 -quality 88 cover.jpg
+```
+
+`/research/[slug]` emits a `Thesis` JSON-LD node whose `author` points at the Person `@id`, with
+a `MediaObject` per edition. Unlike portfolio (see below), this is safe: a thesis is wholly the
+author's own work, so there is no mixed-ownership problem.
 
 ### Authorship and image credit
 

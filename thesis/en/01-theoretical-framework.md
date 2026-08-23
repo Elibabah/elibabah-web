@@ -235,7 +235,7 @@ resonates with a mythical echo. The spirit of imagination has a primitive root.
 
 [^30]: An important consideration is not to see the modernity–postmodernity counterpart as that of authentic values against inauthentic ones, as though modernity were a utopia that degrades until reaching its decadent postmodernity. This phenomenon is far more complex, and modernity itself presents its own contradictions. On this point see: Agnes Heller, *El péndulo de la modernidad*, Barcelona, Península, 2000.
 
-[^31]: See note 11 of this Introduction.
+[^31]: See the note on Bachelard's *El aire y los sueños* in the Introduction above.
 
 [^32]: "Anxiety, as a state-of-mind, is a way of being-in-the-world; that in the face of which anxiety is anxious is thrown being-in-the-world; that about which anxiety is anxious is our potentiality-for-being-in-the-world. Consequently the phenomenon of anxiety taken in its totality shows *Dasein* [being] as factically existing being-in-the-world. The fundamental ontological characteristics of this entity are existentiality, facticity and being-fallen. These existential determinations are not parts of a *compositum* from which one of them might sometimes be missing; rather, they weave an originary web that constitutes the totality of the structural whole being sought" [rendered from the Spanish edition]. Martin Heidegger, *Ser y tiempo*, p. 192.
 

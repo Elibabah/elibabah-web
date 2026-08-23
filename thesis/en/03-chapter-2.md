@@ -1062,7 +1062,7 @@ of being.
 
 [^67]: "Imagination and will, which might be considered antithetical, are in reality closely joined: dialectical. One wills only what one imagines richly […]. When one lives a reverie of the will, time acquires a material reality" [my translation]. Gaston Bachelard, *La tierra y los ensueños de la voluntad*, México, FCE, 1991, pp. 14–31.
 
-[^68]: Sigmund Freud, *El malestar en la cultura*, Madrid, Alianza Editorial, 1999. [Translator's note: the Spanish here reads *Creonte*, Creon, which is a slip for *Caronte*, Charon, the ferryman correctly named earlier in this chapter (note 33). Rendered as Charon.]
+[^68]: Sigmund Freud, *El malestar en la cultura*, Madrid, Alianza Editorial, 1999. [Translator's note: the Spanish here reads *Creonte*, Creon, which is a slip for *Caronte*, Charon, the ferryman correctly named earlier in this chapter, in the note on Charon and the Acheron. Rendered as Charon.]
 
 [^69]: "Arce is a synecdoche of Brausen, a part in a relation of contiguity; Arce is, moreover, the anti-Brausen. Not like Díaz Grey, the displaced complement that could fill his lacks within the first system: money, work, a complete woman, but his absolute negativisation, the other law: anti-money, anti-love, anti-work" [my translation]. Josefina Ludmer, *op. cit.*, p. 108.
 
