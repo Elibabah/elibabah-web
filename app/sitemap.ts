@@ -3,6 +3,7 @@ import { SITE_URL } from "@/lib/site"
 import { getAllArticles } from "@/lib/editorial"
 import { getAllCaseStudies } from "@/lib/case-studies"
 import { getAllProjects } from "@/lib/portfolio"
+import { getAllResearch } from "@/lib/research"
 
 const BASE = SITE_URL
 
@@ -22,6 +23,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified: new Date(),
   }))
 
+  const research = getAllResearch().map((r) => ({
+    url: `${BASE}/research/${r.slug}`,
+    lastModified: new Date(),
+  }))
+
   return [
     { url: BASE },
     { url: `${BASE}/portfolio` },
@@ -29,9 +35,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/editorial/software` },
     { url: `${BASE}/editorial/career` },
     { url: `${BASE}/editorial/aotearoa` },
+    { url: `${BASE}/research` },
     { url: `${BASE}/about` },
     ...projects,
     ...articles,
     ...caseStudies,
+    ...research,
   ]
 }
