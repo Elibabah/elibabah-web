@@ -15,8 +15,9 @@ Elías's personal professional site (handle: **Elibabah**). It is neither a pure
 Site language: **English**. Spanish is reserved as a deliberate identity marker — the epigraph
 *"Aunque el tiempo me borre, aunque yo mismo no me recuerde, vivir habrá valido la pena."*,
 kept verbatim. **Not placed on the site yet**: the current Home hero uses an English headline
-("Building software with intention. Sharing the thinking behind it."). Still pending a decision
-on where the epigraph lands — Home hero, About, or footer.
+("I build fast, accessible web apps with React and TypeScript."), rewritten from the earlier
+"Building software with intention" to lead with the capability a recruiter scans for. Still
+pending a decision on where the epigraph lands — Home hero, About, or footer.
 
 ---
 
@@ -31,9 +32,10 @@ Infrastructure:
 
 The site is built and live. All routes from the architecture in §5 exist:
 
-- Home with hero, Featured Work and Latest from the Editorial.
+- Home with hero, an "At a glance" facts strip, Featured Work and Latest from the Editorial.
 - `/portfolio` listing + `/portfolio/[slug]`.
 - `/editorial` index + `/editorial/software`, `/career`, `/aotearoa` + `/editorial/[slug]`.
+- `/research` listing + `/research/[slug]`.
 - `/case-studies/[slug]`.
 - `/about`.
 
@@ -45,8 +47,10 @@ Also in place:
 - Theme toggle (`next-themes`, `data-theme`), light/dark palettes.
 - Contact as an anchor: nav CTA `#contact` → `<footer id="contact">` with `mailto:elias@elibabah.com`,
   LinkedIn, GitHub and `resume.pdf`.
-- SEO/ops: `sitemap.ts`, `robots.ts`, `opengraph-image.tsx`, `icon.svg`, `not-found.tsx`,
+- SEO/ops: `sitemap.ts` (all four collections), `robots.ts`, `icon.svg`, `not-found.tsx`,
   Google site verification, Vercel Analytics and Speed Insights.
+- Social cards with `next/og`: a site-wide `app/opengraph-image.tsx` plus per-item cards at
+  `app/editorial/[slug]/` and `app/research/[slug]/`, prerendered via `generateStaticParams`.
 - MDX pipeline: `gray-matter` for front matter, `next-mdx-remote` for the body,
   `lib/mdx-components.tsx` for the component mapping.
 - Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive widths,
@@ -54,15 +58,18 @@ Also in place:
   `image-size`, so MDX images never declare width/height by hand.
 - Reading time derived from the body in `lib/reading-time.ts`, not declared per file.
 - Image credit and authorship: footer notice, per-image `credit` via `MdxFigcaption`, and a
-  `BlogPosting` + `ImageObject` JSON-LD on editorial articles only (see §7).
+  `BlogPosting` + `ImageObject` JSON-LD on editorial articles only (see §7). `/research/[slug]`
+  emits a `Thesis` node with one `MediaObject` per language edition.
 - `lib/site.ts` as the single source of the absolute base URL, consumed by `sitemap.ts`,
   `robots.ts`, `metadataBase` and every JSON-LD block.
 - Icons: `lucide` for icon data plus `morphicons` for spring-interpolated transitions
   (the nav hamburger ↔ close morph).
 
-Content written so far: **6 projects, 4 case studies, 3 articles**. No placeholders remain — every
-`.mdx` in `content/` has a real body. The three articles cover one section each
-(`career`, `software`, `aotearoa`), which is the premise the §5 routing decision rests on.
+Content written so far: **6 projects, 4 case studies, 3 articles, 1 research work**. No
+placeholders remain — every `.mdx` in `content/` has a real body. The three articles cover one
+section each (`career`, `software`, `aotearoa`), which is the premise the §5 routing decision
+rests on. The research work is the UNAM thesis, shipped in both its Spanish original and the
+English translation.
 
 ---
 
@@ -81,6 +88,10 @@ Content written so far: **6 projects, 4 case studies, 3 articles**. No placehold
   morph cannot consume a rendered React component.
 - Structured data is hand-built JSON-LD in plain `<script type="application/ld+json">` tags —
   not `next/script`, and not the Metadata API, which has no field for it.
+- **Social cards are generated, not designed**: `next/og` `ImageResponse` at build time, one
+  card per editorial article and per research work on top of the site-wide one. `ImageResponse`
+  cannot read a `next/font` object, so Source Serif 4 is *also* kept as a raw `.ttf` in
+  `public/fonts/` and passed as a buffer. That duplicate file is deliberate, not a leftover.
 
 ---
 
@@ -169,7 +180,7 @@ elibabah-web/
     page.tsx                # Home (/)
     globals.css             # design tokens + prose theming (no separate styles/ folder)
     not-found.tsx
-    sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg
+    sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg   # site-wide OG card
     portfolio/
       page.tsx              # /portfolio (listing)
       [slug]/page.tsx       # /portfolio/project
@@ -179,11 +190,13 @@ elibabah-web/
       career/page.tsx       # /editorial/career
       aotearoa/page.tsx     # /editorial/aotearoa
       [slug]/page.tsx       # /editorial/article
+      [slug]/opengraph-image.tsx   # per-article social card
     case-studies/
       [slug]/page.tsx       # /case-studies/case (no index for now)
     research/
       page.tsx              # /research (listing)
       [slug]/page.tsx       # /research/work
+      [slug]/opengraph-image.tsx   # per-work social card
     about/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
@@ -202,10 +215,11 @@ elibabah-web/
     reading-time.ts         # reading time derived from the MDX body
     site.ts                 # SITE_URL — single source for absolute URLs
   public/
-    images/{portfolio,editorial,case-studies}/<slug>/…
+    images/{portfolio,editorial,case-studies,research}/<slug>/…
     videos/portfolio/<slug>/…
-    logo-light.svg, logo-dark.svg, resume.pdf
     thesis/*.pdf          # research editions, one PDF per language
+    fonts/                # raw Source Serif 4 .ttf, read by the OG images (see §3)
+    logo-light.svg, logo-dark.svg, resume.pdf
 ```
 
 Structure decisions made:
@@ -221,8 +235,9 @@ Structure decisions made:
 
 ## 7. Content models (front matter, as implemented)
 
-Source of truth are the TypeScript types in `lib/portfolio.ts`, `lib/case-studies.ts` and
-`lib/editorial.ts` — if this section and those types disagree, the types win.
+Source of truth are the TypeScript types in `lib/portfolio.ts`, `lib/case-studies.ts`,
+`lib/editorial.ts` and `lib/research.ts` — if this section and those types disagree, the
+types win.
 
 Image fields are **not** a generic `cover`: each one names a slot defined in `lib/image-slots.ts`,
 so the aspect ratio and `sizes` are decided once, not per page. Files live under
@@ -393,18 +408,30 @@ Three conventions baked into the current implementation, all worth knowing befor
 4. ~~**Case Study**~~ — `[slug]` route, linked from project cards. ✅
 5. ~~**Editorial**~~ — index + three subsections + `[slug]` route. ✅
 6. ~~**About**~~ — static with scroll sections. ✅
+7. ~~**Research**~~ — listing + `[slug]`, language editions, `Thesis` JSON-LD, per-work OG card. ✅
 
-Contact (CTA + footer) was integrated into the layout in step 1, not as a separate step.
+Contact (CTA + footer) was integrated into the layout in step 1, not as a separate step. Research
+(step 7) came later than the rest and reopened the nav; the reasoning is in §5.
 
 The scaffolding phase is over. Work from here is **refinement and content**. Where that stands:
 
-- Real content is written for all 6 projects, 4 case studies and 3 articles — no placeholders left.
-- Authorship, credit and JSON-LD are in place for editorial (§7). Extending structured data to
-  portfolio needs a per-project ownership field first, and is deliberately not done yet.
+- Real content is written for all 6 projects, 4 case studies, 3 articles and 1 research work —
+  no placeholders left.
+- Authorship, credit and JSON-LD are in place for editorial and research (§7). Extending
+  structured data to portfolio needs a per-project ownership field first, and is deliberately
+  not done yet.
+- **Home is being re-aimed at the recruiter** (in progress, uncommitted on `develop`): the hero
+  headline now states the capability directly, the secondary CTA is "Download CV ↓" pointing at
+  `resume.pdf` instead of a link to About, and a four-cell "At a glance" strip (role, stack,
+  location, work status) sits under the hero. The strip is a local `facts` array in
+  `app/page.tsx`, not content — if it grows or needs to change per audience, that is the moment
+  to move it out.
 - Still open: the Spanish epigraph has **no home on the site yet** (§1) — the Home hero currently
   runs the English headline. Candidates remain Home hero, About, or footer.
 - Still open: image credit exists as a mechanism but no `.mdx` body uses the `credit` prop yet; the
   first article with its own photographs inside the body will be the one to exercise it.
+- Next research work: the **Master of Applied Management thesis**, which is what the one-work /
+  N-editions model in §7 was built to absorb without code changes.
 
 ---
 

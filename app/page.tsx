@@ -4,12 +4,19 @@ import { getAllArticles } from "@/lib/editorial";
 import { getAllProjects } from "@/lib/portfolio";
 import { imageSlots } from "@/lib/image-slots";
 
+const facts = [
+  { label: "Role", value: "Frontend Engineer" },
+  { label: "Stack", value: "React · TypeScript · Next.js" },
+  { label: "Based in", value: "New Zealand" },
+  { label: "Work status", value: "Valid NZ work visa", accent: true },
+];
+
 export default function Home() {
   const latestArticles = getAllArticles().slice(0, 3) || [];
   const featuredProjects = getAllProjects().filter(p => p.featured) || [];
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-20">
+    <main className="mx-auto w-full max-w-5xl px-6 py-16 flex flex-col gap-16">
 
       {/* Hero */}
       <section className="flex flex-col gap-5">
@@ -19,12 +26,12 @@ export default function Home() {
             Frontend Engineer · New Zealand
           </span>
         </div>
-        <h1 className="font-heading max-w-xxl font-bold text-5xl leading-[1.12] tracking-[-0.5px] text-foreground">
+        <h1 className="font-heading max-w-3xl font-bold text-5xl leading-[1.12] tracking-[-0.5px] text-foreground">
           Building software with intention.<br />
           Sharing the thinking behind it.<br />
         </h1>
         <p className="font-body text-lg leading-relaxed text-ink-soft max-w-xl">
-          I build software, think about the craft in the age of AI, and write about the move from Mexico to New Zealand. A portfolio and an editorial, under one roof.
+          I care about the details and the thinking behind them. Below you will find selected work, and, if you are curious, reflections on the craft and on moving from Mexico to Aotearoa. A portfolio and an editorial, under one roof.
         </p>
         <div className="flex items-center gap-3 mt-1">
           <Link
@@ -33,13 +40,34 @@ export default function Home() {
           >
             View work
           </Link>
-          <Link
-            href="/about"
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-accent border border-accent font-semibold text-sm px-5 py-2.75 rounded-[9px] hover:bg-accent/5 transition-colors"
           >
-            About me
-          </Link>
+            Download CV ↓
+          </a>
         </div>
+      </section>
+
+      {/* At a glance — the facts a recruiter scans first */}
+      <section
+        aria-label="At a glance"
+        className="grid grid-cols-2 md:grid-cols-4 gap-px bg-line border border-line rounded-2xl overflow-hidden"
+      >
+        {facts.map((fact) => (
+          <div key={fact.label} className="bg-surface flex flex-col gap-1.5 p-4">
+            <span className="font-mono text-[10px] text-ink-faint tracking-[0.6px] uppercase">
+              {fact.label}
+            </span>
+            <span
+              className={`font-body text-sm font-medium ${fact.accent ? "text-accent" : "text-foreground"}`}
+            >
+              {fact.value}
+            </span>
+          </div>
+        ))}
       </section>
 
       {/* Selected Work */}

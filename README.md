@@ -2,7 +2,7 @@
 
 Source code for [elibabah.com](https://elibabah.com) — the personal site of **Elías Hernández** (`Elibabah`), a frontend engineer based in New Zealand.
 
-It is not a pure portfolio nor a pure blog: it is both, woven together. Projects link to case studies, case studies link back to projects, and editorial articles cross-link to the work that inspired them.
+It is not a pure portfolio nor a pure blog: it is both, woven together, plus a research shelf. Projects link to case studies, case studies link back to projects, and editorial articles cross-link to the work that inspired them. Academic work lives in its own collection, published in full with one downloadable PDF per language edition.
 
 ---
 
@@ -15,7 +15,8 @@ It is not a pure portfolio nor a pure blog: it is both, woven together. Projects
 | Styling | Tailwind CSS v4 (CSS-first config, `@theme inline`) + `@tailwindcss/typography` |
 | Content | MDX with YAML front matter, rendered via `next-mdx-remote` + `gray-matter` |
 | Theming | `next-themes` with `attribute="data-theme"` |
-| Fonts | `next/font/google` — Source Serif 4, Inter, JetBrains Mono |
+| Fonts | `next/font/google` — Source Serif 4, Inter, JetBrains Mono (a local `.ttf` copy of Source Serif 4 lives in `public/fonts/` for the OG images) |
+| Social cards | `next/og` `ImageResponse` — a site-wide card plus per-article and per-research-work cards |
 | Icons | `lucide` (icon data) + `morphicons` (spring-interpolated transitions) |
 | Images | `image-size` reads intrinsic dimensions at build time, so MDX images need no width/height |
 | Analytics | `@vercel/analytics`, `@vercel/speed-insights` |
@@ -58,8 +59,13 @@ app/
     career/page.tsx       # /editorial/career
     aotearoa/page.tsx     # /editorial/aotearoa
     [slug]/page.tsx       # /editorial/<article>
+    [slug]/opengraph-image.tsx
   case-studies/
     [slug]/page.tsx       # /case-studies/<case> — no index, reached from project cards
+  research/
+    page.tsx              # /research — listing
+    [slug]/page.tsx       # /research/<work>
+    [slug]/opengraph-image.tsx
   about/page.tsx          # /about
   globals.css             # design tokens + prose theming
   sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg, not-found.tsx
@@ -73,26 +79,31 @@ content/                  # all site content, as MDX
   portfolio/*.mdx
   case-studies/*.mdx
   editorial/*.mdx
+  research/*.mdx
 
 lib/                      # bridge between content/ and app/
   portfolio.ts            # read + parse portfolio front matter
   case-studies.ts
   editorial.ts
+  research.ts             # research works + their language editions
   mdx-components.tsx      # MDX -> React component mapping
   image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
   reading-time.ts         # reading time derived from the MDX body
   site.ts                 # SITE_URL — single source for absolute URLs (sitemap, robots, JSON-LD)
 
 public/
-  images/{portfolio,editorial,case-studies}/<slug>/…
+  images/{portfolio,editorial,case-studies,research}/<slug>/…
   videos/portfolio/<slug>/…
+  thesis/*.pdf            # research editions, one PDF per language
+  fonts/                  # Source Serif 4, read at build time by the OG images
   logo-light.svg, logo-dark.svg, resume.pdf
 ```
 
-Two structural decisions worth knowing:
+Three structural decisions worth knowing:
 
 - **`components/` lives at the repo root**, outside `app/`, to keep routes and reusable UI separate.
 - **The three editorial subsections are real routes, not filters.** Each targets a distinct audience and deserves its own linkable URL. Since fixed segments coexist with `[slug]` inside `app/editorial/`, the slugs `software`, `career` and `aotearoa` are **reserved** and must never be used for an article — App Router would shadow it.
+- **Research is a fourth collection, and a fourth nav item** (Portfolio · Editorial · Research · About). It earned one because research stopped being a single artifact: the UNAM thesis ships in Spanish and English, and the Master of Applied Management thesis will follow. One document would have belonged inside About; a growing body of work does not.
 
 Contact is deliberately not a route: it lives as a CTA in the nav and a block in the footer, alongside the résumé link.
 
@@ -146,6 +157,39 @@ heroCredit: string?      # e.g. "Photo: Elías Hernández"
 heroCaption: string?     # place / context line under the band
 ```
 
+**Research work** — `content/research/<slug>.mdx`
+
+```yaml
+title: string            # display title, in English
+originalTitle: string?   # title in the original language, when it differs
+slug: string
+kind: string             # 'Undergraduate thesis' | "Master's thesis" | …
+field: string
+institution: string
+degree: string
+year: number
+advisor: string?
+abstract: string         # listing card + page intro
+featured: boolean
+cover: path?             # documentCover slot — portrait, see lib/image-slots.ts
+coverAlt: string?
+editions:                # one entry per language the work exists in
+  - lang: string         # ISO code
+    label: string        # as shown: 'English', 'Spanish'
+    file: path           # PDF under public/thesis/
+    pages: number
+    primary: boolean?    # the language it was written in
+```
+
+The model is **one work, N language editions**. A work with a single edition renders correct copy
+with no configuration; adding a translation is a front-matter entry, not a code change. Covers are
+generated from page 1 of the PDF rather than drawn by hand:
+
+```bash
+pdftoppm -f 1 -l 1 -r 150 -png -singlefile work.pdf cover
+magick cover.png -resize 660x -bordercolor '#e2e3df' -border 1 -quality 88 cover.jpg
+```
+
 `readingTime` is not declared anywhere: it is derived from the MDX body by [lib/reading-time.ts](lib/reading-time.ts) as the file is read, so it can never drift from the text.
 
 Images referenced from front matter live under `public/images/<collection>/<slug>/`. The canonical aspect ratio, responsive width, `sizes` attribute and recommended export dimensions for every image slot are defined once in [lib/image-slots.ts](lib/image-slots.ts) — use it instead of hardcoding values.
@@ -156,7 +200,7 @@ Editorial photographs are Elías's own. Portfolio imagery is mixed: most project
 
 Credit is carried at three levels: a global notice in the footer, an optional per-image `credit` line rendered by `MdxFigcaption` (alongside `caption` and an optional source link), and a JSON-LD `ImageObject` on editorial articles.
 
-Structured data is a graph, not a per-page tag: the root layout emits a `Person` node with a stable `@id`, and `/editorial/[slug]` emits a `BlogPosting` that references it by that `@id` rather than duplicating the node. Portfolio and case studies deliberately emit no `ImageObject` — a single hardcoded copyright notice cannot be true for a collection with mixed ownership. See §7 of [CLAUDE.md](CLAUDE.md) for the full rationale, including which schema.org fields are omitted on purpose.
+Structured data is a graph, not a per-page tag: the root layout emits a `Person` node with a stable `@id`, and page-level blocks reference it by that `@id` rather than duplicating the node — `/editorial/[slug]` emits a `BlogPosting`, `/research/[slug]` a `Thesis` with one `MediaObject` per language edition. Research is safe to describe this way for the same reason portfolio is not: a thesis is wholly the author's own work. Portfolio and case studies deliberately emit no `ImageObject` — a single hardcoded copyright notice cannot be true for a collection with mixed ownership. See §7 of [CLAUDE.md](CLAUDE.md) for the full rationale, including which schema.org fields are omitted on purpose.
 
 ---
 
