@@ -143,6 +143,32 @@ bank, where every change carries its own review chain.
 
 The steps below are the ones BBVA documents publicly for an N2→N4 upgrade in the app.
 
+```mermaid
+flowchart TB
+    n2["<b>N2 payroll account</b><br/>opened years ago on the minimum identity file<br/>ceiling: 3,000 UDIs a month, around MXN $24,333"]
+    orch["<b>Orchestration layer</b><br/><i>holds no document logic of its own</i><br/>tracks which modules are complete and returns<br/>the customer to where they stopped"]
+
+    subgraph modules["Five modules — each independently shippable, testable and fixable"]
+        direction LR
+        ine["1 · Official ID (INE)<br/>front · back · selfie<br/><i>framing, glare and blur judged on-device</i>"]
+        addr["2 · Proof of address<br/>structured fields + a photographed document<br/><i>rebuilt from scratch in 2024</i>"]
+        fatca["3 · Tax residency<br/>FATCA / CRS<br/><i>one tap, or a branch</i>"]
+        kyc["4 · KYC questionnaire<br/>four sections<br/><i>longest, and costliest to abandon</i>"]
+        benef["5 · Beneficiary<br/><i>the only module that collects data<br/>about someone who is not the customer</i>"]
+    end
+
+    n4["<b>N4 account</b><br/>no deposit ceiling"]
+
+    n2 -->|"a notification the customer's own<br/>transaction volume triggers"| orch
+    orch <-->|"any order, across any number of sittings"| modules
+    modules -->|"the file complete and verified"| n4
+
+    classDef hub fill:var(--accent-soft),stroke:var(--color-accent),color:var(--foreground)
+    classDef done fill:var(--diagram-pass),stroke:var(--diagram-pass-line),color:var(--foreground)
+    class orch hub
+    class n4 done
+```
+
 ### 1. Official ID (INE)
 
 Front, back, and a selfie. The INE credential is the identity anchor of the Mexican
@@ -255,8 +281,10 @@ protection law.
 */}
 
 {/* PLACEHOLDER — mobile, optional. A progress/hub screen showing the five modules with
-    their completion state, if you can capture or reconstruct one. This is the single
-    most explanatory image on the page — it makes "modular and resumable" visible.
+    their completion state, if you can capture or reconstruct one. The Mermaid flowchart under
+    "The five modules" now carries the "modular and resumable" argument, so this is no
+    longer the only thing that can make it, but a real screen would still show that the
+    product keeps the promise the diagram describes. Redact the customer data.
     File: /images/portfolio/nomina-upgrade/upgrade-hub.png
 <Image
   src="/images/portfolio/nomina-upgrade/upgrade-hub.png"

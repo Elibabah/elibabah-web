@@ -86,6 +86,80 @@ English translation.
 - Icons come from **`lucide`** (icon *data*, not `lucide-react` components) so `morphicons` can
   interpolate their geometry. Both packages tree-shake and may coexist; see LEARNING.md for why a
   morph cannot consume a rendered React component.
+- **Diagrams are Mermaid, rendered in the browser.** Authoring is a plain ```` ```mermaid ````
+  fence in the `.mdx`, identical to a repo README, so a diagram already written for a project's
+  README moves across unedited. `MdxPre` intercepts the fence at the `<pre>` level and hands it to
+  `MdxMermaid`, a client component that `await import("mermaid")` from inside its effect — which
+  puts the library in its own chunk, downloaded only on pages that actually contain a diagram.
+  That is roughly 400KB gzip, lazily, below the fold, and it is the one place on the site where
+  content ships client JavaScript. The alternative, `rehype-mermaid`, renders to static SVG at
+  build time but pulls **Playwright** into every Vercel deploy; Mermaid measures text with
+  `getBBox`, so there is no browserless renderer and no third option. If the JS cost ever stops
+  being worth it, the fences do not change — only where they are rendered.
+- **Mermaid is themed from the tokens, not from a preset.** `MdxMermaid` resolves the CSS
+  variables against the live document and feeds them to `themeVariables`, re-reading them when
+  `resolvedTheme` changes, because Mermaid derives colours with khroma and needs real values.
+  Two consequences, both learned the hard way:
+  - **`classDef fill:var(--x)` is a Mermaid parse error.** So the component resolves every
+    `var(--token)` in the diagram source *before* Mermaid sees it. In an `.mdx` you therefore
+    write `classDef pure fill:var(--accent-soft),stroke:var(--color-accent)` and it works — but
+    only the no-fallback form: `var(--x, #fff)` would break on Mermaid's comma-separated
+    declarations. An unknown token is left untouched rather than blanked, so a typo fails loudly.
+  - `--diagram-pass{,-line}` and `--diagram-fail{,-line}` in `app/globals.css` exist **only** for
+    this. They are the one extension to the §4 palette, they are never used for text, and they
+    are defined for both themes. Reach for accent before adding a third pair.
+- `securityLevel` is `"strict"`, and `<b>`, `<i>` and `<br/>` in node labels still render —
+  verified, not assumed. There is no need to rewrite README labels into markdown strings.
+- **A diagram is never scaled down to fit.** `max-width: 100%` is what made wide flowcharts
+  unreadable on a phone: a 1180px diagram in a 360px column drew its 16px type at about 6px, and
+  `overflow-x-auto` never engaged because nothing overflowed. `MdxMermaid` reads the natural width
+  off the SVG's `viewBox` and sets the width itself — fit-to-column, floored at `MIN_FIT_SCALE`
+  (0.7, the point where the type drops under ~11px). Past that the panel scrolls, and a zoom
+  control (50–250% in 25% steps, plus Fit) and Expand sit above every diagram, always. Showing
+  them only when the diagram overflowed was tried and reverted: the condition flips on the *same*
+  diagram when a phone is rotated, so the controls came and went, and it hid Expand on exactly
+  the diagrams a reader might still want full screen. Whether to enlarge is the reader's call,
+  not a threshold's. Only the "Scroll to pan" hint stays conditional, because it would otherwise
+  be false. The scroll panel carries `tabIndex={0}` because a
+  region that scrolls and cannot be reached by keyboard is a WCAG 2.1.1 failure, and
+  `overscroll-x-contain` so panning does not trigger the browser's back gesture.
+  **Measure the content box, not `clientWidth`** — `clientWidth` includes the panel's own `p-7`,
+  and comparing against it overflows every diagram by 56px.
+- **Full screen, offered on every diagram.** `Expand` opens a native `<dialog>` via
+  `showModal()`, which is what buys the focus
+  trap, the inert background, Esc-to-close and `::backdrop` without writing any of them.
+  The dialog takes the **whole viewport** (`w-screen h-[100dvh]`, opaque `bg-background`, no
+  card inside it) rather than floating at 96vw. That was a deliberate revision: a floating panel
+  left a dimmed strip of page around it that read as visual noise and gave the diagram no real
+  room. Covering the page outright removes the backdrop as something to look at, which is why
+  there is no blur to tune — and it is the only version that helps on a phone.
+  The dialog holds a second `DiagramSurface` that measures and zooms independently, because the
+  room it gets is nothing like the article column. Four things that are easy to get wrong:
+  - **Full screen fits both axes**, the article fits width only. Fitting width alone in a
+    full-screen dialog just trades horizontal scrolling for vertical and defeats the point: on a
+    1440×900 screen the widest diagram lands at 80% with *no scrolling in either direction*.
+  - The floor stays `MIN_FIT_SCALE` in both. Going lower full screen was tried and reverted —
+    on a phone a wide diagram overflows at any scale that small anyway, so it cost legibility
+    (8px type at 50%) and bought no overview at all.
+  - The copy in the dialog is **re-ided** (`svg.replaceAll(domId, domId + "-full")`). Mermaid
+    scopes the diagram's own CSS *and* its arrowhead `url()` references by element id, so two
+    live copies sharing an id collide.
+  - Style the dialog with `[&[open]]:flex`, never a bare `flex`. A plain `display:flex` beats the
+    UA's `dialog:not([open]) { display: none }` and leaves the dialog permanently on screen.
+
+  `document.body.style.overflow` is locked while open: Chrome still scrolls the page behind a
+  modal, which is disorienting when the thing you are panning is itself scrollable. There is no
+  click-outside handler, because full screen there is no outside.
+- **The width effect has no dependency array, on purpose — do not "fix" it.** React owns the SVG
+  subtree through `dangerouslySetInnerHTML`, so a commit that recreates the panel rebuilds the
+  `<svg>` from the HTML string and silently drops the inline width set on the previous node,
+  *without changing anything a dependency array could watch*. The trigger we hit was the controls
+  row appearing above the panel once the widths were measured: a new sibling changes the child
+  list, React rebuilds the panel under it, and the diagram sticks at the SVG's 300px intrinsic
+  default — intermittently, which is what made it hard to see. The controls row being
+  unconditional now settles that on its own, but the effect still re-applies after every commit,
+  because the same trap waits for the next conditional child anyone adds above the panel. It is
+  two style writes on a cached element and it cannot go stale.
 - Structured data is hand-built JSON-LD in plain `<script type="application/ld+json">` tags —
   not `next/script`, and not the Metadata API, which has no field for it.
 - **Social cards are generated, not designed**: `next/og` `ImageResponse` at build time, one
@@ -201,7 +275,7 @@ elibabah-web/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
     layout/                 # Nav, Footer, Logo, ThemeToggle
-    content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption
+    content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption, MdxMermaid, MdxPre
     theme-provider.tsx
   content/
     portfolio/*.mdx

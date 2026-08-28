@@ -82,6 +82,26 @@ Places knows about places in general, and only our backend knows which of them a
 or Bodega Aurrera clinics with real coverage. Keeping the search forgiving while the answer
 stayed authoritative was the work.
 
+```mermaid
+flowchart TB
+    typed["<b>What the member types</b><br/>an address · a colonia · a postal code · a city<br/><i>or half of one, remembered badly, on a phone</i>"]
+    places["Google Places autocomplete<br/><i>knows places in general</i><br/>absorbs the ambiguity and resolves the text to a point<br/>never asked which of them honour a membership"]
+    backend["<b>Our clinic directory</b><br/><i>knows our places</i><br/>owns which locations are Walmart or Bodega Aurrera<br/>clinics with real coverage"]
+
+    subgraph out["The same result set, read two ways"]
+        direction LR
+        list["Results list"]
+        map["Google Map"]
+    end
+
+    typed -->|"free text, however people actually write a location"| places
+    places -->|"coordinates, not names"| backend
+    backend -->|"what is in range"| out
+
+    classDef truth fill:var(--accent-soft),stroke:var(--color-accent),color:var(--foreground)
+    class backend truth
+```
+
 ## Member account and self-service
 
 For existing members the account area gathers self-service behind a persistent sidebar:

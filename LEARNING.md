@@ -2005,3 +2005,253 @@ build y el navegador, no en el código. Hacer esa bifurcación primero habría e
 > interna**: dos fuentes que deberían coincidir y no coinciden, como una tabla de build que anuncia una
 > ruta que el servidor devuelve como 404. Un código roto suele fallar de forma consistente; un método
 > roto produce contradicciones.
+
+---
+
+## Dónde se renderiza una librería: cliente, build, o ninguno de los dos
+
+Al añadir diagramas Mermaid al portafolio la pregunta no fue *si* usar la librería, sino **dónde se
+ejecuta**. Había tres opciones y la investigación redujo el espacio antes de decidir:
+
+- **En build, a SVG estático.** `rehype-mermaid@3` depende de `mermaid-isomorphic`, que declara
+  `playwright` como **peer dependency**. Renderizar en build significa descargar Chromium en cada
+  deploy de Vercel.
+- **En cliente, cargando bajo demanda.** ~180–200KB gzip que solo bajan en las páginas con diagrama.
+- **Sin librería**, dibujando SVG a mano o con un componente propio.
+
+Lo que cerró la primera opción no fue una preferencia sino un hecho: **Mermaid mide texto con
+`getBBox`**, que jsdom no implementa. No existe un renderizador sin navegador, y por eso todas las
+soluciones "server-side" del ecosistema terminan arrastrando Playwright o Puppeteer. Cuando una
+librería depende de APIs de layout del navegador, "renderizar en el servidor" siempre significa
+"llevarse un navegador al servidor".
+
+El detalle que volvió la decisión barata: **el formato de autoría es idéntico en las tres opciones**.
+En el `.mdx` se escribe un bloque ` ```mermaid ` igual que en un README. Cambiar dónde se renderiza
+no toca ni un archivo de contenido. Una decisión reversible se puede tomar rápido; una irreversible
+merece la investigación completa. Vale la pena preguntarse a cuál de las dos se está enfrentando uno
+antes de gastar horas comparando.
+
+### Corolario: una librería que parsea estilos no acepta CSS arbitrario
+
+El tema del sitio vive en CSS variables, así que el primer intento fue escribir
+`classDef pure fill:var(--accent-soft)` dentro del diagrama. **Mermaid lo rechaza con un parse
+error.** Su parser de `classDef` separa declaraciones por comas y no entiende `var()`.
+
+La solución no fue pelear con el parser sino **resolver antes de entregarle el string**: el
+componente reemplaza cada `var(--token)` por su valor computado (`getComputedStyle`) y Mermaid nunca
+llega a ver una función CSS. Como efecto secundario el diagrama queda ligado al tema vivo y se
+redibuja al cambiar de claro a oscuro.
+
+> **Pregunta de entrevista**: ¿cómo decides si una dependencia va al cliente o al build?
+> Primero averiguando si la opción de build existe de verdad. Muchas librerías de render dependen de
+> APIs de medición del navegador (`getBBox`, `getComputedStyle`, fuentes cargadas), y en ese caso
+> "moverlo al build" no elimina el coste, lo traslada al pipeline de CI en forma de un navegador
+> headless. Después, midiendo en vez de estimar: el chunk real, no el tamaño del paquete en npm.
+> Y por último preguntando cuánto cuesta cambiar de opinión: si el formato de entrada es el mismo en
+> todos los caminos, la decisión es reversible y no merece bloquear el trabajo.
+
+---
+
+## Cuando React reconstruye el DOM que tú mutaste (y el array de dependencias no se entera)
+
+El componente de diagramas inyecta el SVG con `dangerouslySetInnerHTML` y después le fija el ancho a
+mano, porque el tamaño depende de una medida que solo existe en runtime. El efecto que lo hacía
+declaraba sus dependencias con cuidado:
+
+```tsx
+useEffect(() => {
+  const el = hostRef.current?.querySelector("svg");
+  if (!el) return;
+  el.style.width = `${natural * zoom}px`;
+}, [svg, zoom, naturalWidth]);   // ← parece completo, y no lo es
+```
+
+Funcionaba **de forma intermitente**. A veces el diagrama salía a su tamaño correcto y a veces se
+quedaba en 300px, que es el ancho intrínseco por defecto de un `<svg>` sin dimensiones.
+
+La causa no estaba en las dependencias sino en la reconciliación. La fila de controles se renderizaba
+condicionalmente (`{showControls && <div>…</div>}`) y `showControls` pasaba de `false` a `true` en
+cuanto se medían los anchos. **Al aparecer un hermano nuevo encima del panel, la lista de hijos cambia
+de forma y React reconstruye el panel de abajo**, regenerando el `<svg>` desde el string HTML — y con
+él se va el `style.width` que estaba puesto en el nodo anterior. En ese commit no cambió `svg`, ni
+`zoom`, ni `naturalWidth`: **nada que un array de dependencias pudiera vigilar**.
+
+El diagnóstico llegó instrumentando el efecto y comprobando `document.contains(el)` sobre cada
+elemento que había tocado:
+
+```
+open #1 {"styleWidth":"961.8px"}          ✓
+open #2 {"styleWidth":"", rendered:300}   ✗   ← el último efecto corrió sobre un nodo con inDom:false
+open #3 {"styleWidth":"961.8px"}          ✓
+```
+
+Ese `inDom:false` es la prueba: el efecto sí corrió y sí escribió, pero sobre un nodo que ya había
+sido descartado.
+
+Dos arreglos, y conviene entender por qué son distintos:
+
+1. **Estabilizar la lista de hijos.** La fila de controles se renderiza siempre; si no hace falta, se
+   oculta con CSS. Un elemento que aparece y desaparece cambia la estructura; uno que cambia de
+   `display` no.
+2. **Quitarle el array de dependencias al efecto**, para que se reaplique en cada commit. Parece un
+   descuido y es lo contrario: es la única guarda que sobrevive a que alguien añada mañana otro hijo
+   condicional encima del panel. Son dos escrituras de estilo sobre un elemento cacheado.
+
+La lección general: **cuando React posee un subárbol, cualquier mutación manual sobre él es una
+apuesta a que React no lo va a rehacer.** Un array de dependencias describe *tus* datos, no las
+decisiones de reconciliación de React. Si el DOM que mutas lo puede regenerar el framework, la
+reaplicación tiene que ser incondicional o el estado tiene que vivir donde React lo controle.
+
+> **Pregunta de entrevista**: ¿cuándo está justificado un `useEffect` sin array de dependencias?
+> Casi nunca para lógica de datos: ahí la ausencia de array suele ser un bug o un bucle. Sí está
+> justificado para **reafirmar una mutación imperativa sobre DOM que React posee y puede recrear**,
+> cuando el evento que la destruye no se refleja en ninguna variable observable. La prueba de que
+> hace falta es empírica, no teórica: instrumentas la mutación, guardas la referencia al nodo y
+> compruebas si sigue en el documento. Si encuentras nodos huérfanos que recibieron tu escritura, no
+> te falta una dependencia, te falta entender que el nodo ya no es el mismo.
+
+---
+
+## Encoger para caber puede ser peor que desbordar
+
+Los diagramas se veían diminutos en móvil. El instinto fue añadir botones de zoom, pero el problema
+estaba una capa más abajo, en dos clases que parecían sensatas juntas:
+
+```
+overflow-x-auto        ← el contenedor puede desplazarse
+[&>svg]:max-w-full     ← el SVG nunca es más ancho que el contenedor
+```
+
+Se anulan. `max-w-full` obliga al SVG a encogerse hasta caber, así que **nunca hay desbordamiento y
+el `overflow-x-auto` no llega a activarse jamás**. Un diagrama de 1180px dentro de una columna de
+360px se dibujaba a 360px, y con él su tipografía de 16px pasaba a unos 6px. Ilegible, sin scroll, y
+sin ninguna pista de que faltaba contenido por ver. Los botones de zoom por sí solos habrían peleado
+contra esa misma restricción.
+
+El arreglo fue invertir la política: **leer el ancho natural del diagrama (del `viewBox`) y fijarlo
+explícitamente**, ajustando a la columna pero con un **suelo de legibilidad**. Por debajo de 0.7 la
+tipografía baja de ~11px, así que ahí se deja de encoger y se empieza a desbordar, que es cuando el
+contenedor de scroll por fin sirve para algo.
+
+```
+sin suelo:   1180px → 360px   tipografía ~6px,  sin scroll   ← ilegible
+con suelo:   1180px → 826px   tipografía ~11px, con scroll   ← legible y navegable
+```
+
+### El error de medición que se coló dentro del arreglo
+
+La primera versión comparaba el ancho natural contra `host.clientWidth`. **`clientWidth` incluye el
+padding del propio elemento**, y el diagrama solo dispone de la caja de contenido. Con `p-7` en los
+dos lados eso son 56px de más: un diagrama que "cabía" desbordaba por 56px. La medida correcta resta
+el padding computado:
+
+```ts
+const { paddingLeft, paddingRight } = getComputedStyle(el);
+const box = el.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight);
+```
+
+### Un ajuste de un solo eje no es "pantalla completa"
+
+Al abrir el diagrama a pantalla completa, ajustar solo el ancho habría cambiado scroll horizontal por
+scroll vertical. Como ahí el objetivo es *ver la pieza entera*, el ajuste toma el mínimo entre ambos
+ejes usando la relación de aspecto del `viewBox`. En 1440×900 el diagrama más ancho cae al 80% y
+entra completo, sin scroll en ninguna dirección.
+
+También se probó bajar el suelo al 50% en pantalla completa para que cupiera más en el teléfono, y se
+revirtió: a 50% la tipografía queda en ~8px **y el diagrama sigue desbordando igual**. Costaba
+legibilidad sin comprar la vista general. Un compromiso que empeora las dos cosas a la vez no es un
+compromiso.
+
+> **Pregunta de entrevista**: ¿cuándo conviene que un contenido desborde en vez de adaptarse?
+> Cuando su legibilidad tiene un mínimo. Texto reflowable se adapta bien porque cambia de forma;
+> un diagrama, una tabla ancha o una partitura no pueden reflowear, y escalarlos por debajo de cierto
+> umbral los convierte en una imagen decorativa que ya no comunica. Ahí la respuesta correcta es
+> desbordar y ofrecer navegación — scroll, zoom, pantalla completa — porque el usuario puede moverse
+> por algo que se lee, pero no puede hacer nada con algo que cabe y no se entiende.
+
+---
+
+## `<dialog>` nativo: lo que regala, y la trampa de darle `display`
+
+Para abrir un diagrama a pantalla completa la opción cara era un div posicionado con overlay propio:
+habría tocado implementar a mano la trampa de foco, el cierre con `Escape`, la inertización del fondo
+y el bloqueo de interacción. El elemento `<dialog>` abierto con **`showModal()`** trae las cuatro
+cosas de fábrica, más un pseudo-elemento `::backdrop` que se puede estilar. Es una de las APIs de
+plataforma donde escribirlo uno mismo es claramente peor.
+
+Detalles que sí hubo que resolver:
+
+**`showModal()` y no el atributo `open`.** Solo la llamada al método activa la capa superior (*top
+layer*), la trampa de foco y el `::backdrop`. Poner `<dialog open>` muestra el elemento pero no lo
+convierte en modal, así que se pierde justo lo que se venía a buscar.
+
+**Nunca darle `display` a secas.** El navegador aplica `dialog:not([open]) { display: none }` desde
+su hoja de estilos. Una clase de utilidad como `flex` lo sobrescribe y deja el diálogo **visible de
+forma permanente**, incluso cerrado. La forma segura es condicionar el display a que esté abierto:
+
+```
+[&[open]]:flex flex-col      ← flex-direction siempre; display solo cuando open
+```
+
+`flex-col` no hace daño porque solo fija la dirección; el problema es exclusivamente la propiedad
+`display`.
+
+**El fondo sigue desplazándose.** Un modal nativo inertiza el fondo para la interacción, pero Chrome
+sigue permitiendo hacer scroll de la página detrás, lo que desorienta cuando lo que estás desplazando
+dentro del diálogo también hace scroll. Hay que bloquear `document.body.style.overflow` mientras esté
+abierto y restaurar el valor anterior al cerrar.
+
+**Si ocupa toda la pantalla, no hay "fuera".** La primera versión era un panel flotante al 96% del
+viewport con el fondo atenuado, y la franja de página alrededor era ruido visual. Al pasarlo a
+viewport completo con fondo opaco, el `::backdrop` deja de ser algo que mirar — no hay blur ni
+opacidad que ajustar porque no se ve nada de él. También se eliminó el manejador de "clic fuera para
+cerrar": mantenerlo habría sido código que miente sobre lo que hace.
+
+> **Pregunta de entrevista**: ¿por qué usar `<dialog>` en vez de un overlay propio?
+> Porque la accesibilidad de un modal no es una capa visual, es un conjunto de comportamientos:
+> el foco no debe escaparse al fondo, `Escape` debe cerrar, el contenido de atrás debe quedar inerte
+> para lectores de pantalla, y el modal debe pintarse por encima de cualquier `z-index` de la página.
+> Cada uno de esos es fácil de hacer a medias. `showModal()` los da correctos y probados. La regla que
+> se generaliza: cuando la plataforma expone una primitiva para un patrón de accesibilidad conocido,
+> reimplementarla es asumir una deuda que casi nadie termina de pagar.
+
+---
+
+## Un health check que no ejerce la ruta real es un semáforo en verde sin coche
+
+Durante toda una sesión la documentación de librerías vía MCP devolvía `Invalid API key`, mientras el
+diagnóstico oficial decía lo contrario:
+
+```
+$ claude mcp list
+context7: https://mcp.context7.com/mcp (HTTP) - ✔ Connected
+```
+
+Las dos cosas eran ciertas. El health check hace un `initialize` del protocolo, y **ese endpoint no
+valida la credencial**: responde 200 con o sin ella. La clave solo se comprueba cuando se llama a una
+herramienta de verdad. El chequeo probaba que el servidor estaba vivo y alcanzable, que era justo la
+parte que nunca estuvo en duda.
+
+Aislarlo requirió ejercer la ruta real a mano, con las tres variantes en paralelo:
+
+```
+CONTEXT7_API_KEY: <key>     → "Invalid API key"
+Authorization: Bearer <key> → "Invalid API key"
+sin cabecera de auth        → "Available Libraries: …"    ← funciona
+```
+
+Esa tabla contesta dos preguntas de golpe. El nombre de la cabecera **no** era el problema (las dos
+formas se comportan igual), y la credencial estaba revocada o mal copiada, porque **sin ella el
+servicio responde mejor que con ella**. Probar solo la configuración actual habría dejado la duda
+entre "cabecera equivocada" y "clave mala"; es la tercera fila, la que nadie pide, la que decide.
+
+El arreglo fue quitar la clave rota para caer al nivel anónimo, usando la interfaz prevista
+(`claude mcp remove` / `claude mcp add`) en vez de editar el JSON global a mano.
+
+> **Pregunta de entrevista**: ¿qué hace bueno a un health check?
+> Que ejercite el mismo camino que el tráfico real, credenciales incluidas. Un check que solo abre la
+> conexión responde "¿está encendido?" cuando la pregunta operativa es "¿puede servir una petición?".
+> El fallo es especialmente traicionero porque **es un falso negativo silencioso**: no rompe, tranquiliza.
+> Cuando un diagnóstico y el comportamiento observado se contradicen, la salida es reproducir el
+> comportamiento por el camino más corto posible y variar **un solo factor a la vez**, incluyendo la
+> variante de control que consiste en quitar el factor sospechoso por completo.
