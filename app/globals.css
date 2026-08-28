@@ -13,6 +13,15 @@
   --accent-soft: #E0ECEE;
   --on-accent: #FFFFFF;
   --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Diagram-only semantics. Mermaid's classDef parser rejects var(), so
+     MdxMermaid resolves these to literal values before handing it the source.
+     Kept out of the general palette: they mean pass/fail inside a diagram and
+     nowhere else, and they are never used for text. */
+  --diagram-pass: #E3F1E9;
+  --diagram-pass-line: #1D6B45;
+  --diagram-fail: #F7E4E2;
+  --diagram-fail-line: #A33A30;
 }
 
 @theme inline {
@@ -40,6 +49,10 @@ html[data-theme="dark"] {
   --color-accent: #4D9FB3;
   --accent-soft: #17302F;
   --on-accent: #121514;
+  --diagram-pass: #16301F;
+  --diagram-pass-line: #6FBF95;
+  --diagram-fail: #331E1C;
+  --diagram-fail-line: #E2857C;
 }
 
 body {

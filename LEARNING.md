@@ -5,6 +5,11 @@
 > aunque algo quede desactualizado se anota como tal en vez de eliminarse.
 >
 > Pensado también como banco de repaso para entrevistas técnicas.
+>
+> **Revisión: 24 de agosto de 2026.** Se contrastaron las afirmaciones del archivo contra el código
+> actual. Lo que resultó impreciso **no se borró**: queda marcado con un bloque
+> **⚠ Corrección (agosto 2026)** debajo del texto original, para que se vea qué se creía entonces y
+> qué resultó ser cierto. Equivocarse y anotarlo es parte de la bitácora.
 
 ---
 
@@ -111,6 +116,14 @@ crear un Client Component chico cuyo único trabajo es envolver el `Provider`, e
 Server Component. Ejemplo real de este proyecto: [components/theme-provider.tsx](components/theme-provider.tsx)
 envuelve `next-themes`, e [app/layout.tsx](app/layout.tsx) (Server Component) lo importa y usa.
 
+> **Pregunta de entrevista**: si el `ThemeProvider` es un Client Component y envuelve toda la
+> aplicación, ¿no queda todo el árbol convertido en cliente?
+> No. El límite `"use client"` se propaga por el **grafo de imports**, no por el anidamiento en el
+> JSX (ver la sección de más arriba sobre esto). `layout.tsx` sigue siendo Server Component: renderiza
+> a sus hijos en el servidor y se los pasa al Provider como la prop `children`, ya convertidos en
+> payload. El Provider recibe un resultado, no ejecuta esos componentes. Por eso el patrón funciona:
+> solo la cáscara del Provider viaja al navegador.
+
 ---
 
 ## Hidratación (Hydration) y `suppressHydrationWarning`
@@ -145,6 +158,15 @@ Por qué importa: el cambio de tema es **puramente CSS** — cambiar `data-theme
 dispara ningún re-render de React, solo hace que el navegador recalcule estilos. Es más performante que
 tener el color en un objeto JS de estado.
 
+> **Pregunta de entrevista**: si el tema cambia, ¿por qué React no se entera ni re-renderiza?
+> Porque el cambio no ocurre en el estado de React. `next-themes` muta un atributo del DOM
+> (`data-theme` en `<html>`) por fuera del árbol de fibers; el navegador recalcula estilos y
+> repinta, y React ni siquiera participa. La alternativa (guardar el color en `useState` y pasarlo
+> por props o contexto) obligaría a re-renderizar a cada consumidor en cada cambio de tema. El
+> matiz importante: eso también significa que **el JS de React no puede leer el tema desde el CSS**;
+> para eso hace falta `useTheme()`, y ahí sí aparece el problema de hidratación que resuelve el
+> patrón `mounted`.
+
 ---
 
 ## Tailwind CSS v4 — "CSS-first config"
@@ -167,6 +189,33 @@ Esto genera gratis las clases `bg-accent`, `text-accent`, `border-accent`, `font
 `@theme inline` (vs `@theme` simple) le dice a Tailwind que las variables ya están definidas afuera
 (en `:root` / `[data-theme="dark"]`) y solo las "reexporta" como tokens de Tailwind — no las redefine.
 
+**Qué hace `inline` con precisión** (verificado contra la documentación de Tailwind v4): la palabra
+clave cambia **qué escribe Tailwind dentro de la clase utilitaria**. Sin `inline`, la utilidad
+referencia el token: `background-color: var(--color-background)`. Con `inline`, Tailwind **mete el
+valor del token** en la utilidad: `background-color: var(--background)`.
+
+La diferencia importa por una regla de CSS que sorprende: **una `var()` se resuelve donde la variable
+se define, no donde se usa**. Sin `inline`, `--color-background` queda definida una sola vez en el
+`:root` que genera Tailwind, y ahí dentro `var(--background)` se congela contra el valor de `:root`;
+el bloque `html[data-theme="dark"]` que sobreescribe `--background` llega tarde y no cambia nada. Con
+`inline` la indirección desaparece: la utilidad apunta directo a `--background`, que se resuelve en el
+elemento donde se aplica y por tanto sí ve el valor del tema activo.
+
+> **Verruga real del proyecto**: la mayoría de los tokens mapean un nombre a otro
+> (`--color-background: var(--background)`), pero el acento se mapea a **sí mismo**
+> (`--color-accent: var(--color-accent)`), porque en `:root` la variable cruda ya se llamó
+> `--color-accent` en vez de `--accent`. Funciona por lo mismo que explica el párrafo anterior, pero
+> rompe la convención del resto del bloque. Si algún día se renombra, hay que tocar `:root`,
+> `html[data-theme="dark"]` y `@theme inline` a la vez.
+
+> **Pregunta de entrevista**: tienes un tema claro/oscuro con variables CSS y las clases de Tailwind
+> se quedan siempre con los colores del tema claro. ¿Qué revisas?
+> Que el bloque sea `@theme inline` y no `@theme` a secas. Con `@theme` simple, la utilidad
+> referencia el token de Tailwind, ese token se define una única vez en `:root`, y la `var()` interna
+> se resuelve ahí, contra los valores claros; el selector del tema oscuro nunca entra en juego. El
+> segundo sospechoso, si `inline` ya está puesto, es la especificidad del selector oscuro (ver la
+> sección sobre `html[data-theme="dark"]` más abajo).
+
 ---
 
 ## `next/font/google`
@@ -184,6 +233,20 @@ const sourceSerif = Source_Serif_4({ variable: "--font-heading", subsets: ["lati
 
 y esa variable se inyecta en el `className` del `<html>`, quedando disponible para todo el árbol CSS.
 
+> **Pregunta de entrevista**: la tipografía se ve bien en desarrollo pero en producción cae al
+> fallback del sistema, sin ningún error en consola. ¿Dónde miras?
+> En que la variable de `next/font` esté realmente en el `className` del `<html>`. `next/font`
+> **no registra la fuente globalmente**: solo crea una custom property, y si esa property no está
+> en un ancestro del elemento, `var(--font-heading)` no resuelve y CSS baja silenciosamente al
+> siguiente candidato de la pila. No hay error porque, para el navegador, un `font-family` que no
+> resuelve es un caso normal, no un fallo. El síntoma es tipografía equivocada sin diagnóstico, que
+> es el peor tipo de fallo.
+>
+> Corolario que muerde en este proyecto: **Satori no puede leer un objeto de `next/font`**. Las
+> imágenes OG generadas con `ImageResponse` necesitan el `.ttf` crudo leído con `fs`, y por eso
+> `public/fonts/SourceSerif4-Bold.ttf` existe duplicado a propósito (ver la sección de
+> `ImageResponse` más abajo).
+
 ---
 
 ## App Router — fundamentos (Next.js)
@@ -199,12 +262,34 @@ y esa variable se inyecta en el `className` del `<html>`, quedando disponible pa
   (`app/editorial/[slug]/`) — por eso esos nombres quedan reservados/prohibidos como slugs de contenido.
 - `(grupo)` con paréntesis organiza rutas sin afectar la URL (route groups).
 
+> **Pregunta de entrevista**: si `layout.tsx` persiste entre navegaciones y no se vuelve a
+> renderizar, ¿qué le pasa al estado de un Client Component que vive dentro del layout?
+> **Sobrevive a la navegación.** Es exactamente lo que se quiere para un reproductor de audio o un
+> scroll de sidebar, y exactamente lo que no se quiere para un menú móvil: al pulsar un enlace la
+> ruta cambia, pero el panel se queda abierto encima del contenido nuevo, porque nadie tocó su
+> `useState`.
+>
+> En este proyecto el `Nav` vive en el layout raíz y lo resuelve cerrando el menú a mano en cada
+> enlace (`onClick={() => setIsOpen(false)}` en [components/layout/Nav.tsx](components/layout/Nav.tsx)).
+> La alternativa es un `useEffect` sobre `usePathname()`, que cierra ante cualquier cambio de ruta
+> (incluido el botón atrás del navegador) en vez de solo ante los clicks que uno recordó instrumentar.
+
 ---
 
 ## Decisiones de diseño aplicadas en este proyecto (referencia rápida)
 
 - Fondo/texto base coordinados con los tonos del logo (no blanco/negro puro):
   light `#fafafa` / `#20221a`, dark `#20221a` / `#fafafa`.
+
+> **⚠ Corrección (agosto 2026)**: esos cuatro hexadecimales quedaron viejos; la paleta se afinó
+> después y nadie actualizó esta nota. Los valores vigentes en
+> [app/globals.css](app/globals.css) son light `#F6F7F6` / `#15160F` y dark `#121514` / `#ECEEEA`.
+> Los acentos (`#0C5566` / `#4D9FB3`) sí siguen siendo correctos.
+>
+> La lección no es el color: es que **una lista de valores copiados a mano se desincroniza en
+> silencio**. `globals.css` es la fuente de verdad, y cualquier documento que repita sus valores
+> literales es una copia que envejece. Lo que sí vale la pena documentar aquí es la *regla* (el
+> acento solo en links, kickers, pills y CTAs), no el hexadecimal.
 - Acento (`#0C5566` light / `#4D9FB3` dark) reservado **solo** para links, kickers, pills, CTAs — nunca
   en texto de cuerpo ni headings completos.
 - Tres roles tipográficos vía variables con nombre semántico (`--font-heading`, `--font-body`,
@@ -243,6 +328,17 @@ necesitan los metadatos para mostrar la card.
 > **Por qué no `@next/mdx`**: ese paquete está optimizado para cuando los archivos `.mdx` son las
 > páginas mismas (dentro de `app/`). Para el patrón de `content/` externo con front matter YAML,
 > `gray-matter` + `next-mdx-remote` es la combinación estándar.
+
+> **Pregunta de entrevista**: `getAllArticles()` lee **todos** los `.mdx` de la carpeta para pintar
+> un listado. ¿Qué pasa si uno solo de esos archivos tiene el front matter mal formado?
+> Se cae la colección entera, no ese artículo. `matter()` lanza al parsear YAML inválido, y como la
+> lectura ocurre dentro de un `map` sobre el directorio, la excepción sube y tumba el listado, la
+> home y cualquier página que llame al loader. Un archivo roto tiene **radio de impacto de
+> colección**, no de documento.
+>
+> Es un fallo de build, así que nunca llega a producción, pero conviene saber leerlo: el error habla
+> de YAML y no menciona el archivo culpable de forma obvia. Ver más abajo la sección sobre los dos
+> puntos sin comillas, que es la causa concreta con la que se tropezó dos veces aquí.
 
 ---
 
@@ -312,6 +408,18 @@ export default async function Page({
 Lo mismo aplica a `searchParams`. Es uno de los breaking changes de Next.js 16 que no refleja la
 documentación general de internet — hay que conocerlo para no copiar ejemplos de versiones anteriores.
 
+> **Pregunta de entrevista**: ¿por qué convertirían `params` en una Promise? Parece una molestia
+> gratuita.
+> Porque permite empezar a renderizar el layout **antes** de conocer los params. Si `params` fuera
+> sincrónico, Next.js tendría que resolver el segmento dinámico completo antes de emitir una sola
+> línea de HTML; siendo una Promise, la parte estática del árbol puede transmitirse ya y la parte que
+> depende de los params se suspende hasta que estén. Es la misma idea detrás de `searchParams`
+> asíncrono y del streaming en general: **diferir lo que bloquea, en vez de esperar a todo**.
+>
+> Detalle práctico: el `await` hay que hacerlo, pero no cuesta nada cuando el valor ya está resuelto.
+> Y en las rutas prerrenderizadas de este sitio (`generateStaticParams` + `dynamicParams = false`)
+> ese await ocurre en build time, no en el request.
+
 ---
 
 ## `@tailwindcss/typography` y las clases `prose`
@@ -344,6 +452,18 @@ Se usa con la clase `prose` en el contenedor del contenido generado:
 > (`h2`, `p`, `ul`, `code`, etc.) sin que tengas que agregar clases a cada elemento manualmente. Esto
 > es especialmente útil porque el contenido MDX lo escribes en markdown plano — no puedes agregar
 > clases de Tailwind directamente a cada párrafo.
+
+> **Pregunta de entrevista**: `prose` trae su propia paleta de grises. ¿Cómo la haces respetar los
+> tokens de tema del sitio en vez de los suyos?
+> Sobreescribiendo las custom properties que el propio plugin expone (`--tw-prose-body`,
+> `--tw-prose-headings`, `--tw-prose-links`, `--tw-prose-bold`…) y apuntándolas a los tokens
+> propios. El plugin está construido sobre variables justamente para eso, así que no hace falta
+> pelear con `prose-p:` ni con `!important` elemento por elemento.
+>
+> Por qué importa aquí en concreto: sin ese mapeo, en tema oscuro `prose-neutral` seguiría pintando
+> el cuerpo en gris oscuro sobre fondo oscuro. Y la regla de color del proyecto (el acento solo en
+> links, kickers, pills y CTAs) se aplica exactamente en este punto: `--tw-prose-links` va al acento,
+> `--tw-prose-headings` **no**.
 
 ---
 
@@ -409,6 +529,41 @@ En este proyecto se usa la Opción B. Las ventajas:
 Se usa en `lib/editorial.ts` para tipar el campo `section` del front matter, y en la firma de
 `getArticlesBySection(section: ArticleSection)` para que TypeScript rechace llamadas con secciones
 inválidas.
+
+> **⚠ Corrección (agosto 2026)**: la segunda viñeta afirma que escribir `section: "sports"` en el
+> front matter se detecta en compile time. **Es falso**, y conviene entender por qué, porque es un
+> malentendido muy común sobre TypeScript.
+>
+> El YAML no lo lee TypeScript: lo lee `gray-matter` en runtime, y devuelve `data` tipado como `any`.
+> El código hace entonces una **aserción de tipo**, no una validación:
+>
+> ```ts
+> // lib/editorial.ts
+> const { data, content } = matter(raw);
+> return { ...(data as ArticleFrontmatter), readingTime: readingTimeOf(content) };
+> ```
+>
+> `as` no comprueba nada; le promete al compilador que el valor tiene esa forma y el compilador se
+> calla. Un `section: "sports"` en el `.mdx` compila sin una sola queja, y lo que ocurre después es
+> que el artículo simplemente no aparece en ningún listado, porque ningún `getArticlesBySection()`
+> pide esa sección. **Un fallo silencioso, no un error.**
+>
+> Lo que la viñeta sí describe bien es la otra mitad: dentro del código TypeScript, una llamada
+> `getArticlesBySection("sports")` sí se rechaza en compile time. La frontera es el archivo: del
+> `.mdx` hacia adentro no hay garantía, del `lib/` hacia adentro sí.
+>
+> Para cerrar de verdad ese hueco haría falta validar en runtime al leer el archivo (un `zod`, o a
+> mano un `if (!SECTIONS.includes(data.section)) throw`), lo que convertiría el fallo silencioso en
+> un error de build con el nombre del archivo. No está hecho, y es una decisión razonable para un
+> sitio de un solo autor; sería insostenible con varios.
+
+> **Pregunta de entrevista**: ¿en qué se diferencia `as Foo` de una validación, y cuándo es peligroso?
+> `as` es una aserción: apaga la comprobación del compilador para esa expresión, sin generar ni una
+> línea de código que verifique nada en runtime. Es seguro cuando el valor viene de un sitio que tú
+> controlas y el compilador simplemente no puede saberlo (un `querySelector`, por ejemplo). Es
+> peligroso justo en la frontera del sistema: JSON de una API, respuestas de red, archivos en disco,
+> `process.env`. Ahí `as` no te da tipos, te da la **ilusión** de tipos, y el error reaparece más
+> tarde y más lejos del origen. La regla práctica: **validar en el borde, tipar hacia adentro**.
 
 ---
 
@@ -522,6 +677,18 @@ era `"system"` (ya que `"system" !== "dark"`), aunque el sistema estuviera en da
 > **Regla práctica**: usa `resolvedTheme` para cualquier lógica que dependa del tema actual
 > (`if dark, do X`). Usa `theme` solo si necesitas saber si el usuario eligió "seguir al sistema".
 
+> **Pregunta de entrevista**: ¿por qué `resolvedTheme` es `undefined` en el primer render, y por qué
+> no basta con darle un valor por defecto?
+> Porque en el servidor no existe ni `localStorage` ni `prefers-color-scheme`: el tema real es
+> literalmente incognoscible en ese momento. `next-themes` devuelve `undefined` en vez de inventarse
+> un valor, que es la respuesta honesta.
+>
+> Poner un default (`resolvedTheme ?? "light"`) parece arreglarlo y en realidad **fabrica un
+> hydration mismatch**: el servidor pinta el árbol en claro, el cliente lo pinta en oscuro, React
+> compara y protesta. Por eso el patrón correcto es el de `mounted`: no adivinar el tema, sino
+> renderizar un marcador neutro hasta que el cliente pueda responder con certeza. La distinción de
+> fondo es entre *no saber todavía* y *saber que es claro*, y son cosas distintas.
+
 ---
 
 ## El árbol de contexto React con Server y Client Components mezclados
@@ -607,6 +774,19 @@ export function Logo() {
 En este proyecto se empezó con Estrategia A y se migró a B cuando surgieron problemas de
 especificidad CSS con Tailwind v4. B es la más robusta para componentes que necesitan lógica
 de tema más allá de simples cambios de color.
+
+> **Pregunta de entrevista**: la Estrategia B introduce un parpadeo (el logo claro aparece un
+> instante antes de que `mounted` sea `true`). ¿Cómo lo evitarías sin volver a la A?
+> La tercera vía es **no cambiar de archivo, sino de tinta**: un solo SVG inline que use
+> `fill="currentColor"`, y dejar que el color lo herede del CSS. Desaparecen las dos imágenes de la
+> A, desaparece el estado de la B, no hay parpadeo porque no hay JS involucrado, y de paso se ahorra
+> un request. Es la opción correcta para un logotipo monocromo como el de este sitio, y por eso
+> CLAUDE.md la menciona junto al patrón `<picture>`.
+>
+> La B sigue siendo la respuesta cuando las dos variantes **no son el mismo dibujo** (distinto
+> trazo, distinto contraste, distinta versión), porque ahí ya no basta con recolorear. La pregunta
+> real que hay detrás es: ¿esto es un cambio de color o un cambio de contenido? Si es color, resuélvelo
+> en CSS; si es contenido, en JS.
 
 ---
 
@@ -768,6 +948,18 @@ en el `<html>` en el panel Elements de DevTools.
 > CSS, hacer el selector más específico con `html[data-theme="dark"]` es más robusto que
 > `[data-theme="dark"]` solo — te protege de conflictos de orden en el CSS procesado.
 
+> **Pregunta de entrevista**: ¿por qué no resolver esto con `!important` y seguir adelante?
+> Porque `!important` no arregla la causa (dos selectores empatados a merced del orden del output),
+> sino que gana la discusión por la fuerza y deja el problema para el siguiente. En variables CSS
+> además escala fatal: cada token que se sobreescriba necesita su propio `!important`, y en cuanto
+> algo legítimo tenga que ganarle a ese valor hace falta otro `!important` encima. Subir la
+> especificidad de 0,1,0 a 0,1,1 añadiendo `html` cuesta cinco caracteres, es determinista y no
+> hipoteca nada.
+>
+> El razonamiento general que busca esta pregunta: `!important` es una respuesta a *quién gana*
+> cuando la pregunta real es *por qué hay empate*. Casi siempre hay una forma barata de deshacer el
+> empate.
+
 ---
 
 ## Navegación responsive — patrón con Tailwind y `useState`
@@ -857,6 +1049,38 @@ generar automáticamente metadata y recursos sin configuración extra:
 sitio. Si una subruta tiene su propio `opengraph-image.tsx`, lo sobreescribe para esa rama. Esto
 permite una imagen base global y variantes específicas por sección sin repetir código.
 
+> **⚠ Corrección (agosto 2026)**: la herencia es cierta, pero tiene una condición que este párrafo
+> omite y que costó una sesión entera de depuración: **declarar un bloque `openGraph` en
+> `generateMetadata` desactiva la herencia de la imagen OG de la raíz**.
+>
+> ```ts
+> // Esto hace que la página deje de heredar app/opengraph-image.tsx
+> export async function generateMetadata() {
+>   return {
+>     openGraph: { type: "article", title, description, url },  // sin images
+>   };
+> }
+> ```
+>
+> La intuición dice que `openGraph` y la convención de archivo son dos mecanismos independientes que
+> se suman. No lo son: al declarar `openGraph` a mano, ese objeto sustituye al heredado en lugar de
+> fusionarse con él, y como no trae `images`, la página se queda **sin ninguna** `og:image`. El
+> síntoma es un enlace que se comparte sin tarjeta, sin ningún error en el build.
+>
+> Lo que sí sigue aplicando es el `opengraph-image.tsx` **del mismo segmento**. Por eso la solución
+> no fue quitar el bloque `openGraph`, sino añadir el archivo que faltaba en
+> `app/research/[slug]/`; el de `app/editorial/[slug]/` ya existía, y por eso una rama funcionaba y
+> la otra no, con un `generateMetadata` prácticamente idéntico.
+>
+> Cómo detectarlo en dos segundos, que es la parte reutilizable:
+>
+> ```bash
+> curl -s https://elibabah.com/research/mi-slug | grep -o 'og:image[^>]*'
+> ```
+>
+> Si no imprime nada, no hay tarjeta. Vale la pena correrlo sobre una URL de cada colección antes de
+> compartir cualquier cosa, porque el build no avisa.
+
 `sitemap.ts` y `robots.ts` exportan funciones que devuelven tipos de Next.js:
 
 ```ts
@@ -883,6 +1107,18 @@ export default function robots(): MetadataRoute.Robots {
 > **Por qué importa para un recruiter técnico**: tener sitemap y robots correctamente configurados
 > demuestra comprensión del ciclo completo de un producto web — no solo el código, sino también
 > cómo los motores de búsqueda lo descubren e indexan.
+
+> **Pregunta de entrevista**: `sitemap.ts` y `robots.ts` son archivos `.ts`, no `.xml` ni `.txt`.
+> ¿Cuándo se ejecutan y qué implica eso?
+> Se ejecutan en **build time** (siempre que no toquen APIs dinámicas), y su salida se congela como
+> un archivo estático. La implicación práctica es que el sitemap puede recorrer el sistema de
+> archivos con `getAllProjects()`, `getAllArticles()`, `getAllResearch()` y quedar siempre completo
+> sin mantenimiento manual: añadir un `.mdx` lo mete en el sitemap sin tocar código.
+>
+> La contrapartida es que **el sitemap solo se actualiza al desplegar**. Para un sitio de contenido
+> estático como este eso es exactamente lo que se quiere, porque el contenido tampoco cambia sin
+> desplegar. Sería la decisión equivocada en un sitio cuyo contenido lo escriben usuarios contra una
+> base de datos.
 
 ---
 
@@ -1525,3 +1761,497 @@ Detalles que importaron al integrarlo:
 > componente React devuelve un elemento ya construido; sus paths son un detalle interno que no expone
 > como datos manipulables. De ahí que el ecosistema publique el mismo set en dos formatos: datos para
 > quien necesita operar sobre la geometría, componentes para quien solo necesita pintarla.
+
+---
+
+## `metadataBase` — por qué las URLs OG salían a `localhost:3000`
+
+Las etiquetas `og:image` y `twitter:image` **deben llevar una URL absoluta**: quien las consume es un
+crawler en otra máquina (LinkedIn, WhatsApp, Slack), y una ruta relativa no significa nada fuera del
+navegador que ya está en el sitio.
+
+Next.js construye esa URL absoluta a partir de `metadataBase`. Si no se declara, usa
+`http://localhost:3000` como base, y el resultado es que **en producción se publican tarjetas que
+apuntan a la máquina de desarrollo**:
+
+```html
+<meta property="og:image" content="http://localhost:3000/editorial/mi-post/opengraph-image">
+```
+
+La solución es una sola línea en el layout raíz, apoyada en la fuente única de verdad del proyecto:
+
+```tsx
+// app/layout.tsx
+import { SITE_URL } from "@/lib/site"
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  // ...
+}
+```
+
+Lo instructivo es la **forma del fallo**: en local todo funciona, porque `localhost:3000` es
+justamente donde estás mirando. El bug solo existe para terceros, y el build lo avisa como mucho con
+un warning fácil de pasar por alto. Es el mismo patrón que la `og:image` ausente: fallos que no rompen
+la página, solo la representación de la página en otro sitio.
+
+> **Pregunta de entrevista**: ¿por qué `metadataBase` va en el layout raíz y no en cada página?
+> Porque la metadata en App Router se **fusiona** de la raíz hacia abajo, y `metadataBase` es
+> exactamente el tipo de campo que se quiere heredar: el dominio es el mismo para todo el sitio.
+> Declararlo por página sería repetir un dato que solo cambia si cambia el dominio entero. Es el
+> contraste exacto con `openGraph`, que **sustituye** en vez de fusionar (ver la corrección de agosto
+> de 2026 más arriba); saber qué campos se heredan y cuáles se pisan es la mitad de entender el
+> sistema de metadata.
+
+---
+
+## `generateStaticParams` no es solo para `page.tsx`
+
+Una ruta dinámica que genera imágenes también necesita saber, en build time, qué slugs existen. El
+archivo `opengraph-image.tsx` acepta las mismas exportaciones de configuración que una página:
+
+```tsx
+// app/research/[slug]/opengraph-image.tsx
+export const size = { width: 1200, height: 630 }
+export const contentType = "image/png"
+
+export function generateStaticParams() {
+  return getAllResearch().map((work) => ({ slug: work.slug }))
+}
+
+export default async function OGImage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const work = getResearchBySlug(slug)
+  // ...
+}
+```
+
+Sin `generateStaticParams`, la imagen se generaría en el primer request de cada crawler en vez de en
+el build. Con ella, la tabla de rutas del build lo confirma explícitamente:
+
+```
+├ ● /research/[slug]/opengraph-image
+│ └ /research/imaginacion-como-salvacion/opengraph-image
+```
+
+Conviene mirar esa tabla después de cada build: el punto `●` marca lo prerrenderizado, y es la
+confirmación más barata de que una convención de archivo se recogió como se esperaba.
+
+> **Pregunta de entrevista**: `params` también es una Promise aquí. ¿Por qué, si esto no es una
+> página?
+> Porque no es una excepción de las páginas sino **la firma de cualquier segmento dinámico** en
+> Next.js 16: páginas, layouts, route handlers y las convenciones de metadata (`opengraph-image`,
+> `twitter-image`, `icon`). La coherencia es el punto; en cuanto se entiende que el segmento dinámico
+> se resuelve de forma asíncrona, deja de haber casos particulares que memorizar.
+
+---
+
+## Los dos puntos sin comillas rompen el front matter (y con él, la colección)
+
+Ocurrió dos veces en este proyecto, con dos autores distintos, en dos colecciones distintas. Es el
+error de contenido más probable del sitio y merece su propia entrada.
+
+```yaml
+# ❌ Rompe el parseo: YAML lee "outcome" y luego no sabe qué hacer con el segundo ":"
+outcome: Resultado: 30% menos tiempo de carga
+
+# ✅
+outcome: "Resultado: 30% menos tiempo de carga"
+```
+
+En YAML, `clave: valor` usa `: ` (dos puntos más espacio) como separador. Un segundo `: ` dentro del
+valor hace que el parser intente leer un mapa anidado donde había una cadena, y lanza.
+
+Lo que lo vuelve peligroso no es el error en sí, sino el **radio de impacto**: los loaders de
+`lib/` leen el directorio entero para construir un listado, así que un archivo malformado no rompe su
+propia página, rompe el listado, la home y todo lo que llame a ese loader. Un artículo tumba la
+sección.
+
+**Regla del proyecto**: entrecomillar cualquier valor de front matter que contenga `: `. Es gratis,
+no cambia el valor parseado, y elimina la clase entera de fallos. Los sospechosos habituales son
+`title`, `excerpt`, `summary`, `outcome` y `abstract`, es decir, precisamente los campos escritos en
+prosa.
+
+> **Pregunta de entrevista**: ¿cómo evitarías que este error llegue siquiera a un commit?
+> Validando el front matter al leerlo en vez de asertarlo (ver la corrección sobre `as` en la sección
+> de union types), y envolviendo la lectura de cada archivo de forma que el error nombre al culpable:
+> un `try/catch` alrededor de `matter(raw)` que relance incluyendo la ruta. El mensaje de YAML por sí
+> solo habla de líneas y columnas sin decir de qué archivo. Convertir "error de YAML en la línea 4" en
+> "error de YAML en content/editorial/mi-post.mdx línea 4" es el arreglo más barato con más retorno.
+
+---
+
+## Modelar para el segundo caso: "una obra, N ediciones"
+
+`/research` nació con una sola tesis, disponible en español y en inglés, y con una segunda tesis (la
+del máster) prevista a futuro. La tentación era modelar lo que había: dos campos, `pdfEs` y `pdfEn`.
+
+Se modeló en cambio la **relación**, no los ejemplares:
+
+```ts
+export type ResearchEdition = {
+  lang: string;      // código ISO
+  label: string;     // como se muestra: "Español", "English"
+  file: string;      // ruta bajo /public
+  pages: number;
+  primary?: boolean; // el idioma en que se escribió
+};
+
+export function primaryEdition(work: Research): ResearchEdition {
+  return work.editions.find((e) => e.primary) ?? work.editions[0];
+}
+```
+
+Las tres consecuencias que justifican el rodeo:
+
+1. **Añadir un idioma es una entrada de front matter, no un cambio de código.** Con `pdfEs`/`pdfEn`,
+   un tercer idioma habría tocado el tipo, el loader, la página y el JSON-LD.
+2. **La copia se adapta sola.** La página distingue entre una obra con una edición y otra con varias
+   (`editions.length > 1`) y redacta distinto, sin que el `.mdx` configure nada.
+3. **`primary` no es lo mismo que "el primero de la lista".** El fallback `?? work.editions[0]` deja
+   que una obra monolingüe funcione sin declarar el campo, y que el orden de presentación (en este
+   sitio, inglés primero, por audiencia) sea independiente de cuál es el original.
+
+El JSON-LD sale del mismo modelo: un nodo `Thesis` con un `MediaObject` por edición, generado con un
+`map` sobre el array. Un modelo que representa la relación se recorre; un par de campos fijos se
+enumera a mano en cada consumidor.
+
+> **Pregunta de entrevista**: ¿cuándo *no* generalizarías así? Suena a sobreingeniería para una sola
+> tesis.
+> El criterio no es "podría haber más algún día", que se cumple siempre y justifica cualquier
+> abstracción. Aquí había dos cosas concretas: el segundo caso ya existía en el momento de escribir el
+> código (la obra ya venía en dos idiomas, no era hipotético), y el tercero estaba comprometido con
+> fecha. Generalizar con **una** instancia y ninguna a la vista es adivinar; hacerlo con dos
+> instancias reales es reconocer un patrón que ya está ahí. La prueba honesta se hizo después:
+> se añadió un `.mdx` de una obra ficticia con una sola edición y el listado y la página se
+> comportaron bien sin tocar nada.
+
+---
+
+## Ampliar un tipo unión: por qué un slot nuevo rompió `MdxImage`
+
+Al añadir el slot `documentCover` a `lib/image-slots.ts` se metió dentro de `imageSlots.body`, que es
+donde vivían los slots existentes. El error de TypeScript apareció lejos, en `MdxImage`, y no
+mencionaba `documentCover`.
+
+La causa: los slots de `body` no son objetos cualesquiera, son los miembros de una unión que
+`MdxImage` consume, y todos comparten un campo `maxWidthClass` que el componente usa para decidir el
+ancho. `documentCover` no tiene ancho de cuerpo de texto (es una portada en una ficha lateral), así
+que no lo declaraba, y al entrar en la unión la volvió heterogénea: `slot.maxWidthClass` dejó de estar
+garantizado para todos los miembros.
+
+La solución fue de modelado, no de tipos: `documentCover` se movió al **nivel superior** de
+`imageSlots`, junto a los otros slots que no son de cuerpo. No pertenecía a esa unión.
+
+```ts
+export const imageSlots = {
+  documentCover: {           // ← nivel superior: no es un slot de cuerpo de texto
+    aspectClass: "aspect-17/22",
+    sizes: "(min-width: 1024px) 220px, 150px",
+    exportPx: { width: 660, height: 854 },
+  },
+  body: {                    // ← unión que MdxImage consume; todos con maxWidthClass
+    // ...
+  },
+}
+```
+
+> **Pregunta de entrevista**: el error de TypeScript apareció en un archivo que no habías tocado.
+> ¿Cómo se lee eso?
+> Como una señal de que el cambio afectó a un **contrato**, no a una implementación. Cuando el error
+> sale donde se *consume* un tipo y no donde se *define*, la pregunta correcta no es "¿cómo callo este
+> error?" sino "¿el valor nuevo pertenece de verdad a este conjunto?". Aquí la respuesta era que no, y
+> el compilador estaba describiendo un error de modelado con precisión: había metido una portada de
+> documento en el conjunto de las imágenes de cuerpo de texto. Añadir `maxWidthClass: ""` para
+> silenciarlo habría dejado el modelo mal y el error latente.
+
+---
+
+## Verificar contra un servidor viejo: el falso negativo más caro
+
+Tres veces en una misma sesión de trabajo se llegó a una conclusión equivocada por el mismo motivo:
+`curl` contra `localhost:3000` estaba respondiendo desde un proceso `next start` anterior, levantado
+con un build previo. Los síntomas fueron un listado al que le "faltaba" una entrada que sí estaba en
+el HTML construido, y una ruta que devolvía 404 aunque la tabla del build la declaraba
+prerrenderizada.
+
+Un `pkill -f "next start"` no siempre basta: el proceso que atiende el puerto puede llamarse
+`next-server`, y el `pkill` retorna antes de que el puerto quede libre.
+
+```bash
+pkill -9 -f "next start"; pkill -9 -f "next-server"
+sleep 2
+lsof -ti:3000 | xargs -r kill -9      # el que de verdad tiene el puerto
+```
+
+La lección que trasciende a Next.js: **cuando una verificación contradice al artefacto construido,
+sospechar de la verificación antes que del código**. El build es determinista y deja rastro en disco;
+el servidor local es estado mutable. Contrastar directamente contra el artefacto sale más barato que
+depurar una teoría equivocada:
+
+```bash
+grep -o 'og:image[^>]*' .next/server/app/research/mi-slug.html
+```
+
+Si el HTML construido contiene lo que se espera y la respuesta HTTP no, el problema está entre el
+build y el navegador, no en el código. Hacer esa bifurcación primero habría evitado los tres desvíos.
+
+> **Pregunta de entrevista**: ¿cómo distingues "mi código está mal" de "mi forma de comprobarlo está
+> mal"?
+> Buscando un punto de observación independiente del que ya usaste. Si la comprobación es una petición
+> HTTP, mira el artefacto en disco; si es un test, ejecútalo con el caso invertido para confirmar que
+> es capaz de fallar. Una verificación que nunca ha fallado no ha demostrado todavía que sirva para
+> algo. El indicio más fuerte de que la culpa es del método, no del código, es la **incoherencia
+> interna**: dos fuentes que deberían coincidir y no coinciden, como una tabla de build que anuncia una
+> ruta que el servidor devuelve como 404. Un código roto suele fallar de forma consistente; un método
+> roto produce contradicciones.
+
+---
+
+## Dónde se renderiza una librería: cliente, build, o ninguno de los dos
+
+Al añadir diagramas Mermaid al portafolio la pregunta no fue *si* usar la librería, sino **dónde se
+ejecuta**. Había tres opciones y la investigación redujo el espacio antes de decidir:
+
+- **En build, a SVG estático.** `rehype-mermaid@3` depende de `mermaid-isomorphic`, que declara
+  `playwright` como **peer dependency**. Renderizar en build significa descargar Chromium en cada
+  deploy de Vercel.
+- **En cliente, cargando bajo demanda.** ~180–200KB gzip que solo bajan en las páginas con diagrama.
+- **Sin librería**, dibujando SVG a mano o con un componente propio.
+
+Lo que cerró la primera opción no fue una preferencia sino un hecho: **Mermaid mide texto con
+`getBBox`**, que jsdom no implementa. No existe un renderizador sin navegador, y por eso todas las
+soluciones "server-side" del ecosistema terminan arrastrando Playwright o Puppeteer. Cuando una
+librería depende de APIs de layout del navegador, "renderizar en el servidor" siempre significa
+"llevarse un navegador al servidor".
+
+El detalle que volvió la decisión barata: **el formato de autoría es idéntico en las tres opciones**.
+En el `.mdx` se escribe un bloque ` ```mermaid ` igual que en un README. Cambiar dónde se renderiza
+no toca ni un archivo de contenido. Una decisión reversible se puede tomar rápido; una irreversible
+merece la investigación completa. Vale la pena preguntarse a cuál de las dos se está enfrentando uno
+antes de gastar horas comparando.
+
+### Corolario: una librería que parsea estilos no acepta CSS arbitrario
+
+El tema del sitio vive en CSS variables, así que el primer intento fue escribir
+`classDef pure fill:var(--accent-soft)` dentro del diagrama. **Mermaid lo rechaza con un parse
+error.** Su parser de `classDef` separa declaraciones por comas y no entiende `var()`.
+
+La solución no fue pelear con el parser sino **resolver antes de entregarle el string**: el
+componente reemplaza cada `var(--token)` por su valor computado (`getComputedStyle`) y Mermaid nunca
+llega a ver una función CSS. Como efecto secundario el diagrama queda ligado al tema vivo y se
+redibuja al cambiar de claro a oscuro.
+
+> **Pregunta de entrevista**: ¿cómo decides si una dependencia va al cliente o al build?
+> Primero averiguando si la opción de build existe de verdad. Muchas librerías de render dependen de
+> APIs de medición del navegador (`getBBox`, `getComputedStyle`, fuentes cargadas), y en ese caso
+> "moverlo al build" no elimina el coste, lo traslada al pipeline de CI en forma de un navegador
+> headless. Después, midiendo en vez de estimar: el chunk real, no el tamaño del paquete en npm.
+> Y por último preguntando cuánto cuesta cambiar de opinión: si el formato de entrada es el mismo en
+> todos los caminos, la decisión es reversible y no merece bloquear el trabajo.
+
+---
+
+## Cuando React reconstruye el DOM que tú mutaste (y el array de dependencias no se entera)
+
+El componente de diagramas inyecta el SVG con `dangerouslySetInnerHTML` y después le fija el ancho a
+mano, porque el tamaño depende de una medida que solo existe en runtime. El efecto que lo hacía
+declaraba sus dependencias con cuidado:
+
+```tsx
+useEffect(() => {
+  const el = hostRef.current?.querySelector("svg");
+  if (!el) return;
+  el.style.width = `${natural * zoom}px`;
+}, [svg, zoom, naturalWidth]);   // ← parece completo, y no lo es
+```
+
+Funcionaba **de forma intermitente**. A veces el diagrama salía a su tamaño correcto y a veces se
+quedaba en 300px, que es el ancho intrínseco por defecto de un `<svg>` sin dimensiones.
+
+La causa no estaba en las dependencias sino en la reconciliación. La fila de controles se renderizaba
+condicionalmente (`{showControls && <div>…</div>}`) y `showControls` pasaba de `false` a `true` en
+cuanto se medían los anchos. **Al aparecer un hermano nuevo encima del panel, la lista de hijos cambia
+de forma y React reconstruye el panel de abajo**, regenerando el `<svg>` desde el string HTML — y con
+él se va el `style.width` que estaba puesto en el nodo anterior. En ese commit no cambió `svg`, ni
+`zoom`, ni `naturalWidth`: **nada que un array de dependencias pudiera vigilar**.
+
+El diagnóstico llegó instrumentando el efecto y comprobando `document.contains(el)` sobre cada
+elemento que había tocado:
+
+```
+open #1 {"styleWidth":"961.8px"}          ✓
+open #2 {"styleWidth":"", rendered:300}   ✗   ← el último efecto corrió sobre un nodo con inDom:false
+open #3 {"styleWidth":"961.8px"}          ✓
+```
+
+Ese `inDom:false` es la prueba: el efecto sí corrió y sí escribió, pero sobre un nodo que ya había
+sido descartado.
+
+Dos arreglos, y conviene entender por qué son distintos:
+
+1. **Estabilizar la lista de hijos.** La fila de controles se renderiza siempre; si no hace falta, se
+   oculta con CSS. Un elemento que aparece y desaparece cambia la estructura; uno que cambia de
+   `display` no.
+2. **Quitarle el array de dependencias al efecto**, para que se reaplique en cada commit. Parece un
+   descuido y es lo contrario: es la única guarda que sobrevive a que alguien añada mañana otro hijo
+   condicional encima del panel. Son dos escrituras de estilo sobre un elemento cacheado.
+
+La lección general: **cuando React posee un subárbol, cualquier mutación manual sobre él es una
+apuesta a que React no lo va a rehacer.** Un array de dependencias describe *tus* datos, no las
+decisiones de reconciliación de React. Si el DOM que mutas lo puede regenerar el framework, la
+reaplicación tiene que ser incondicional o el estado tiene que vivir donde React lo controle.
+
+> **Pregunta de entrevista**: ¿cuándo está justificado un `useEffect` sin array de dependencias?
+> Casi nunca para lógica de datos: ahí la ausencia de array suele ser un bug o un bucle. Sí está
+> justificado para **reafirmar una mutación imperativa sobre DOM que React posee y puede recrear**,
+> cuando el evento que la destruye no se refleja en ninguna variable observable. La prueba de que
+> hace falta es empírica, no teórica: instrumentas la mutación, guardas la referencia al nodo y
+> compruebas si sigue en el documento. Si encuentras nodos huérfanos que recibieron tu escritura, no
+> te falta una dependencia, te falta entender que el nodo ya no es el mismo.
+
+---
+
+## Encoger para caber puede ser peor que desbordar
+
+Los diagramas se veían diminutos en móvil. El instinto fue añadir botones de zoom, pero el problema
+estaba una capa más abajo, en dos clases que parecían sensatas juntas:
+
+```
+overflow-x-auto        ← el contenedor puede desplazarse
+[&>svg]:max-w-full     ← el SVG nunca es más ancho que el contenedor
+```
+
+Se anulan. `max-w-full` obliga al SVG a encogerse hasta caber, así que **nunca hay desbordamiento y
+el `overflow-x-auto` no llega a activarse jamás**. Un diagrama de 1180px dentro de una columna de
+360px se dibujaba a 360px, y con él su tipografía de 16px pasaba a unos 6px. Ilegible, sin scroll, y
+sin ninguna pista de que faltaba contenido por ver. Los botones de zoom por sí solos habrían peleado
+contra esa misma restricción.
+
+El arreglo fue invertir la política: **leer el ancho natural del diagrama (del `viewBox`) y fijarlo
+explícitamente**, ajustando a la columna pero con un **suelo de legibilidad**. Por debajo de 0.7 la
+tipografía baja de ~11px, así que ahí se deja de encoger y se empieza a desbordar, que es cuando el
+contenedor de scroll por fin sirve para algo.
+
+```
+sin suelo:   1180px → 360px   tipografía ~6px,  sin scroll   ← ilegible
+con suelo:   1180px → 826px   tipografía ~11px, con scroll   ← legible y navegable
+```
+
+### El error de medición que se coló dentro del arreglo
+
+La primera versión comparaba el ancho natural contra `host.clientWidth`. **`clientWidth` incluye el
+padding del propio elemento**, y el diagrama solo dispone de la caja de contenido. Con `p-7` en los
+dos lados eso son 56px de más: un diagrama que "cabía" desbordaba por 56px. La medida correcta resta
+el padding computado:
+
+```ts
+const { paddingLeft, paddingRight } = getComputedStyle(el);
+const box = el.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight);
+```
+
+### Un ajuste de un solo eje no es "pantalla completa"
+
+Al abrir el diagrama a pantalla completa, ajustar solo el ancho habría cambiado scroll horizontal por
+scroll vertical. Como ahí el objetivo es *ver la pieza entera*, el ajuste toma el mínimo entre ambos
+ejes usando la relación de aspecto del `viewBox`. En 1440×900 el diagrama más ancho cae al 80% y
+entra completo, sin scroll en ninguna dirección.
+
+También se probó bajar el suelo al 50% en pantalla completa para que cupiera más en el teléfono, y se
+revirtió: a 50% la tipografía queda en ~8px **y el diagrama sigue desbordando igual**. Costaba
+legibilidad sin comprar la vista general. Un compromiso que empeora las dos cosas a la vez no es un
+compromiso.
+
+> **Pregunta de entrevista**: ¿cuándo conviene que un contenido desborde en vez de adaptarse?
+> Cuando su legibilidad tiene un mínimo. Texto reflowable se adapta bien porque cambia de forma;
+> un diagrama, una tabla ancha o una partitura no pueden reflowear, y escalarlos por debajo de cierto
+> umbral los convierte en una imagen decorativa que ya no comunica. Ahí la respuesta correcta es
+> desbordar y ofrecer navegación — scroll, zoom, pantalla completa — porque el usuario puede moverse
+> por algo que se lee, pero no puede hacer nada con algo que cabe y no se entiende.
+
+---
+
+## `<dialog>` nativo: lo que regala, y la trampa de darle `display`
+
+Para abrir un diagrama a pantalla completa la opción cara era un div posicionado con overlay propio:
+habría tocado implementar a mano la trampa de foco, el cierre con `Escape`, la inertización del fondo
+y el bloqueo de interacción. El elemento `<dialog>` abierto con **`showModal()`** trae las cuatro
+cosas de fábrica, más un pseudo-elemento `::backdrop` que se puede estilar. Es una de las APIs de
+plataforma donde escribirlo uno mismo es claramente peor.
+
+Detalles que sí hubo que resolver:
+
+**`showModal()` y no el atributo `open`.** Solo la llamada al método activa la capa superior (*top
+layer*), la trampa de foco y el `::backdrop`. Poner `<dialog open>` muestra el elemento pero no lo
+convierte en modal, así que se pierde justo lo que se venía a buscar.
+
+**Nunca darle `display` a secas.** El navegador aplica `dialog:not([open]) { display: none }` desde
+su hoja de estilos. Una clase de utilidad como `flex` lo sobrescribe y deja el diálogo **visible de
+forma permanente**, incluso cerrado. La forma segura es condicionar el display a que esté abierto:
+
+```
+[&[open]]:flex flex-col      ← flex-direction siempre; display solo cuando open
+```
+
+`flex-col` no hace daño porque solo fija la dirección; el problema es exclusivamente la propiedad
+`display`.
+
+**El fondo sigue desplazándose.** Un modal nativo inertiza el fondo para la interacción, pero Chrome
+sigue permitiendo hacer scroll de la página detrás, lo que desorienta cuando lo que estás desplazando
+dentro del diálogo también hace scroll. Hay que bloquear `document.body.style.overflow` mientras esté
+abierto y restaurar el valor anterior al cerrar.
+
+**Si ocupa toda la pantalla, no hay "fuera".** La primera versión era un panel flotante al 96% del
+viewport con el fondo atenuado, y la franja de página alrededor era ruido visual. Al pasarlo a
+viewport completo con fondo opaco, el `::backdrop` deja de ser algo que mirar — no hay blur ni
+opacidad que ajustar porque no se ve nada de él. También se eliminó el manejador de "clic fuera para
+cerrar": mantenerlo habría sido código que miente sobre lo que hace.
+
+> **Pregunta de entrevista**: ¿por qué usar `<dialog>` en vez de un overlay propio?
+> Porque la accesibilidad de un modal no es una capa visual, es un conjunto de comportamientos:
+> el foco no debe escaparse al fondo, `Escape` debe cerrar, el contenido de atrás debe quedar inerte
+> para lectores de pantalla, y el modal debe pintarse por encima de cualquier `z-index` de la página.
+> Cada uno de esos es fácil de hacer a medias. `showModal()` los da correctos y probados. La regla que
+> se generaliza: cuando la plataforma expone una primitiva para un patrón de accesibilidad conocido,
+> reimplementarla es asumir una deuda que casi nadie termina de pagar.
+
+---
+
+## Un health check que no ejerce la ruta real es un semáforo en verde sin coche
+
+Durante toda una sesión la documentación de librerías vía MCP devolvía `Invalid API key`, mientras el
+diagnóstico oficial decía lo contrario:
+
+```
+$ claude mcp list
+context7: https://mcp.context7.com/mcp (HTTP) - ✔ Connected
+```
+
+Las dos cosas eran ciertas. El health check hace un `initialize` del protocolo, y **ese endpoint no
+valida la credencial**: responde 200 con o sin ella. La clave solo se comprueba cuando se llama a una
+herramienta de verdad. El chequeo probaba que el servidor estaba vivo y alcanzable, que era justo la
+parte que nunca estuvo en duda.
+
+Aislarlo requirió ejercer la ruta real a mano, con las tres variantes en paralelo:
+
+```
+CONTEXT7_API_KEY: <key>     → "Invalid API key"
+Authorization: Bearer <key> → "Invalid API key"
+sin cabecera de auth        → "Available Libraries: …"    ← funciona
+```
+
+Esa tabla contesta dos preguntas de golpe. El nombre de la cabecera **no** era el problema (las dos
+formas se comportan igual), y la credencial estaba revocada o mal copiada, porque **sin ella el
+servicio responde mejor que con ella**. Probar solo la configuración actual habría dejado la duda
+entre "cabecera equivocada" y "clave mala"; es la tercera fila, la que nadie pide, la que decide.
+
+El arreglo fue quitar la clave rota para caer al nivel anónimo, usando la interfaz prevista
+(`claude mcp remove` / `claude mcp add`) en vez de editar el JSON global a mano.
+
+> **Pregunta de entrevista**: ¿qué hace bueno a un health check?
+> Que ejercite el mismo camino que el tráfico real, credenciales incluidas. Un check que solo abre la
+> conexión responde "¿está encendido?" cuando la pregunta operativa es "¿puede servir una petición?".
+> El fallo es especialmente traicionero porque **es un falso negativo silencioso**: no rompe, tranquiliza.
+> Cuando un diagnóstico y el comportamiento observado se contradicen, la salida es reproducir el
+> comportamiento por el camino más corto posible y variar **un solo factor a la vez**, incluyendo la
+> variante de control que consiste en quitar el factor sospechoso por completo.

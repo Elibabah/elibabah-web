@@ -12,7 +12,7 @@ stack:
   - CSS Grid
 role: Frontend Developer @ Innovattia
 year: 2022
-featured: true
+featured: false
 links:
   demo: null
   repo: null
@@ -62,6 +62,35 @@ A three-level drill-down, entirely on the client:
 Reports leave the tool in five formats (PDF, XLSX, CSV, XML and TXT) either as a direct
 download or encoded to base64 and dispatched as an email attachment through the
 notifications service, with recipients composed in-app.
+
+```mermaid
+flowchart TB
+    subgraph api["Three services, none of them aggregated"]
+        direction LR
+        catalog["Catalog<br/>categories · subcategories · offers"]
+        consumption["Consumption<br/>totals per offer_id, nothing rolled up"]
+        series["Time series<br/>points over a date range"]
+    end
+
+    reduce["<b>Client-side aggregation</b><br/>activations · recharges · offer changes<br/>redemptions · minutes · SMS · data<br/><i>which metrics a card may even show depends on<br/>the product mix the category happens to contain —<br/>ten categories, ten branches</i>"]
+
+    summary["Period summary<br/>ten category cards + a ranked top-5 of recharges"]
+    category["Category dashboard<br/>one category, re-plotted by clicking a metric card"]
+    product["Product detail<br/>the series narrowed to a single recharge offer"]
+
+    out["PDF · XLSX · CSV · XML · TXT<br/><i>downloaded, or base64 to the notifications service<br/>as an email attachment</i>"]
+
+    api -->|"ten concurrent requests, settled together —<br/>a failing category degrades its own card"| reduce
+    reduce --> summary
+    summary -->|"drill into a category"| category
+    category -->|"drill into one offer"| product
+    summary -.-> out
+    category -.-> out
+    product -.-> out
+
+    classDef core fill:var(--accent-soft),stroke:var(--color-accent),color:var(--foreground)
+    class reduce core
+```
 
 ## Technical notes
 

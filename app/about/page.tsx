@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About",
@@ -45,7 +46,7 @@ export default function AboutPage() {
         attentive to intention and structure, and I approach architecture as a problem of meaning as much as mechanics.
         Over five years I have built enterprise interfaces at Sngular, React products at Innovattia for Walmart, 
         and now design-system components at BBVA, where I work with Web Components and Lit across banking products used by millions. 
-        I am also completing a Master of Applied Management at SIT, which has sharpened how I connect technical work to strategy, value, and the business it serves. My <a href="/research" className="text-accent hover:underline">research</a> is published here in full.
+        I am also completing a Master of Applied Management at SIT, which has sharpened how I connect technical work to strategy, value, and the business it serves. My <Link href="/research" className="text-accent hover:underline">research</Link> is published here in full.
         </p>
       </section>
 

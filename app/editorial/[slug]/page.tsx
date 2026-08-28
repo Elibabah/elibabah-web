@@ -121,40 +121,42 @@ export default async function ArticlePage({
         </article>
 
         {relatedProject && (
-          <div className="max-w-xl border border-line rounded-xl bg-surface p-5 flex items-center gap-4">
-            {relatedProject.relatedThumb ? (
-                  <div className={`${imageSlots.relatedThumb.aspectClass} w-20 h-20 shrink-0 rounded-[9px] border border-line relative border-b overflow-hidden`}>
-                    <Image
-                      src={relatedProject.relatedThumb}
-                      alt={relatedProject.title}
-                      fill
-                      sizes={imageSlots.relatedThumb.sizes}
-                      className="object-cover"
-                    />
+          <aside aria-label="Related project">
+            <Link
+              href={`/portfolio/${relatedProject.slug}`}
+              aria-label={`View project: ${relatedProject.title}`}
+              className="group max-w-xl border border-line rounded-xl bg-surface p-5 flex items-center gap-4 hover:border-accent transition-colors"
+            >
+              {relatedProject.relatedThumb ? (
+                <div className={`${imageSlots.relatedThumb.aspectClass} w-20 h-20 shrink-0 rounded-[9px] border border-line relative overflow-hidden`}>
+                  <Image
+                    src={relatedProject.relatedThumb}
+                    alt=""
+                    fill
+                    sizes={imageSlots.relatedThumb.sizes}
+                    className="object-cover"
+                  />
                 </div>
-            ) : (
-              <div className="w-20 h-20 rounded-[9px] bg-accent-soft border border-line shrink-0" />
-            )}
-            <div className="flex flex-col gap-1 min-w-0">
-              <span className="font-mono text-[10px] text-accent tracking-[0.5px] uppercase">
-                Related project
-              </span>
-              <span className="font-heading text-base text-foreground">
-                {relatedProject.title}
-              </span>
-              <p className="font-body text-sm text-ink-soft line-clamp-2">
-                {relatedProject.summary}
-              </p>
-              <Link
-                href={`/portfolio/${relatedProject.slug}`}
-                className="font-mono text-xs text-accent hover:underline mt-0.5"
-              >
-                View project →
-              </Link>
-            </div>
-          </div>
+              ) : (
+                <div className="w-20 h-20 rounded-[9px] bg-accent-soft border border-line shrink-0" />
+              )}
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="font-mono text-[10px] text-accent tracking-[0.5px] uppercase">
+                  Related project
+                </span>
+                <span className="font-heading text-base text-foreground">
+                  {relatedProject.title}
+                </span>
+                <p className="font-body text-sm text-ink-soft line-clamp-2">
+                  {relatedProject.summary}
+                </p>
+                <span className="font-mono text-xs text-accent group-hover:underline">
+                  View project →
+                </span>
+              </div>
+            </Link>
+          </aside>
         )}
-
       </main>
     </>
   );

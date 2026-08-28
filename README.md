@@ -72,7 +72,7 @@ app/
 
 components/
   layout/                 # Nav, Footer, Logo, ThemeToggle
-  content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption
+  content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption, MdxMermaid, MdxPre
   theme-provider.tsx
 
 content/                  # all site content, as MDX
