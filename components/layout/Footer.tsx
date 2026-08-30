@@ -39,7 +39,7 @@ export function Footer() {
               GitHub
             </a>
             <a
-              href="/resume.pdf"
+              href="/Elias_Hernandez_Frontend_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-accent font-semibold border border-accent/30 rounded-full px-3 py-1 hover:bg-accent/10 hover:border-accent/50 transition-colors"

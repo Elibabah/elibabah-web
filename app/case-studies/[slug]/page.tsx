@@ -6,7 +6,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import { getProjectBySlug } from "@/lib/portfolio";
 import { imageSlots } from "@/lib/image-slots";
-import { mdxComponents } from "@/lib/mdx-components";
+import { mdxComponents, mdxOptions } from "@/lib/mdx-components";
 
 export async function generateMetadata({
   params,
@@ -83,7 +83,7 @@ export default async function CaseStudyPage({
       )}
 
       <article className="prose prose-neutral max-w-none">
-        <MDXRemote source={caseStudy.content} components={mdxComponents}/>
+        <MDXRemote source={caseStudy.content} components={mdxComponents} options={mdxOptions} />
       </article>
 
       <footer className="border-t border-line pt-8 flex flex-col gap-2">

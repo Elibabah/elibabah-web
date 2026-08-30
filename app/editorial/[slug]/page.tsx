@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site"
 import { findProjectBySlug } from '@/lib/portfolio'
 import { imageSlots } from "@/lib/image-slots";
-import { mdxComponents } from "@/lib/mdx-components";
+import { mdxComponents, mdxOptions } from "@/lib/mdx-components";
 
 export async function generateMetadata({
   params,
@@ -117,7 +117,7 @@ export default async function ArticlePage({
         )}
 
         <article className="prose prose-neutral max-w-none">
-          <MDXRemote source={article.content} components={mdxComponents} />
+          <MDXRemote source={article.content} components={mdxComponents} options={mdxOptions} />
         </article>
 
         {relatedProject && (

@@ -1,7 +1,7 @@
 ---
 title: "Sam: your NZ driving practice app"
 slug: nz-drive-practice
-summary: "A React Native simulator for New Zealand's full-licence test. AI examiner Sam directs the drive by voice, quizzes on hazards, silently reroutes, and closes with a verdict modelled on the official NZTA assessment."
+summary: "The project I point to when someone asks to see AI-assisted development. A React Native simulator for New Zealand's full-licence test, built with AI deliberately and held to ADRs, falsifiable exit criteria and 254 deterministic tests. An AI examiner directs the drive by voice and closes with an NZTA-modelled verdict."
 stack:
   - React Native + Expo
   - react-native-maps (Google Maps)
@@ -34,10 +34,6 @@ NZTA assessment. The design goal is a session in which the phone is never touche
 and closing the remaining gap to that goal is the project's central open problem (see
 Known limitations).
 
-The audience I had in mind is the one I belong to: drivers converting an overseas full
-licence, a path a great many new residents walk. What they need is not more driving
-practice. It is to find out what the examiner is watching for.
-
 {/* IMAGE — cover / onboarding screen: "Pass your NZ practical test" with feature highlights */}
 <ImageRow
   side="right"
@@ -46,9 +42,37 @@ practice. It is to find out what the examiner is watching for.
   caption="Onboarding: the app frames itself as a full simulation of the NZ full-licence test."
 >
 
-Beyond the product itself, I built this as a deliberate case study in AI-assisted engineering with process. It is not vibecoding. Every structural decision is captured in an ADR, the build follows an MVP roadmap with explicit exit criteria, and the core logic is covered by deterministic replay tests.
+The audience I had in mind is the one I belong to: drivers converting an overseas full
+licence, a path a great many new residents walk. What they need is not more driving
+practice. It is to find out what the examiner is watching for.
 
 </ImageRow>
+
+## Built with AI, on purpose
+
+This project has two jobs, and I took both on deliberately.
+
+The first is the one above: a real problem, taken from my own migration, with a user who is
+not hypothetical because for several months it was me.
+
+The second is that this is where I practise AI-assisted engineering under conditions I
+control. My master's research asks what happens to professional craft when AI absorbs the
+routine part of the work, and I did not want to answer that from reading alone. So I built
+something with real constraints and used AI throughout, to find out first-hand what the
+discipline costs and what it buys.
+
+That is a different claim from "the product uses AI", which is also true and much cheaper to
+make. Claude runs the examiner inside the app; Claude also helped write the app. The second
+is the one worth interrogating, and it is why this is the project I hand over when someone
+asks to see AI-assisted work.
+
+It is not vibecoding, and the difference is checkable rather than rhetorical. Every
+structural decision is captured in an ADR written at the moment of choosing, not
+reconstructed afterwards. The roadmap advances through MVPs whose exit criteria are
+falsifiable statements rather than aspirations. The exam logic sits in a pure engine covered
+by 254 deterministic replay tests that run in about four seconds. Speed that leaves no
+reasoning behind turns into a liability within a fortnight, and those three things are what
+keep it from becoming one.
 
 ## The live drive
 
@@ -212,7 +236,7 @@ I keep the AI layer deliberately off the client. No provider key ships in the ap
 
 ## Process
 
-I structured this project to show engineering judgement, not just output. Each structural choice has an ADR that records the decision and the trade-off I accepted with it, written at the point of choosing rather than reconstructed afterwards. The build advances through MVPs with explicit exit criteria, so scope is bounded and progress is legible. And the deterministic replay tests mean the exam logic can be verified continuously, cheaply, and without a vehicle in the loop.
+The three guardrails are not decoration, and what they cost is recorded rather than smoothed over. Each ADR names the alternative I rejected and what I gave up by rejecting it. The MVP exit criteria are written before the work starts, so scope stays bounded and "done" is something checked rather than felt. And the deterministic replay tests mean the exam logic can be verified continuously, cheaply, and without a vehicle in the loop.
 
 The fuller argument, decision by decision, is in the [case study](/case-studies/nz-drive-practice-case).
 

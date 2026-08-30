@@ -5,7 +5,7 @@ import Link from "next/link";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import { imageSlots } from "@/lib/image-slots";
-import { mdxComponents } from "@/lib/mdx-components";
+import { mdxComponents, mdxOptions } from "@/lib/mdx-components";
 
 export async function generateMetadata({
   params,
@@ -121,7 +121,7 @@ export default async function ProjectPage({
       )}
 
       <article className="prose prose-neutral max-w-none">
-        <MDXRemote source={project.content} components={mdxComponents} />
+        <MDXRemote source={project.content} components={mdxComponents} options={mdxOptions} />
       </article>
 
     </main>
