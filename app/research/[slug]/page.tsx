@@ -6,7 +6,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/site";
 import { imageSlots } from "@/lib/image-slots";
-import { mdxComponents } from "@/lib/mdx-components";
+import { mdxComponents, mdxOptions } from "@/lib/mdx-components";
 
 export async function generateMetadata({
   params,
@@ -110,7 +110,7 @@ export default async function ResearchWorkPage({
         </header>
 
         <article className="prose prose-neutral max-w-none">
-          <MDXRemote source={work.content} components={mdxComponents} />
+          <MDXRemote source={work.content} components={mdxComponents} options={mdxOptions} />
         </article>
 
         {/* Editions */}
