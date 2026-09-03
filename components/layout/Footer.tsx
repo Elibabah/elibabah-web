@@ -1,3 +1,5 @@
+import { RESUME_PATH } from "@/lib/site";
+
 export function Footer() {
   return (
     <footer id="contact" className="bg-surface border-t border-line mt-auto transition-colors duration-350">
@@ -39,7 +41,7 @@ export function Footer() {
               GitHub
             </a>
             <a
-              href="/Elias_Hernandez_Frontend_Resume.pdf"
+              href={RESUME_PATH}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-accent font-semibold border border-accent/30 rounded-full px-3 py-1 hover:bg-accent/10 hover:border-accent/50 transition-colors"

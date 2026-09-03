@@ -46,13 +46,13 @@ Also in place:
 - Design tokens as CSS variables in `app/globals.css`, exposed to Tailwind v4 via `@theme inline`.
 - Theme toggle (`next-themes`, `data-theme`), light/dark palettes.
 - Contact as an anchor: nav CTA `#contact` → `<footer id="contact">` with `mailto:elias@elibabah.com`,
-  LinkedIn, GitHub and `resume.pdf`.
+  LinkedIn, GitHub and the résumé (`RESUME_PATH` in `lib/site.ts`).
 - SEO/ops: `sitemap.ts` (all four collections), `robots.ts`, `icon.svg`, `not-found.tsx`,
   Google site verification, Vercel Analytics and Speed Insights.
 - Social cards with `next/og`: a site-wide `app/opengraph-image.tsx` plus per-item cards at
   `app/editorial/[slug]/` and `app/research/[slug]/`, prerendered via `generateStaticParams`.
 - MDX pipeline: `gray-matter` for front matter, `next-mdx-remote` for the body,
-  `lib/mdx-components.tsx` for the component mapping.
+  `lib/mdx-components.tsx` for the component mapping **and** the shared `remark-gfm` options.
 - Image system: `lib/image-slots.ts` as the single source of aspect ratios, responsive widths,
   `sizes` and recommended export dimensions. Intrinsic dimensions are read at build time with
   `image-size`, so MDX images never declare width/height by hand.
@@ -78,6 +78,22 @@ English translation.
 - **Next.js App Router** (not Pages Router) — currently Next 16 / React 19.
 - **MDX with front matter** for all content (projects, articles, case studies),
   read with `gray-matter` and rendered with `next-mdx-remote`.
+- **`remark-gfm` is not optional, and its absence is silent.** MDX on its own is CommonMark,
+  which has no tables: without the plugin a `| a | b |` table parses as a paragraph and renders
+  as a wall of literal pipes, with no build error and nothing in the console. Strikethrough, task
+  lists, footnotes and bare autolinks fail the same way. The plugin list is exported as
+  `mdxOptions` from `lib/mdx-components.tsx`, next to the component map, and **every**
+  `MDXRemote` call site passes it. A new collection that copies a page but forgets
+  `options={mdxOptions}` will look fine until the first table.
+- **GFM tables get their own scroll panel** (`MdxTable`, mapped over `table`). A three-column
+  table of prose is around 576px and the article column on a phone is about 325px, so the same
+  rule as diagrams applies: the table pans inside itself rather than pushing the page into a
+  horizontal scroll, with `tabIndex={0}` for WCAG 2.1.1 and `overscroll-x-contain` so panning
+  does not fire the back gesture. Unlike a diagram it is never scaled down; shrinking type is not
+  an option for something read cell by cell. The table's own `prose` margin is killed with
+  Tailwind's `!` modifier, because `@tailwindcss/typography` styles it at `.prose :where(table)`,
+  which outranks a plain utility class; without that there are 29px of dead space inside the
+  border.
 - **Tailwind CSS v4**, CSS-first config (`@theme inline` in `app/globals.css`, no `tailwind.config`),
   plus `@tailwindcss/typography` for MDX prose.
 - Theming with **next-themes**, using `attribute="data-theme"`.
@@ -192,9 +208,17 @@ theming keeps working.
 
 **Logo:** interlocked EB monogram, monochrome SVG (single-ink, scalable).
 
-- Dark-ink variant (`#20221a`) for light backgrounds.
-- Cream/light variant (`#fafafa`) for dark backgrounds.
-- Embedded with theme adaptation (`<picture>` pattern or `currentColor`).
+- **One path, inlined in `components/layout/Logo.tsx`, painted with `currentColor`** and
+  inheriting from `text-foreground`, so the mark follows the theme in CSS with no JavaScript.
+- This replaced two files (`logo-light.svg` / `logo-dark.svg`) swapped by a client component
+  reading `resolvedTheme`, which needed a `mounted` flag and an effect and still flashed the
+  light logo before hydration. The two files turned out to be byte-identical apart from the
+  fill, so the swap was never buying anything. `Logo` is a Server Component again.
+- Consequence worth knowing: the ink is now exactly `--foreground` (`#15160F` / `#ECEEEA`),
+  not the older hardcoded `#20221a` / `#fafafa`. Those were the previous palette's foreground
+  values, so this is the mark tracking the tokens rather than drifting from them.
+- The two `.svg` files were **deleted** once the inline path replaced them (August 2026). They
+  remain in git history if the artwork is ever needed again.
 
 ---
 
@@ -275,26 +299,41 @@ elibabah-web/
       page.tsx              # /about
   components/               # reusable UI (root, outside app/)
     layout/                 # Nav, Footer, Logo, ThemeToggle
-    content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption, MdxMermaid, MdxPre
+    content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption,
+                            # MdxMermaid, MdxPre, MdxTable
     theme-provider.tsx
   content/
     portfolio/*.mdx
     editorial/*.mdx
     case-studies/*.mdx
     research/*.mdx
+  thesis/                   # sources for the research PDFs — NOT served, not in public/
+    build.sh                # rebuilds both editions; ./thesis/build.sh [all|es|en|covers]
+    GLOSSARY.md             # binding EN terminology for the translation
+    CORRECTIONS.md          # defects found in the original, deliberately unpublished
+    source/                 # the deposited UNAM PDF, untouched
+    en/*.md                 # the English translation, source of truth for that edition
+    build/                  # *.typ title pages are tracked; the generated PDFs are ignored
   lib/                      # content <-> app bridge
     portfolio.ts, editorial.ts, case-studies.ts, research.ts
-    mdx-components.tsx      # MDX -> React component mapping
+    mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
-    site.ts                 # SITE_URL — single source for absolute URLs
+    site.ts                 # SITE_URL + RESUME_PATH — single source for both
   public/
     images/{portfolio,editorial,case-studies,research}/<slug>/…
     videos/portfolio/<slug>/…
     thesis/*.pdf          # research editions, one PDF per language
     fonts/                # raw Source Serif 4 .ttf, read by the OG images (see §3)
-    logo-light.svg, logo-dark.svg, resume.pdf
+    Elias_Hernandez_Frontend_Resume.pdf   # the résumé; path lives in lib/site.ts
 ```
+
+> **The résumé path is a constant, not a literal.** `RESUME_PATH` in `lib/site.ts` is the single
+> source, imported by the Home hero CTA and the footer link. This is the fix for a real drift:
+> there used to be two different PDFs (`resume.pdf` and this one) linked from those two places,
+> so a visitor got a different CV depending on where they clicked. Nothing was broken, which is
+> exactly why it went unnoticed. `resume.pdf` was deleted in August 2026. Never hardcode the path
+> again — link it from the constant, the same way `SITE_URL` is treated.
 
 Structure decisions made:
 
@@ -494,16 +533,24 @@ The scaffolding phase is over. Work from here is **refinement and content**. Whe
 - Authorship, credit and JSON-LD are in place for editorial and research (§7). Extending
   structured data to portfolio needs a per-project ownership field first, and is deliberately
   not done yet.
-- **Home is being re-aimed at the recruiter** (in progress, uncommitted on `develop`): the hero
-  headline now states the capability directly, the secondary CTA is "Download CV ↓" pointing at
-  `resume.pdf` instead of a link to About, and a four-cell "At a glance" strip (role, stack,
-  location, work status) sits under the hero. The strip is a local `facts` array in
-  `app/page.tsx`, not content — if it grows or needs to change per audience, that is the moment
-  to move it out.
+- **Home is re-aimed at the recruiter** (shipped): the hero headline states the capability
+  directly, the secondary CTA is "Download CV ↓" pointing at `RESUME_PATH` instead of a link to
+  About, and a four-cell "At a glance" strip (role, stack, location, work status) sits under the
+  hero. The strip is a local `facts` array in `app/page.tsx`, not content — if it grows or needs
+  to change per audience, that is the moment to move it out.
+- **The NZ Drive Practice project is positioned as the AI-assisted engineering exhibit.** Its
+  `summary` leads with that role rather than with the product, because `summary` renders in full
+  on both the Home featured card and the `/portfolio` listing and is most of what a recruiter
+  reads. The body carries a "Built with AI, on purpose" section stating the dual intent, and it
+  draws the distinction the `stack` line alone cannot: the product uses AI *and* the project was
+  built with AI, which are different claims. Still missing, and only Elías can supply it: an
+  account of **how** he actually works with AI day to day, which is the first thing an
+  interviewer will ask after reading any of this.
 - Still open: the Spanish epigraph has **no home on the site yet** (§1) — the Home hero currently
   runs the English headline. Candidates remain Home hero, About, or footer.
-- Still open: image credit exists as a mechanism but no `.mdx` body uses the `credit` prop yet; the
-  first article with its own photographs inside the body will be the one to exercise it.
+- Closed: the `credit` prop is exercised. `content/editorial/learning-the-quiet.mdx` carries a
+  body `<Image … credit="Photo: Elías Hernández" />`, so the mechanism described in §7 is no
+  longer theoretical.
 - Next research work: the **Master of Applied Management thesis**, which is what the one-work /
   N-editions model in §7 was built to absorb without code changes.
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getAllArticles } from "@/lib/editorial";
 import { getAllProjects } from "@/lib/portfolio";
 import { imageSlots } from "@/lib/image-slots";
+import { RESUME_PATH } from "@/lib/site";
 
 const facts = [
   { label: "Role", value: "Frontend Engineer" },
@@ -41,7 +42,7 @@ export default function Home() {
             View work
           </Link>
           <a
-            href="/resume.pdf"
+            href={RESUME_PATH}
             target="_blank"
             rel="noopener noreferrer"
             className="text-accent border border-accent font-semibold text-sm px-5 py-2.75 rounded-[9px] hover:bg-accent/5 transition-colors"

@@ -775,6 +775,31 @@ En este proyecto se empezó con Estrategia A y se migró a B cuando surgieron pr
 especificidad CSS con Tailwind v4. B es la más robusta para componentes que necesitan lógica
 de tema más allá de simples cambios de color.
 
+> **⚠ Actualización (agosto 2026): el logo acabó en la tercera vía, y la excusa para no verla
+> antes era falsa.** La pregunta de entrevista de abajo proponía `currentColor` como alternativa
+> hipotética. Resultó ser lo correcto aquí, y el detonante fue un linter.
+>
+> La regla `react-hooks/set-state-in-effect` marcó el `useEffect(() => setMounted(true), [])` de
+> `Logo.tsx` como error. Al ir a silenciarlo apareció el dato que lo cambiaba todo: los dos
+> archivos (`logo-light.svg` y `logo-dark.svg`) eran **idénticos byte a byte salvo el `fill`** —
+> mismos 2674 bytes, mismo `viewBox`, un solo `<path>`. La Estrategia B nunca estuvo cambiando de
+> dibujo; estaba cambiando de color por la vía más cara posible.
+>
+> El logo es ahora un `<path fill="currentColor">` inline que hereda de `text-foreground`. Se
+> fueron con él `useState`, `useEffect`, `useTheme`, el `"use client"`, un `eslint-disable`, la
+> segunda petición de red y el parpadeo previo a la hidratación. El componente volvió a ser
+> Server Component, y los dos `.svg` se borraron de `public/`.
+>
+> Dos cosas que llevarse de aquí, y ninguna es sobre logos:
+>
+> - **Un warning del linter puede ser un problema de diseño disfrazado.** La reacción por defecto
+>   ante `set-state-in-effect` es discutir si la regla aplica. La pregunta útil era otra: ¿por qué
+>   necesito estado para esto? No lo necesitaba.
+> - **Compara los assets antes de escribir la lógica que los alterna.** Un `diff` de treinta
+>   segundos habría evitado el componente entero. La pregunta de abajo ya distinguía entre cambio
+>   de color y cambio de contenido; lo que faltó fue *verificar* de cuál de los dos se trataba en
+>   vez de asumirlo por el nombre de los archivos.
+
 > **Pregunta de entrevista**: la Estrategia B introduce un parpadeo (el logo claro aparece un
 > instante antes de que `mounted` sea `true`). ¿Cómo lo evitarías sin volver a la A?
 > La tercera vía es **no cambiar de archivo, sino de tinta**: un solo SVG inline que use
@@ -2255,3 +2280,137 @@ El arreglo fue quitar la clave rota para caer al nivel anónimo, usando la inter
 > Cuando un diagnóstico y el comportamiento observado se contradicen, la salida es reproducir el
 > comportamiento por el camino más corto posible y variar **un solo factor a la vez**, incluyendo la
 > variante de control que consiste en quitar el factor sospechoso por completo.
+
+---
+
+## MDX no tiene tablas: `remark-gfm` y los fallos que no avisan
+
+Una tabla escrita en un `.mdx` se veía en el sitio como una pared de pipes literales, en un solo
+párrafo:
+
+```text
+| ADR | Decision | Trade-off accepted | | --- | --- | --- | | 0001 | All AI calls go through…
+```
+
+**MDX de base es CommonMark, y CommonMark no tiene tablas.** Las tablas son una extensión de
+GitHub Flavored Markdown, igual que el tachado (`~~`), las task lists (`- [ ]`), las notas al pie
+(`[^1]`) y los autoenlaces. Nada de eso funciona sin `remark-gfm`.
+
+Lo grave no es que falte el plugin, es **cómo falla**. `| a | b |` es un párrafo perfectamente
+válido en CommonMark, así que el parser no tiene nada que objetar: no hay error de build, no hay
+warning, no hay nada en consola. El documento compila, la página se sirve, y el defecto solo
+existe a los ojos de quien lo lee. Es la misma familia que los dos puntos sin comillas en el
+front matter, la `og:image` que se pierde al declarar `openGraph`, y la fuente que cae al
+fallback: **el sistema no distingue entre "esto está bien" y "esto es sintácticamente válido
+pero no es lo que querías decir".**
+
+La instalación es trivial; el cableado es donde se decide si vuelve a pasar:
+
+```tsx
+// lib/mdx-components.tsx — junto al mapa de componentes, a propósito
+import remarkGfm from "remark-gfm";
+
+export const mdxOptions = {
+  mdxOptions: { remarkPlugins: [remarkGfm] }
+};
+```
+
+```tsx
+<MDXRemote source={content} components={mdxComponents} options={mdxOptions} />
+```
+
+Las opciones viven en el mismo archivo que el mapa de componentes para que las dos mitades de
+"cómo se renderiza MDX en este sitio" no puedan separarse. Aun así hay cuatro puntos de llamada
+(portfolio, case studies, editorial, research) y **una colección nueva que copie una página y
+olvide `options={mdxOptions}` se verá perfecta hasta la primera tabla**. Esa es la deuda real que
+queda; la alternativa sería un componente propio que envuelva a `MDXRemote` y no acepte
+renderizar sin opciones.
+
+> **Pregunta de entrevista**: ¿cómo detectarías que a un pipeline de markdown le falta soporte de
+> GFM, sin revisar la configuración?
+> Escribiendo una sonda que use las cuatro extensiones a la vez (una tabla, un `~~tachado~~`, una
+> task list y una nota al pie) y mirando el HTML resultante: si sale `<table>`, `<del>`, un
+> checkbox y un `<sup>`, está; si sale un `<p>` con los caracteres crudos, no. Es más rápido que
+> leer configuración y no depende de saber qué librería se está usando. El principio general es
+> que **una capacidad se comprueba ejerciéndola**, y para un fallo silencioso es la única forma:
+> no hay error que buscar, solo salida que comparar contra lo esperado.
+
+---
+
+## Una tabla ancha en una columna estrecha
+
+Renderizada ya como tabla, la de ADRs mide 576px de ancho natural. La columna del artículo en un
+teléfono son unos 325px. Sin hacer nada, la página entera se va en horizontal.
+
+Es el mismo problema que ya estaba resuelto para los diagramas Mermaid, y merece la misma
+solución, con una diferencia importante. Un diagrama **se escala** para caber; una tabla **no**.
+Encoger la tipografía no es una opción en algo que se lee celda por celda, así que la tabla
+conserva su tamaño y el panel se panea:
+
+```tsx
+export function MdxTable(props: Readonly<ComponentPropsWithoutRef<"table">>) {
+  return (
+    <div tabIndex={0} className="my-6 overflow-x-auto overscroll-x-contain rounded-lg border border-line">
+      <table {...props} className="my-0! min-w-[36rem]" />
+    </div>
+  );
+}
+```
+
+Tres detalles, cada uno con su razón:
+
+- **`tabIndex={0}`** porque una región que scrollea y no se puede alcanzar con el teclado es un
+  incumplimiento de WCAG 2.1.1. Un `div` con `overflow` no es focusable por defecto.
+- **`overscroll-x-contain`** para que llegar al final del paneo no dispare el gesto de "atrás"
+  del navegador.
+- **`my-0!`**, con el modificador important de Tailwind v4. Sin él la tabla conserva su margen
+  de `prose` y quedan 29px de aire muerto **dentro** del borde, arriba y abajo, porque el
+  contenedor con `overflow` crea un BFC y ese margen ya no colapsa hacia fuera.
+
+Ese último punto merece matiz, porque en este mismo archivo hay una sección que argumenta contra
+`!important`. Ahí el problema era un empate entre dos selectores propios, y la respuesta correcta
+era deshacer el empate. Aquí es distinto: `@tailwindcss/typography` estiliza en
+`.prose :where(table)`, que gana a una utilidad suelta por especificidad legítima, y el plugin es
+de un tercero. **Pisar el default de una dependencia es el caso para el que `!important` existe;
+ganar una discusión que uno mismo creó, no.**
+
+> **Pregunta de entrevista**: ¿por qué el margen de la tabla se convierte en espacio interior en
+> cuanto envuelves la tabla en un contenedor con `overflow: auto`?
+> Porque `overflow` distinto de `visible` establece un **block formatting context**, y los
+> márgenes no colapsan a través de la frontera de un BFC. Sin el contenedor, el margen superior de
+> la tabla colapsaba con el del elemento anterior y se fundía en un solo hueco; dentro del
+> contenedor no tiene con quién colapsar, así que se dibuja íntegro entre el borde y la tabla. Es
+> la misma mecánica por la que un `overflow: hidden` en un padre "arregla" que el margen de un
+> hijo se escape, un truco que mucha gente usa sin saber que lo que está haciendo es crear un BFC.
+
+---
+
+## Un warning del linter puede ser un problema de diseño disfrazado
+
+Dos avisos de ESLint en el mismo pase, con resoluciones opuestas. La comparación es la lección.
+
+**`Logo.tsx` — `react-hooks/set-state-in-effect`.** El linter marcaba el patrón `mounted`. Al
+investigar apareció que los dos SVG del logo eran idénticos salvo el color, de modo que no hacía
+falta ni estado ni efecto ni cliente: `currentColor` bastaba (ver la actualización en la sección
+de theme switching). El linter tenía razón, y detrás de su queja había un diseño mejor.
+
+**`MdxMermaid.tsx` — `react-hooks/exhaustive-deps`.** El linter pedía `[natural.width,
+natural.height, zoom]` en un efecto deliberadamente sin dependencias. Añadirlas reintroduce el
+bug que ese efecto existe para evitar, porque el commit que descarta el ancho **no cambia ninguno
+de esos valores**. Aquí el linter describe una regla general que el código incumple a sabiendas y
+por escrito, así que la resolución fue un `eslint-disable-next-line` con la razón y un puntero a
+la decisión registrada.
+
+La diferencia no es de qué regla se trata, sino de qué se descubre al investigar. La pregunta
+correcta ante un warning nunca es "¿lo silencio o lo obedezco?" sino "¿qué está viendo esta regla
+que yo no?". A veces la respuesta es un patrón que sobra; a veces es que la regla no puede saber
+lo que tú sí sabes.
+
+> **Pregunta de entrevista**: ¿cuándo es legítimo un `eslint-disable`, y qué debe acompañarlo
+> siempre?
+> Es legítimo cuando la regla generaliza sobre un caso que el código incumple **a propósito y con
+> motivo documentado**, no cuando el arreglo es incómodo. Debe acompañarlo siempre la razón, en
+> línea, y en lo posible un puntero a dónde está la decisión completa; una supresión desnuda es
+> indistinguible de una rendición, y a los seis meses nadie se atreve a quitarla porque nadie sabe
+> si protege algo. El olor a evitar es el `eslint-disable` de archivo completo: apaga la regla
+> también para el código que se escriba después, que es justo el que nadie revisó.

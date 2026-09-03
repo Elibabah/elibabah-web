@@ -13,7 +13,7 @@ It is not a pure portfolio nor a pure blog: it is both, woven together, plus a r
 | Framework | Next.js 16 (App Router, React 19) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 (CSS-first config, `@theme inline`) + `@tailwindcss/typography` |
-| Content | MDX with YAML front matter, rendered via `next-mdx-remote` + `gray-matter` |
+| Content | MDX with YAML front matter, rendered via `next-mdx-remote` + `gray-matter`, with `remark-gfm` for tables and the rest of GitHub-flavoured Markdown |
 | Theming | `next-themes` with `attribute="data-theme"` |
 | Fonts | `next/font/google` — Source Serif 4, Inter, JetBrains Mono (a local `.ttf` copy of Source Serif 4 lives in `public/fonts/` for the OG images) |
 | Social cards | `next/og` `ImageResponse` — a site-wide card plus per-article and per-research-work cards |
@@ -72,7 +72,8 @@ app/
 
 components/
   layout/                 # Nav, Footer, Logo, ThemeToggle
-  content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption, MdxMermaid, MdxPre
+  content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption,
+                          # MdxMermaid, MdxPre, MdxTable
   theme-provider.tsx
 
 content/                  # all site content, as MDX
@@ -86,17 +87,24 @@ lib/                      # bridge between content/ and app/
   case-studies.ts
   editorial.ts
   research.ts             # research works + their language editions
-  mdx-components.tsx      # MDX -> React component mapping
+  mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
   image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
   reading-time.ts         # reading time derived from the MDX body
-  site.ts                 # SITE_URL — single source for absolute URLs (sitemap, robots, JSON-LD)
+  site.ts                 # SITE_URL (sitemap, robots, JSON-LD) + RESUME_PATH (hero CTA, footer)
+
+thesis/                   # sources for the research PDFs — not served, not in public/
+  build.sh                # rebuilds both editions: ./thesis/build.sh [all|es|en|covers]
+  GLOSSARY.md             # binding English terminology for the translation
+  en/*.md                 # the English translation, source of truth for that edition
+  source/                 # the deposited UNAM PDF, untouched
+  build/                  # typst covers and intermediates (regenerable)
 
 public/
   images/{portfolio,editorial,case-studies,research}/<slug>/…
   videos/portfolio/<slug>/…
   thesis/*.pdf            # research editions, one PDF per language
   fonts/                  # Source Serif 4, read at build time by the OG images
-  logo-light.svg, logo-dark.svg, resume.pdf
+  Elias_Hernandez_Frontend_Resume.pdf   # linked via RESUME_PATH in lib/site.ts
 ```
 
 Three structural decisions worth knowing:
@@ -226,7 +234,7 @@ Typography is a three-family system, one job each:
 
 **Theming** is driven by `next-themes` writing `data-theme` on `<html>`; dark values override the defaults under `html[data-theme="dark"]`.
 
-**Logo:** interlocked EB monogram, single-ink SVG, in dark-ink and cream variants for light and dark backgrounds.
+**Logo:** interlocked EB monogram, single-ink SVG. It is one path inlined in the `Logo` component and painted with `currentColor`, so it inherits `--foreground` and follows the theme in CSS — no second file, no JavaScript, and no flash of the wrong variant before hydration.
 
 ---
 
