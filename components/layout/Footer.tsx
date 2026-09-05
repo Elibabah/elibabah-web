@@ -1,8 +1,13 @@
-import { RESUME_PATH } from "@/lib/site";
+import Link from "next/link";
+import { CV_PATH } from "@/lib/site";
 
 export function Footer() {
   return (
-    <footer id="contact" className="bg-surface border-t border-line mt-auto transition-colors duration-350">
+    <footer
+      id="contact"
+      data-print="hide"
+      className="bg-surface border-t border-line mt-auto transition-colors duration-350"
+    >
       <div className="mx-auto max-w-5xl px-6 py-10 flex flex-col gap-10">
 
         {/* Contact block */}
@@ -40,14 +45,12 @@ export function Footer() {
             >
               GitHub
             </a>
-            <a
-              href={RESUME_PATH}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href={CV_PATH}
               className="font-mono text-sm text-accent font-semibold border border-accent/30 rounded-full px-3 py-1 hover:bg-accent/10 hover:border-accent/50 transition-colors"
             >
-              Resume ↓
-            </a>
+              View CV
+            </Link>
           </div>
           <div className="flex flex-col items-end gap-1">
             <p className="font-mono text-xs text-ink-faint italic">

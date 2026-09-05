@@ -1,15 +1,14 @@
 ---
 title: "Nómina Account Upgrade — BBVA México"
 slug: nomina-upgrade
-summary: "Modular in-app flow that takes a payroll customer from an N2 account (capped at 3,000 UDIs of deposits a month) to a fully documented N4, collecting ID, proof of address, KYC, tax residency and beneficiary as five independent, resumable modules inside BBVA's Cells/Lit stack."
+summary: "Modular in-app flow that takes a payroll customer from an N2 account (capped at 3,000 UDIs of deposits a month) to a fully documented N4, collecting ID, proof of address, KYC, tax residency and beneficiary as five independent, resumable modules inside the bank's internal Web Components stack."
 stack:
-  - Lit
   - TypeScript
-  - Cells
+  - Lit
   - Web Components
   - Jest
   - Cypress
-role: Frontend Developer @ BBVA
+role: "Frontend Developer — Sngular (client: BBVA México), then BBVA"
 year: 2024
 links:
   demo: null
@@ -42,6 +41,11 @@ from **N2 to N4**, the fully documented level with no deposit ceiling.
 Two of us owned the frontend end to end: UX/UI sessions with design and business,
 implementation, API integration, unit and E2E tests, analytics tagging against the business
 tagging spec, and accessibility review.
+
+I built the original flow while at **Sngular**, the consultancy that placed me with BBVA
+México for the full engagement; the 2024 rebuild of the address module came later, after
+the client took me on directly. Same product, two employers, and worth stating plainly
+because it is the kind of detail an interviewer will cross-check against LinkedIn.
 
 ## Why the flow exists: account levels are a regulation, not a product tier
 
@@ -303,9 +307,9 @@ so nothing about the implementation assumes one. The payoff was structural rathe
 theoretical: it is what made the 2024 rebuild of a single module possible without regression
 risk to the other four.
 
-**Cells, Lit, TypeScript.** Cells is BBVA's internal Web Components framework, built on Lit.
-It is not a framework you choose; it is the one the bank has standardised on, with its own
-component catalogue, routing and state conventions. In practice that meant no npm packages,
+**An internal Web Components framework, Lit, TypeScript.** The bank has its own in-house
+framework built on Lit, with its own component catalogue, routing and state conventions. It
+is not a framework you choose; it is the one you are given. In practice that meant no npm packages,
 no external component library, no escape hatch. The constraint turned out to be a useful
 forcing function: with no library to reach for, the answer to most problems was a smaller
 amount of plainer code, which is also the code that is easiest to audit.
@@ -321,7 +325,7 @@ recoverable UI state rather than a generic failure.
        endpoint returning per-module completion? Say whatever is safe to say.
     2. One concrete error case you had to translate from an API code into a recoverable
        screen. Specifics like this are what separate a real engineer's page from a summary.
-    3. Whether the modules were separate Cells apps/routes or components inside one app.
+    3. Whether the modules were separate apps/routes or components inside one app.
     4. Test setup: what Jest covered, what the E2E suite covered, who ran it, and whether
        the analytics tags were asserted in tests. (I put Jest/Cypress in the stack — correct
        or replace them.) */}

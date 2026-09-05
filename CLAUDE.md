@@ -38,6 +38,7 @@ The site is built and live. All routes from the architecture in §5 exist:
 - `/research` listing + `/research/[slug]`.
 - `/case-studies/[slug]`.
 - `/about`.
+- `/cv` — the CV as a page, with the PDF offered from it.
 
 Also in place:
 
@@ -46,7 +47,7 @@ Also in place:
 - Design tokens as CSS variables in `app/globals.css`, exposed to Tailwind v4 via `@theme inline`.
 - Theme toggle (`next-themes`, `data-theme`), light/dark palettes.
 - Contact as an anchor: nav CTA `#contact` → `<footer id="contact">` with `mailto:elias@elibabah.com`,
-  LinkedIn, GitHub and the résumé (`RESUME_PATH` in `lib/site.ts`).
+  LinkedIn, GitHub and the CV (`CV_PATH` in `lib/site.ts`).
 - SEO/ops: `sitemap.ts` (all four collections), `robots.ts`, `icon.svg`, `not-found.tsx`,
   Google site verification, Vercel Analytics and Speed Insights.
 - Social cards with `next/og`: a site-wide `app/opengraph-image.tsx` plus per-item cards at
@@ -297,6 +298,9 @@ elibabah-web/
       [slug]/opengraph-image.tsx   # per-work social card
     about/
       page.tsx              # /about
+    cv/
+      page.tsx              # /cv — CV as a page
+      cv.module.css         # scoped styles + the print sheet
   components/               # reusable UI (root, outside app/)
     layout/                 # Nav, Footer, Logo, ThemeToggle
     content/                # MdxImage, MdxImageRow, MdxVideo, MdxFigcaption,
@@ -319,21 +323,25 @@ elibabah-web/
     mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
-    site.ts                 # SITE_URL + RESUME_PATH — single source for both
+    site.ts                 # SITE_URL + CV_PATH + CV_PDF_PATH
   public/
     images/{portfolio,editorial,case-studies,research}/<slug>/…
     videos/portfolio/<slug>/…
     thesis/*.pdf          # research editions, one PDF per language
     fonts/                # raw Source Serif 4 .ttf, read by the OG images (see §3)
-    Elias_Hernandez_Frontend_Resume.pdf   # the résumé; path lives in lib/site.ts
+    cv.pdf                # the CV; both paths live in lib/site.ts
 ```
 
-> **The résumé path is a constant, not a literal.** `RESUME_PATH` in `lib/site.ts` is the single
-> source, imported by the Home hero CTA and the footer link. This is the fix for a real drift:
-> there used to be two different PDFs (`resume.pdf` and this one) linked from those two places,
-> so a visitor got a different CV depending on where they clicked. Nothing was broken, which is
-> exactly why it went unnoticed. `resume.pdf` was deleted in August 2026. Never hardcode the path
-> again — link it from the constant, the same way `SITE_URL` is treated.
+> **The CV is a page first, a file second.** `CV_PATH` (`/cv`) and `CV_PDF_PATH` (`/cv.pdf`) both
+> live in `lib/site.ts`. The site's own buttons point at the **page**, which is indexable,
+> accessible and linkable; the page offers the PDF. Updating the CV means replacing
+> `public/cv.pdf` and touching nothing else.
+>
+> This closed a real drift: there were two differently-named résumé PDFs linked from two
+> components, so a visitor got a different document depending on where they clicked. Both old
+> filenames, plus `/resume`, are 308-redirected in `next.config.ts`. **A static file in
+> `public/` is served before a redirect**, so those files had to be deleted for the redirects to
+> fire at all — that is why they are gone rather than kept around.
 
 Structure decisions made:
 
@@ -534,7 +542,7 @@ The scaffolding phase is over. Work from here is **refinement and content**. Whe
   structured data to portfolio needs a per-project ownership field first, and is deliberately
   not done yet.
 - **Home is re-aimed at the recruiter** (shipped): the hero headline states the capability
-  directly, the secondary CTA is "Download CV ↓" pointing at `RESUME_PATH` instead of a link to
+  directly, the secondary CTA is "View CV" pointing at the `/cv` page instead of a link to
   About, and a four-cell "At a glance" strip (role, stack, location, work status) sits under the
   hero. The strip is a local `facts` array in `app/page.tsx`, not content — if it grows or needs
   to change per audience, that is the moment to move it out.

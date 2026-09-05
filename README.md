@@ -67,6 +67,9 @@ app/
     [slug]/page.tsx       # /research/<work>
     [slug]/opengraph-image.tsx
   about/page.tsx          # /about
+  cv/
+    page.tsx              # /cv — the CV as a page; offers cv.pdf
+    cv.module.css         # scoped styles, including the print stylesheet
   globals.css             # design tokens + prose theming
   sitemap.ts, robots.ts, opengraph-image.tsx, icon.svg, not-found.tsx
 
@@ -90,7 +93,7 @@ lib/                      # bridge between content/ and app/
   mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
   image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
   reading-time.ts         # reading time derived from the MDX body
-  site.ts                 # SITE_URL (sitemap, robots, JSON-LD) + RESUME_PATH (hero CTA, footer)
+  site.ts                 # SITE_URL (sitemap, robots, JSON-LD) + CV_PATH / CV_PDF_PATH
 
 thesis/                   # sources for the research PDFs — not served, not in public/
   build.sh                # rebuilds both editions: ./thesis/build.sh [all|es|en|covers]
@@ -104,7 +107,7 @@ public/
   videos/portfolio/<slug>/…
   thesis/*.pdf            # research editions, one PDF per language
   fonts/                  # Source Serif 4, read at build time by the OG images
-  Elias_Hernandez_Frontend_Resume.pdf   # linked via RESUME_PATH in lib/site.ts
+  cv.pdf                  # canonical CV file; old filenames 308 to it
 ```
 
 Three structural decisions worth knowing:
@@ -113,7 +116,9 @@ Three structural decisions worth knowing:
 - **The three editorial subsections are real routes, not filters.** Each targets a distinct audience and deserves its own linkable URL. Since fixed segments coexist with `[slug]` inside `app/editorial/`, the slugs `software`, `career` and `aotearoa` are **reserved** and must never be used for an article — App Router would shadow it.
 - **Research is a fourth collection, and a fourth nav item** (Portfolio · Editorial · Research · About). It earned one because research stopped being a single artifact: the UNAM thesis ships in Spanish and English, and the Master of Applied Management thesis will follow. One document would have belonged inside About; a growing body of work does not.
 
-Contact is deliberately not a route: it lives as a CTA in the nav and a block in the footer, alongside the résumé link.
+Contact is deliberately not a route: it lives as a CTA in the nav and a block in the footer, alongside the CV link.
+
+**The CV is a page, not just a file.** `/cv` is the canonical destination the site links to: indexable, keyboard-accessible, themed, and carrying its own print stylesheet so a recruiter who prints it gets the document without the site chrome. `/cv.pdf` is offered from it. Old résumé URLs (`/resume.pdf`, `/Elias_Hernandez_Frontend_Resume.pdf`, `/resume`) are permanently redirected.
 
 ---
 

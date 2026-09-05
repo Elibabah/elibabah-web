@@ -1,3 +1,4 @@
 export const SITE_URL = "https://elibabah.com"
 
-export const RESUME_PATH = "/Elias_Hernandez_Frontend_Resume.pdf"
+export const CV_PATH = "/cv"
+export const CV_PDF_PATH = "/cv.pdf"

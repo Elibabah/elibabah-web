@@ -37,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/editorial/aotearoa` },
     { url: `${BASE}/research` },
     { url: `${BASE}/about` },
+    { url: `${BASE}/cv` },
     ...projects,
     ...articles,
     ...caseStudies,
