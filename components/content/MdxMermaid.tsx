@@ -4,30 +4,6 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { useTheme } from "next-themes";
 
-/**
- * Mermaid, rendered in the browser and nowhere else.
- *
- * Mermaid measures text with getBBox, so it needs a real DOM: there is no
- * browserless renderer, and the build-time route (rehype-mermaid) drags
- * Playwright into every Vercel deploy. So the library is imported lazily, from
- * inside the effect, which puts it in its own chunk that only downloads on the
- * pages that actually contain a diagram — below the fold, after paint.
- *
- * Theming is the reason this reads the tokens instead of picking a Mermaid
- * preset. Mermaid derives colours (borders, contrast text) with khroma, which
- * needs real values, so `var(--surface)` cannot be handed to it directly. The
- * variables are resolved against the live document and re-resolved whenever the
- * theme changes, which is also what forces the re-render.
- *
- * Sizing is the third thing this owns. Letting the SVG shrink to the container
- * (max-width: 100%) is what makes a wide flowchart illegible on a phone: a
- * 900px diagram in a 360px column renders its 16px type at about 6px, and the
- * scroll container never engages because nothing overflows. So the width is set
- * explicitly instead — fit-to-container, but floored at a scale where the text
- * is still readable — and anything past that is reached by scrolling, zooming,
- * or opening the diagram full screen.
- */
-
 /** Below this the 16px Mermaid type drops under ~11px, which is not worth showing. */
 const MIN_FIT_SCALE = 0.7;
 const MIN_ZOOM = 0.5;
@@ -74,15 +50,6 @@ const controlClass =
   "transition-colors hover:border-accent hover:text-accent " +
   "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line " +
   "disabled:hover:text-ink-soft";
-
-/**
- * One rendering of a diagram, owning its own fit and zoom.
- *
- * There are two of these on screen at most — the one in the article and the one
- * in the full-screen dialog — and they must size independently, because the
- * space they are given is completely different. Everything here is derived from
- * the surface's own measured width, so neither knows the other exists.
- */
 function DiagramSurface({ svg, fill = false, children }: Readonly<{
   svg: string;
   /** In the dialog the surface takes the room it is given, and scrolls both ways. */
@@ -131,10 +98,7 @@ function DiagramSurface({ svg, fill = false, children }: Readonly<{
     if (!fill) return clamp(Math.min(1, host.width / natural.width), MIN_FIT_SCALE, 1);
 
     // Full screen, seeing the whole thing wins, so the height counts too — fitting
-    // width alone would just trade horizontal scrolling for vertical. The floor is
-    // the same as the article's: below it the type is unreadable, and on a phone a
-    // wide diagram overflows at any scale that small anyway, so going lower costs
-    // legibility and buys no overview at all.
+    // width alone would just trade horizontal scrolling for vertical.
     const byWidth = host.width / natural.width;
     const byHeight = natural.height ? host.height / natural.height : Infinity;
     return clamp(Math.min(1, byWidth, byHeight), MIN_FIT_SCALE, 1);
@@ -147,18 +111,7 @@ function DiagramSurface({ svg, fill = false, children }: Readonly<{
     setZoom(fitZoom());
   }, [natural.width, host.width, fitZoom]);
 
-  // Deliberately dependency-free: this has to run after *every* commit.
-  //
-  // React owns this subtree through dangerouslySetInnerHTML, so any commit that
-  // recreates the panel — the controls row appearing above it was the one that
-  // caught us — rebuilds the <svg> from the HTML string and silently discards
-  // the width set on the previous node, without changing anything this effect
-  // could have depended on. The symptom was a diagram intermittently stuck at
-  // its 300px intrinsic default. Re-applying every time is a couple of style
-  // writes on a cached element, and it cannot go stale.
-  //
-  // Measuring lives here too: natural size is read off the viewBox, which the
-  // width below never disturbs, so the pass is idempotent.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const el = hostRef.current?.querySelector("svg");
     if (!el) return;
@@ -190,11 +143,6 @@ function DiagramSurface({ svg, fill = false, children }: Readonly<{
 
   return (
     <div className={`flex flex-col gap-2 ${fill ? "min-h-0 flex-1" : ""}`}>
-      {/* Always present, always visible. Tying this to "does it overflow" made the
-          controls come and go on the same diagram as a phone was rotated, and hid
-          Expand on exactly the diagrams a reader might still want full screen.
-          Its being unconditional is also what keeps the sibling list stable — a
-          child appearing above the panel makes React rebuild the panel under it. */}
       <div
         className={`flex items-center justify-end gap-1 ${
           fill ? "shrink-0 border-b border-line bg-background px-4 py-3" : ""
@@ -391,17 +339,10 @@ export function MdxMermaid({ chart }: Readonly<MdxMermaidProps>) {
         ref={dialogRef}
         onClose={() => setExpanded(false)}
         aria-label="Diagram, full screen"
-        // The whole viewport, not a floating panel: covering the page outright is
-        // what removes the backdrop as something to look at, and it is the only
-        // way a wide diagram gets room worth having on a phone.
-        // [&[open]]:flex, not flex: a bare `display:flex` would beat the UA's
-        // `dialog:not([open]) { display: none }` and leave the dialog on screen.
-        className="m-0 h-[100dvh] max-h-none w-screen max-w-none flex-col bg-background p-0
-                   text-foreground backdrop:bg-background [&[open]]:flex"
+        className="m-0 h-dvh max-h-none w-screen max-w-none flex-col bg-background p-0
+                   text-foreground backdrop:bg-background [[open]]:flex"
       >
         {expanded && svg && (
-          // Re-ids the copy: Mermaid scopes the diagram's own CSS and its marker
-          // url() references by element id, and two live copies would collide.
           <DiagramSurface svg={svg.replaceAll(domId, `${domId}-full`)} fill>
             <button
               type="button"

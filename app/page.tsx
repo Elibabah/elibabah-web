@@ -1,3 +1,4 @@
+import { CV_PATH } from "@/lib/site";
 import Image from "next/image"
 import Link from "next/link";
 import { getAllArticles } from "@/lib/editorial";
@@ -6,9 +7,9 @@ import { imageSlots } from "@/lib/image-slots";
 
 const facts = [
   { label: "Role", value: "Frontend Engineer" },
-  { label: "Stack", value: "React · TypeScript · Next.js" },
+  { label: "Stack", value: "TypeScript · Lit / Web Components · React · Next.js" },
   { label: "Based in", value: "New Zealand" },
-  { label: "Work status", value: "Valid NZ work visa", accent: true },
+  { label: "Work status", value: "Entitled to work full-time in NZ", accent: true },
 ];
 
 export default function Home() {
@@ -40,14 +41,12 @@ export default function Home() {
           >
             View work
           </Link>
-          <a
-            href="/resume.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
+          <Link
+            href={CV_PATH}
             className="text-accent border border-accent font-semibold text-sm px-5 py-2.75 rounded-[9px] hover:bg-accent/5 transition-colors"
           >
-            Download CV ↓
-          </a>
+            View CV
+          </Link>
         </div>
       </section>
 

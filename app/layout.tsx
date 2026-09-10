@@ -31,7 +31,8 @@ export const metadata: Metadata = {
     default: "Elibabah — Elías Hernández",
     template: "%s | Elibabah",
   },
-  description: "Software developer. Portfolio and editorial.",
+  description:
+      "Elías Hernández, front-end engineer in New Zealand. Portfolio, writing and CV.",
   verification: {
     google: "WxOXaeBjakeZGTAZcwBGhCgTIjnPRPLTbgnErf0UQoE",
   },
