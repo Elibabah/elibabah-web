@@ -179,6 +179,13 @@
   padding-left: 1.1rem;
 }
 
+/* The reset above (0,1,1) outranks `.entryBody > * + *` (0,1,0), which glued
+   every list to the italic context line before it. Same specificity, later in
+   the file, so this one wins and restores the rhythm the sibling rule intended. */
+.entryBody > * + ul {
+  margin-top: 0.75rem;
+}
+
 .entryBody li + li {
   margin-top: 0.5rem;
 }
