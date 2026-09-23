@@ -6,7 +6,7 @@ import { getAllProjects } from "@/lib/portfolio";
 import { imageSlots } from "@/lib/image-slots";
 
 const facts = [
-  { label: "Role", value: "Frontend Engineer" },
+  { label: "Role", value: "Frontend Software Engineer" },
   { label: "Stack", value: "TypeScript · Lit / Web Components · React · Next.js" },
   { label: "Based in", value: "New Zealand" },
   { label: "Work status", value: "Entitled to work full-time in NZ", accent: true },

@@ -1,4 +1,4 @@
-import { CV_PATH, CV_PDF_PATH, SITE_URL } from "@/lib/site";
+import { CV_PATH, CV_PDF_FILENAME, CV_PDF_PATH, SITE_URL } from "@/lib/site";
 
 import type { Metadata } from "next";
 import styles from "./cv.module.css";
@@ -21,7 +21,6 @@ const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${SITE_URL}/#elias`,
-  jobTitle: "Frontend Software Engineer",
   email: "mailto:elias@elibabah.com",
   address: {
     "@type": "PostalAddress",
@@ -49,6 +48,7 @@ const personSchema = {
     "JavaScript",
     "Web Components",
     "Lit",
+    "Angular",
     "React",
     "React Native",
     "Design systems",
@@ -106,7 +106,7 @@ export default function CvPage() {
             <a href="https://github.com/Elibabah" rel="me">
               GitHub
             </a>{" "}
-            <a href={CV_PDF_PATH} className={styles.download} data-print="hide">
+            <a href={CV_PDF_PATH} download={CV_PDF_FILENAME} className={styles.download} data-print="hide">
               Download as PDF
             </a>
           </p>
@@ -123,8 +123,8 @@ export default function CvPage() {
               scale. At BBVA I own flows end to end, from Figma handoff through
               business logic, testing and staged release, working to a regulated
               bank’s quality gates and accessibility requirements. Currently
-              completing a Master of Applied Management in New Zealand,
-              researching how AI is changing software engineering practice.
+              completing a Master of Applied Management (NZQF Level 9) at the
+              Southern Institute of Technology in New Zealand.
             </p>
           </div>
         </section>
@@ -224,10 +224,11 @@ export default function CvPage() {
                 </li>
                 <li>
                   Built the address module on the new stack, letting customers
-                  upload proof of address in-app to update their identity data,
-                  and am currently completing Pay by Bank, which lets customers
-                  pay third-party merchants from deeplinks and push
-                  notifications.
+                  upload proof of address in-app to update their identity data.
+                </li>
+                <li>
+                  Currently completing Pay by Bank, which lets customers pay
+                  third-party merchants from deeplinks and push notifications.
                 </li>
                 <li>
                   Work to a monthly release train on two-week sprints, with
@@ -274,7 +275,7 @@ export default function CvPage() {
 
             <Entry
               title="Innovattia"
-              subtitle="React Developer, client: Walmart Mexico"
+              subtitle="Frontend Developer, client: Walmart Mexico"
               meta={
                 <>
                   Mexico. <time dateTime="2022-04">April 2022</time> to{" "}
@@ -284,14 +285,43 @@ export default function CvPage() {
             >
               <ul>
                 <li>
-                  Developed responsive web and mobile interfaces in React for
-                  Walmart Mexico’s health services and mobile telecommunications
+                  Developed responsive web and mobile interfaces in Angular and
+                  vanilla JavaScript for Walmart Mexico’s health services and mobile telecommunications
                   products, building reusable components and integrating
                   back-end APIs.
                 </li>
                 <li>
                   Led a small front-end team, coordinating implementation and
-                  unblocking delivery across releases. First professional role.
+                  unblocking delivery across releases.
+                </li>
+              </ul>
+            </Entry>
+
+            <Entry
+              title="Ajusco CrossFit"
+              subtitle="React Developer, contract"
+              meta={
+                <>
+                  Mexico. <time dateTime="2022-03">March 2022</time> to{" "}
+                  <time dateTime="2022-06">June 2022</time>.
+                </>
+              }
+            >
+              <p className={styles.context}>
+                Paid client project, sourced through Ajusco Coding Bootcamp: the
+                client chose our team of six developers from competing demos.
+              </p>
+              <ul>
+                <li>
+                  Owned the community feature of a React and Firebase web app
+                  end to end: a real-time feed of posts and comments, with media
+                  uploads (images, PDFs and links) validated by file type, sorted
+                  by date and editable in place.
+                </li>
+                <li>
+                  Built the role-based flows behind it for members and the
+                  instructor, including admin moderation and event management,
+                  and fixed client-side routing for the GitHub Pages deployment.
                 </li>
               </ul>
             </Entry>
@@ -323,7 +353,9 @@ export default function CvPage() {
                 no provider keys ship in the app: AI and speech calls are
                 proxied through an authenticated Supabase Edge Function.
                 Architecture decisions are recorded as ADRs in the repository.
-                In development, not yet published.
+                Built as a work sample for AI-assisted engineering, where the
+                discipline lives in the decision records and the test suite
+                rather than the prompt. In development, not yet published.
               </p>
             </Entry>
 
@@ -355,14 +387,10 @@ export default function CvPage() {
                   <time dateTime="2026">2026</time>.
                 </>
               }
-            >
-              <p>
-                Research: how AI is reshaping software engineering practice.
-              </p>
-            </Entry>
+            />
             <Entry
               title="National Autonomous University of Mexico (UNAM)"
-              subtitle="Bachelor’s degree in Linguistics and Hispanic Literatures"
+              subtitle="Bachelor’s degree in Hispanic Language and Literatures"
               meta="Mexico City, Mexico"
             />
           </div>
@@ -427,7 +455,7 @@ export default function CvPage() {
         <p className={styles.closing}>
           Full New Zealand Class 1 driver licence. References on request. The
           same content is available as a{" "}
-          <a href={CV_PDF_PATH} data-print="hide">
+          <a href={CV_PDF_PATH} download={CV_PDF_FILENAME} data-print="hide">
             PDF
           </a>
           .

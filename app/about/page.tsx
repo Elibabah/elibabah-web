@@ -39,13 +39,13 @@ export default function AboutPage() {
       <section className="flex flex-col gap-3 py-8 border-t border-line max-w-xl">
         <h2 className="font-heading text-2xl font-bold text-foreground">Background</h2>
         <p className="font-body text-base text-ink-soft leading-relaxed">
-        I came to software through language. I trained as a linguist and literary scholar, 
+        I came to software through language. I trained in Hispanic language and literature, 
         and spent years learning to read structure: how a system of signs holds meaning, 
         where an argument breaks, why one arrangement works and another does not.
         That turned out to be engineering training in disguise. I read code the way I once read texts, 
         attentive to intention and structure, and I approach architecture as a problem of meaning as much as mechanics.
-        Over five years I have built enterprise interfaces at Sngular, React products at Innovattia for Walmart, 
-        and now design-system components at BBVA, where I work with Web Components and Lit across banking products used by millions. 
+        Over four years I have built a React and Firebase app for a CrossFit gym, my first client project; Angular products at Innovattia for Walmart;
+          enterprise interfaces at Sngular; and now customer journeys at BBVA, composed from the bank’s Web Components and Lit catalogue for a banking app used by millions. 
         I am also completing a Master of Applied Management at SIT, which has sharpened how I connect technical work to strategy, value, and the business it serves. My <Link href="/research" className="text-accent hover:underline">research</Link> is published here in full.
         </p>
       </section>
@@ -56,8 +56,8 @@ export default function AboutPage() {
         <p className="font-body text-base text-ink-soft leading-relaxed">
           My core is JavaScript, TypeScript, Web Components, and Lit; 
           the last two are what I work with daily at BBVA, 
-          building reusable components for a shared design system. React is where 
-          I have shipped production work and where I am actively deepening, alongside Next.js. 
+          composing and extending the components of a shared design system. React is where
+            I started, and where I am actively deepening now, alongside Next.js; NZ Drive Practice is built in React Native. 
           This site is part of that practice: built from scratch, App Router, MDX, continuous deployment.
         </p>
         <ul className="flex flex-wrap gap-2 mt-1">
