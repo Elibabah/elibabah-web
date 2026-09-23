@@ -323,7 +323,7 @@ elibabah-web/
     mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
-    site.ts                 # SITE_URL + CV_PATH + CV_PDF_PATH
+    site.ts                 # SITE_URL + CV_PATH + CV_PDF_PATH + CV_PDF_FILENAME
   public/
     images/{portfolio,editorial,case-studies,research}/<slug>/…
     videos/portfolio/<slug>/…
@@ -335,7 +335,9 @@ elibabah-web/
 > **The CV is a page first, a file second.** `CV_PATH` (`/cv`) and `CV_PDF_PATH` (`/cv.pdf`) both
 > live in `lib/site.ts`. The site's own buttons point at the **page**, which is indexable,
 > accessible and linkable; the page offers the PDF. Updating the CV means replacing
-> `public/cv.pdf` and touching nothing else.
+> `public/cv.pdf` and touching nothing else. The URL stays generic but the file is saved as
+> `CV_PDF_FILENAME`: a `download` attribute on the /cv links, plus a `Content-Disposition:
+> inline; filename=…` header on `/cv.pdf` in `next.config.ts` for anyone who opens it directly.
 >
 > This closed a real drift: there were two differently-named résumé PDFs linked from two
 > components, so a visitor got a different document depending on where they clicked. Both old

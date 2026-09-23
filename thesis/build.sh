@@ -28,7 +28,7 @@ cd "$(dirname "$0")/.."
 
 BUILD=thesis/build
 SRC=thesis/source/elias_tesis_unam-ORIGINAL.pdf
-OUT_ES=public/thesis/tesis-la-imaginacion-as-salvation-es.pdf
+OUT_ES=public/thesis/tesis-la-imaginacion-como-salvacion-es.pdf
 OUT_EN=public/thesis/thesis-imagination-as-salvation-en.pdf
 COVER_DIR=public/images/research/imaginacion-as-salvation
 

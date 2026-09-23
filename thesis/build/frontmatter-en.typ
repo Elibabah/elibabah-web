@@ -22,15 +22,15 @@
   #v(96pt)
 
   #text(size: 10.5pt)[
-    Thesis submitted for the degree of\
-    Licenciado en Lengua y Literaturas Hispánicas
+    Thesis submitted for the Bachelor’s degree in\
+    Hispanic Language and Literatures
   ]
 
   #v(18pt)
 
   #text(size: 10.5pt)[
-    Universidad Nacional Autónoma de México\
-    Facultad de Filosofía y Letras
+    National Autonomous University of Mexico\
+    Faculty of Philosophy and Letters
   ]
 
   #v(18pt)

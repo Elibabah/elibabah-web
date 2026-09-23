@@ -45,7 +45,7 @@ const personJsonLd = {
   name: "David Elías Hernández Morales",
   alternateName: ["Elías Hernández", "Elibabah"],
   url: SITE_URL,
-  jobTitle: "Frontend Engineer",
+  jobTitle: "Frontend Software Engineer",
   address: {
     "@type": "PostalAddress",
     addressCountry: "NZ",

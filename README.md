@@ -93,7 +93,7 @@ lib/                      # bridge between content/ and app/
   mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
   image-slots.ts          # canonical image aspect ratios / widths / sizes / export dimensions
   reading-time.ts         # reading time derived from the MDX body
-  site.ts                 # SITE_URL (sitemap, robots, JSON-LD) + CV_PATH / CV_PDF_PATH
+  site.ts                 # SITE_URL (sitemap, robots, JSON-LD) + CV_PATH / CV_PDF_PATH / CV_PDF_FILENAME
 
 thesis/                   # sources for the research PDFs — not served, not in public/
   build.sh                # rebuilds both editions: ./thesis/build.sh [all|es|en|covers]
