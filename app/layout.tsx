@@ -1,12 +1,12 @@
 import "./globals.css";
 
+import { GITHUB_URL, LINKEDIN_URL, SITE_URL } from "@/lib/site"
 import { Inter, JetBrains_Mono, Source_Serif_4 } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/next"
 import { Footer } from "@/components/layout/Footer";
 import type { Metadata } from "next";
 import { Nav } from "@/components/layout/Nav";
-import { SITE_URL } from "@/lib/site"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -51,8 +51,8 @@ const personJsonLd = {
     addressCountry: "NZ",
   },
   sameAs: [
-    "https://www.linkedin.com/in/elibabah/",
-    "https://github.com/elibabah",
+    LINKEDIN_URL,
+    GITHUB_URL,
   ],
 };
 

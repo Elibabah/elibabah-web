@@ -1,7 +1,9 @@
-import { CV_PATH, CV_PDF_FILENAME, CV_PDF_PATH, SITE_URL } from "@/lib/site";
+import { CV_PATH, CV_PDF_FILENAME, CV_PDF_PATH, GITHUB_URL, LINKEDIN_URL, SITE_URL, displayUrl } from "@/lib/site";
 
 import type { Metadata } from "next";
 import styles from "./cv.module.css";
+
+const NZ_DRIVE_REPO = `${GITHUB_URL}/nz-drive-test`
 
 export const metadata: Metadata = {
   title: "CV — Elías Hernández",
@@ -100,10 +102,10 @@ export default function CvPage() {
           </p>
           <p className={styles.links}>
             <a href="mailto:elias@elibabah.com">elias@elibabah.com</a>{" "}
-            <a href="https://www.linkedin.com/in/elibabah/" rel="me">
+            <a href={LINKEDIN_URL} rel="me">
               LinkedIn
             </a>{" "}
-            <a href="https://github.com/Elibabah" rel="me">
+            <a href={GITHUB_URL} rel="me">
               GitHub
             </a>{" "}
             <a href={CV_PDF_PATH} download={CV_PDF_FILENAME} className={styles.download} data-print="hide">
@@ -337,8 +339,8 @@ export default function CvPage() {
               title="NZ Drive Practice"
               subtitle="React Native, TypeScript, Supabase"
               meta={
-                <a href="https://github.com/Elibabah/nz-drive-test">
-                  github.com/Elibabah/nz-drive-test
+                <a href={NZ_DRIVE_REPO}>
+                  {displayUrl(NZ_DRIVE_REPO)}
                 </a>
               }
             >
@@ -362,7 +364,7 @@ export default function CvPage() {
             <Entry
               title="elibabah.com"
               subtitle="Personal site and design system"
-              meta={<a href="https://elibabah.com">elibabah.com</a>}
+              meta={<a href={SITE_URL}>{displayUrl(SITE_URL)}</a>}
             >
               <p>
                 Portfolio and writing platform built and maintained by me,

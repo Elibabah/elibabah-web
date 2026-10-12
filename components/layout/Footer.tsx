@@ -1,5 +1,6 @@
+import { CV_PATH, GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+
 import Link from "next/link";
-import { CV_PATH } from "@/lib/site";
 
 export function Footer() {
   return (
@@ -30,7 +31,7 @@ export function Footer() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-5">
             <a
-              href="https://linkedin.com/in/elibabah"
+              href={LINKEDIN_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-ink-soft hover:text-accent transition-colors"
@@ -38,7 +39,7 @@ export function Footer() {
               LinkedIn
             </a>
             <a
-              href="https://github.com/elibabah"
+              href={GITHUB_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-sm text-ink-soft hover:text-accent transition-colors"

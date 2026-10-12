@@ -323,7 +323,7 @@ elibabah-web/
     mdx-components.tsx      # MDX -> React component mapping + shared remark-gfm options
     image-slots.ts          # aspect ratios, responsive widths/sizes, export dimensions
     reading-time.ts         # reading time derived from the MDX body
-    site.ts                 # SITE_URL + CV_PATH + CV_PDF_PATH + CV_PDF_FILENAME
+    site.ts                 # SITE_URL, CV_*, LINKEDIN_URL, GITHUB_URL
   public/
     images/{portfolio,editorial,case-studies,research}/<slug>/…
     videos/portfolio/<slug>/…
