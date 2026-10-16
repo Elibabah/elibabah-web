@@ -1,6 +1,6 @@
 "use server"
 
-import { MAX_EMAIL, MAX_MESSAGE, MAX_NAME } from '@/lib/contact'
+import { MAX_EMAIL, MAX_MESSAGE, MAX_NAME, TOPICS, Topic } from '@/lib/contact'
 
 type Field = "name" | "email" | "message"
 
@@ -19,7 +19,7 @@ export type ContactState = {
     values?: {
         name: string,
         email: string,
-        topic: string,
+        topic: Topic,
         message: string
     }
 }
@@ -28,11 +28,15 @@ export async function sendContact(prevState: ContactState, formData: FormData): 
     const website = read(formData, "website")
     
     if (website) return {status: "success"}
+
+    const rawTopic = read(formData, "topic")
+
+    const topicInUse = isTopic(rawTopic) ? rawTopic : "role"
     
     const values = {
         name: read(formData, "name"),
         email: read(formData, "email"),
-        topic: read(formData, "topic"),
+        topic: topicInUse,
         message: read(formData, "message"),
     }
 
@@ -68,4 +72,8 @@ function read(formData: FormData, key: string): string {
     if(typeof value !== 'string') return ""
     
     return value.trim()
+}
+
+function isTopic(value: string): value is Topic {
+    return TOPICS.some(topic => topic === value)
 }
