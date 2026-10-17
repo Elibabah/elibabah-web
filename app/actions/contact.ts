@@ -14,6 +14,7 @@ const errorsCopies = {
     missingEmail: "Add your email so I know where to reply",
     wrongEmail: "Enter a full email address, like jane@company.co.nz",
     missingMessage: "Write a message so I know what it's about",
+    sendingFailure: `That didn't go through. Your message is still here. Try again, or email ${CONTACT_EMAIL} directly`
 }
 
 export type ContactState = {
@@ -25,6 +26,7 @@ export type ContactState = {
         topic: Topic,
         message: string
     }
+    formError?: string
 }
 
 export async function sendContact(prevState: ContactState, formData: FormData): Promise<ContactState> {
@@ -67,10 +69,10 @@ export async function sendContact(prevState: ContactState, formData: FormData): 
     
     if(hasErrors) return {status: "error", values, errors}
     
-    const resultSendEmail = await sendEmail(values)
+    const sent = await sendEmail(values)
 
-    if(resultSendEmail.error){
-        return {status: "error", values, errors}
+    if(!sent){
+        return {status: "error", values, formError: errorsCopies.sendingFailure}
     }
         
     return {status: "success"}
@@ -87,24 +89,33 @@ function isTopic(value: string): value is Topic {
     return TOPICS.some(topic => topic === value)
 }
 
-async function sendEmail(values: NonNullable<ContactState["values"]>){
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    
+async function sendEmail(values: NonNullable<ContactState["values"]>): Promise<boolean> {
     const {name, email, topic, message} = values
-    
-    const { data, error } = await resend.emails.send({
-      from: "Elibabah contact form <contact@elibabah.com>",
-      to: ["delivered@resend.dev"],
-      replyTo: email,
-      subject: `${TOPIC_LABELS[topic]} - ${name}`,
-      text: [
-        `Topic: ${TOPIC_LABELS[topic]}`,
-        `Name: ${name}`,
-        `Email: ${email}`,
-        "",
-        message
-      ].join("\n"),
-    })
-    
-    return {data, error}
+    try{
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const { error } = await resend.emails.send({
+          from: "Elibabah contact form <contact@elibabah.com>",
+          to: ["delivered@resend.dev"],
+          replyTo: email,
+          subject: `${TOPIC_LABELS[topic]} - ${name}`,
+          text: [
+            `Topic: ${TOPIC_LABELS[topic]}`,
+            `Name: ${name}`,
+            `Email: ${email}`,
+            "",
+            message
+          ].join("\n"),
+        })
+        
+        if (error) {
+            console.error("[contact] send failed", error)
+            return false
+        }
+
+        return true
+    }
+    catch(error){
+        console.error("[contact] send failed", error)
+        return false
+    }
 }
