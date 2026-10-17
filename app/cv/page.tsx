@@ -1,4 +1,4 @@
-import { CV_PATH, CV_PDF_FILENAME, CV_PDF_PATH, GITHUB_URL, LINKEDIN_URL, SITE_URL, displayUrl } from "@/lib/site";
+import { CONTACT_EMAIL, CV_PATH, CV_PDF_FILENAME, CV_PDF_PATH, GITHUB_URL, LINKEDIN_URL, SITE_URL, displayUrl } from "@/lib/site";
 
 import type { Metadata } from "next";
 import styles from "./cv.module.css";
@@ -23,7 +23,7 @@ const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${SITE_URL}/#elias`,
-  email: "mailto:elias@elibabah.com",
+  email: `mailto:${CONTACT_EMAIL}`,
   address: {
     "@type": "PostalAddress",
     addressLocality: "Invercargill",
@@ -101,7 +101,7 @@ export default function CvPage() {
             Legally entitled to work full-time in New Zealand.
           </p>
           <p className={styles.links}>
-            <a href="mailto:elias@elibabah.com">elias@elibabah.com</a>{" "}
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>{" "}
             <a href={LINKEDIN_URL} rel="me">
               LinkedIn
             </a>{" "}

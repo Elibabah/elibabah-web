@@ -1,6 +1,9 @@
 "use server"
 
-import { MAX_EMAIL, MAX_MESSAGE, MAX_NAME, TOPICS, Topic } from '@/lib/contact'
+import { MAX_EMAIL, MAX_MESSAGE, MAX_NAME, TOPICS, TOPIC_LABELS, Topic } from "@/lib/contact"
+
+import { CONTACT_EMAIL } from "@/lib/site"
+import { Resend } from "resend"
 
 type Field = "name" | "email" | "message"
 
@@ -28,9 +31,9 @@ export async function sendContact(prevState: ContactState, formData: FormData): 
     const website = read(formData, "website")
     
     if (website) return {status: "success"}
-
+    
     const rawTopic = read(formData, "topic")
-
+    
     const topicInUse = isTopic(rawTopic) ? rawTopic : "role"
     
     const values = {
@@ -39,7 +42,7 @@ export async function sendContact(prevState: ContactState, formData: FormData): 
         topic: topicInUse,
         message: read(formData, "message"),
     }
-
+    
     const errors: ContactState["errors"] = {}
     
     if(!values.name) {
@@ -61,9 +64,15 @@ export async function sendContact(prevState: ContactState, formData: FormData): 
     }
     
     const hasErrors = Object.keys(errors).length > 0
-
+    
     if(hasErrors) return {status: "error", values, errors}
+    
+    const resultSendEmail = await sendEmail(values)
 
+    if(resultSendEmail.error){
+        return {status: "error", values, errors}
+    }
+        
     return {status: "success"}
 }
 
@@ -76,4 +85,26 @@ function read(formData: FormData, key: string): string {
 
 function isTopic(value: string): value is Topic {
     return TOPICS.some(topic => topic === value)
+}
+
+async function sendEmail(values: NonNullable<ContactState["values"]>){
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    
+    const {name, email, topic, message} = values
+    
+    const { data, error } = await resend.emails.send({
+      from: "Elibabah contact form <contact@elibabah.com>",
+      to: ["delivered@resend.dev"],
+      replyTo: email,
+      subject: `${TOPIC_LABELS[topic]} - ${name}`,
+      text: [
+        `Topic: ${TOPIC_LABELS[topic]}`,
+        `Name: ${name}`,
+        `Email: ${email}`,
+        "",
+        message
+      ].join("\n"),
+    })
+    
+    return {data, error}
 }

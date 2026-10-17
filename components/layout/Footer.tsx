@@ -1,4 +1,4 @@
-import { CV_PATH, GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
+import { CONTACT_EMAIL, CV_PATH, GITHUB_URL, LINKEDIN_URL } from "@/lib/site";
 
 import Link from "next/link";
 
@@ -20,10 +20,10 @@ export function Footer() {
             Open to new opportunities in New Zealand. Feel free to reach out.
           </p>
           <a
-            href="mailto:elias@elibabah.com"
+            href={`mailto:${CONTACT_EMAIL}`}
             className="font-mono text-sm text-accent hover:underline"
           >
-            elias@elibabah.com
+            {CONTACT_EMAIL}
           </a>
         </div>
 
